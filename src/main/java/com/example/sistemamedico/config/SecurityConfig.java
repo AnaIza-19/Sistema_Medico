@@ -87,7 +87,8 @@ public class SecurityConfig {
 
                                 "/medico",
                                 "/medico/**",
-
+                                "/laboratorio",
+                                "/laboratorio/**",
 
                                 // =========================
                                 // ERROR

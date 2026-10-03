@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Órdenes de Laboratorio</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .encabezado {
+            background: #1f4e79;
+            color: white;
+            padding: 20px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+        }
+
+        .usuario {
+            text-align: right;
+        }
+
+        .usuario p {
+            margin: 3px 0;
+        }
+
+        .cerrar-sesion {
+            display: inline-block;
+            margin-top: 5px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .contenedor {
+            width: 95%;
+            max-width: 1400px;
+            margin: 30px auto;
+        }
+
+        .tarjeta {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1f4e79;
+        }
+
+        .filtros {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .campo label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .campo input,
+        .campo select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1f4e79;
+            color: white;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: #f5f9fc;
+        }
+
+        .estado {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .en-proceso {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .completada {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .externa {
+            background: #e2d9f3;
+            color: #432874;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .normal {
+            color: #666;
+        }
+
+        .sin-registros {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+        }
+
+        .btn-detalle {
+            display: inline-block;
+            background: #1f4e79;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .btn-detalle:hover {
+            background: #163a5c;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- ================================================= -->
+<!-- ENCABEZADO -->
+<!-- ================================================= -->
+
+<div class="encabezado">
+
+    <div>
+
+        <h1>
+            Órdenes de Laboratorio
+        </h1>
+
+        <p>
+            CU-09 Gestión de Laboratorio
+        </p>
+
+    </div>
+
+
+    <div class="usuario">
+
+        <p>
+            <strong>Personal:</strong>
+
+            <span th:text="${personalLaboratorio.nombreCompleto}">
+                Usuario
+            </span>
+        </p>
+
+
+        <p>
+            Rol:
+            <strong>LABORATORIO</strong>
+        </p>
+
+
+        <a class="cerrar-sesion"
+           th:href="@{/personal/cerrar-sesion}">
+
+            Cerrar sesión
+
+        </a>
+
+    </div>
+
+</div>
+
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <h2>
+            Órdenes registradas
+        </h2>
+
+
+        <!-- ================================================= -->
+        <!-- FILTROS CU-09 -->
+        <!-- ================================================= -->
+
+        <div class="filtros">
+
+
+            <div class="campo">
+
+                <label>
+                    Estado
+                </label>
+
+                <select id="filtroEstado"
+                        onchange="filtrarOrdenes()">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    <option value="PENDIENTE">
+                        Pendiente
+                    </option>
+
+                    <option value="EN_PROCESO">
+                        En proceso
+                    </option>
+
+                    <option value="COMPLETADA">
+                        Completada
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Paciente
+                </label>
+
+                <input
+                        type="text"
+                        id="filtroPaciente"
+                        placeholder="Buscar paciente..."
+                        oninput="filtrarOrdenes()">
+
+            </div>
+
+
+            <div class="campo">
+
+                <label>
+                    Médico
+                </label>
+
+                <input
+                        type="text"
+                        id="filtroMedico"
+                        placeholder="Buscar médico..."
+                        oninput="filtrarOrdenes()">
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- TABLA -->
+        <!-- ================================================= -->
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>
+                        Orden
+                    </th>
+
+                    <th>
+                        Paciente
+                    </th>
+
+                    <th>
+                        Médico
+                    </th>
+
+                    <th>
+                        Estado
+                    </th>
+
+                    <th>
+                        Monto total
+                    </th>
+
+                    <th>
+                        Tipo
+                    </th>
+
+                    <th>
+                        Observaciones
+                    </th>
+
+                    <th>
+                        Acciones
+                    </th>
+
+                </tr>
+
+                </thead>
+
+
+                <tbody id="tablaOrdenes">
+
+
+                <tr th:each="orden : ${ordenes}"
+                    class="fila-orden"
+
+                    th:attr="
+                        data-estado=${orden.estado},
+                        data-paciente=${orden.cita.paciente.nombreCompleto},
+                        data-medico=${orden.medico.nombreCompleto}
+                    ">
+
+
+                    <!-- ORDEN -->
+
+                    <td>
+
+                        #<span th:text="${orden.id}">
+                        </span>
+
+                    </td>
+
+
+                    <!-- PACIENTE -->
+
+                    <td th:text="${orden.cita.paciente.nombreCompleto}">
+                        Paciente
+                    </td>
+
+
+                    <!-- MEDICO -->
+
+                    <td th:text="${orden.medico.nombreCompleto}">
+                        Médico
+                    </td>
+
+
+                    <!-- ESTADO -->
+
+                    <td>
+
+
+                        <span
+                                class="estado"
+
+                                th:classappend="${
+                                    orden.estado == 'PENDIENTE'
+                                    ? ' pendiente'
+                                    :
+                                    orden.estado == 'EN_PROCESO'
+                                    ? ' en-proceso'
+                                    :
+                                    orden.estado == 'COMPLETADA'
+                                    ? ' completada'
+                                    :
+                                    ''
+                                }"
+
+                                th:text="${
+                                    orden.estado == 'PENDIENTE'
+                                    ? 'Pendiente'
+                                    :
+                                    orden.estado == 'EN_PROCESO'
+                                    ? 'En proceso'
+                                    :
+                                    orden.estado == 'COMPLETADA'
+                                    ? 'Completada'
+                                    :
+                                    orden.estado
+                                }">
+
+                        </span>
+
+
+                    </td>
+
+
+                    <!-- MONTO TOTAL -->
+
+                    <td>
+
+                        Q<span
+                            th:text="${#numbers.formatDecimal(
+                                orden.montoTotal,
+                                1,
+                                2
+                            )}">
+                        </span>
+
+                    </td>
+
+
+                    <!-- TIPO -->
+
+                    <td>
+
+
+                        <span
+                                class="externa"
+                                th:if="${orden.ordenExterna}">
+
+                            Externa
+
+                        </span>
+
+
+                        <span
+                                class="normal"
+                                th:unless="${orden.ordenExterna}">
+
+                            Interna
+
+                        </span>
+
+
+                    </td>
+
+
+                    <!-- OBSERVACIONES -->
+
+                    <td th:text="${
+                        orden.observaciones != null
+                        ? orden.observaciones
+                        : 'Sin observaciones'
+                    }">
+
+                    </td>
+
+
+                    <!-- ACCIONES -->
+
+                    <td>
+
+                        <a
+                                class="btn-detalle"
+
+                                th:href="@{/laboratorio/orden/{id}
+                                (id=${orden.id})}">
+
+                            Ver detalle
+
+                        </a>
+
+                    </td>
+
+
+                </tr>
+
+
+
+                <!-- ================================================= -->
+                <!-- SIN ORDENES -->
+                <!-- ================================================= -->
+
+                <tr th:if="${#lists.isEmpty(ordenes)}">
+
+                    <td colspan="8"
+                        class="sin-registros">
+
+                        No existen órdenes de laboratorio registradas.
+
+                    </td>
+
+                </tr>
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- SIN RESULTADOS POR FILTRO -->
+        <!-- ================================================= -->
+
+        <p id="mensajeFiltro"
+           class="sin-registros"
+           style="display:none;">
+
+            No se encontraron órdenes con los filtros seleccionados.
+
+        </p>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- ================================================= -->
+<!-- FILTROS -->
+<!-- ================================================= -->
+
+<script>
+
+    function filtrarOrdenes() {
+
+        const estado =
+            document
+                .getElementById("filtroEstado")
+                .value
+                .toUpperCase();
+
+
+        const paciente =
+            document
+                .getElementById("filtroPaciente")
+                .value
+                .toLowerCase()
+                .trim();
+
+
+        const medico =
+            document
+                .getElementById("filtroMedico")
+                .value
+                .toLowerCase()
+                .trim();
+
+
+        const filas =
+            document.querySelectorAll(
+                ".fila-orden"
+            );
+
+
+        let visibles = 0;
+
+
+        filas.forEach(
+            function (fila) {
+
+
+                const estadoFila =
+                    (
+                        fila.dataset.estado
+                        || ""
+                    )
+                        .toUpperCase();
+
+
+                const pacienteFila =
+                    (
+                        fila.dataset.paciente
+                        || ""
+                    )
+                        .toLowerCase();
+
+
+                const medicoFila =
+                    (
+                        fila.dataset.medico
+                        || ""
+                    )
+                        .toLowerCase();
+
+
+                const cumpleEstado =
+                    estado === ""
+                    ||
+                    estadoFila === estado;
+
+
+                const cumplePaciente =
+                    paciente === ""
+                    ||
+                    pacienteFila.includes(
+                        paciente
+                    );
+
+
+                const cumpleMedico =
+                    medico === ""
+                    ||
+                    medicoFila.includes(
+                        medico
+                    );
+
+
+                if (
+                    cumpleEstado
+                    &&
+                    cumplePaciente
+                    &&
+                    cumpleMedico
+                ) {
+
+                    fila.style.display = "";
+
+                    visibles++;
+
+                } else {
+
+                    fila.style.display = "none";
+                }
+
+            }
+        );
+
+
+        const mensaje =
+            document.getElementById(
+                "mensajeFiltro"
+            );
+
+
+        if (
+            filas.length > 0
+            &&
+            visibles === 0
+        ) {
+
+            mensaje.style.display =
+                "block";
+
+        } else {
+
+            mensaje.style.display =
+                "none";
+        }
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

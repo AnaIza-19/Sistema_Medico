@@ -23,7 +23,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.example.sistemamedico.model.OrdenLaboratorio;
+import com.example.sistemamedico.model.PagoLaboratorio;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/caja")
@@ -652,5 +656,517 @@ public class CajaController {
 
 
         return "caja/comprobante";
+    }
+    // =====================================================
+// CU-10
+// PANTALLA PRINCIPAL COBRO DE LABORATORIO
+// =====================================================
+
+    @GetMapping("/laboratorio")
+    public String mostrarCobroLaboratorio(
+
+            HttpSession session,
+
+            Model model
+    ) {
+
+        Usuario cajero =
+                obtenerCajero(
+                        session
+                );
+
+
+        if (cajero == null) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        model.addAttribute(
+                "cajero",
+                cajero
+        );
+
+
+        return "caja/laboratorio";
+    }
+
+
+// =====================================================
+// CU-10
+// BUSCAR ORDEN DE LABORATORIO
+// POR DPI O NUMERO DE ORDEN
+// =====================================================
+
+    @GetMapping("/laboratorio/buscar")
+    public String buscarOrdenLaboratorio(
+
+            @RequestParam String tipo,
+
+            @RequestParam String valor,
+
+            HttpSession session,
+
+            Model model
+    ) {
+
+        Usuario cajero =
+                obtenerCajero(
+                        session
+                );
+
+
+        if (cajero == null) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        model.addAttribute(
+                "cajero",
+                cajero
+        );
+
+
+        String tipoLimpio =
+                tipo == null
+                        ? ""
+                        : tipo
+                        .trim()
+                        .toUpperCase();
+
+
+        String valorLimpio =
+                valor == null
+                        ? ""
+                        : valor.trim();
+
+
+        model.addAttribute(
+                "tipoSeleccionado",
+                tipoLimpio
+        );
+
+
+        model.addAttribute(
+                "valorBuscado",
+                valorLimpio
+        );
+
+
+        // =================================================
+        // VALIDAR CAMPO VACIO
+        // =================================================
+
+        if (valorLimpio.isBlank()) {
+
+            model.addAttribute(
+                    "mensajeError",
+                    "Debe ingresar un criterio de búsqueda."
+            );
+
+
+            return "caja/laboratorio";
+        }
+
+
+        // =================================================
+        // BUSCAR POR NUMERO DE ORDEN
+        // =================================================
+
+        if (
+                "ORDEN".equals(
+                        tipoLimpio
+                )
+        ) {
+
+            try {
+
+                Long ordenId =
+                        Long.parseLong(
+                                valorLimpio
+                        );
+
+
+                OrdenLaboratorio orden =
+                        cajaService
+                                .buscarOrdenLaboratorioPendientePorNumero(
+                                        ordenId
+                                )
+                                .orElse(null);
+
+
+                if (orden == null) {
+
+                    model.addAttribute(
+                            "mensajeError",
+                            "No se encontraron órdenes de laboratorio pendientes de pago. "
+                                    + "Verifique el DPI o número de orden e intente de nuevo."
+                    );
+
+
+                    return "caja/laboratorio";
+                }
+
+
+                model.addAttribute(
+                        "ordenes",
+                        List.of(
+                                orden
+                        )
+                );
+
+
+                Map<Long, Integer> cantidades =
+                        new LinkedHashMap<>();
+
+
+                cantidades.put(
+                        orden.getId(),
+                        cajaService
+                                .contarExamenesLaboratorio(
+                                        orden.getId()
+                                )
+                );
+
+
+                model.addAttribute(
+                        "cantidadesExamenes",
+                        cantidades
+                );
+
+
+                return "caja/laboratorio";
+
+            } catch (
+                    NumberFormatException e
+            ) {
+
+                model.addAttribute(
+                        "mensajeError",
+                        "El número de orden debe ser numérico."
+                );
+
+
+                return "caja/laboratorio";
+            }
+        }
+
+
+        // =================================================
+        // BUSCAR POR DPI
+        // =================================================
+
+        if (
+                "DPI".equals(
+                        tipoLimpio
+                )
+        ) {
+
+            if (
+                    !valorLimpio.matches(
+                            "\\d{13}"
+                    )
+            ) {
+
+                model.addAttribute(
+                        "mensajeError",
+                        "El DPI debe contener exactamente 13 dígitos."
+                );
+
+
+                return "caja/laboratorio";
+            }
+
+
+            List<OrdenLaboratorio> ordenes =
+                    cajaService
+                            .buscarOrdenesLaboratorioPendientesPorDpi(
+                                    valorLimpio
+                            );
+
+
+            if (ordenes.isEmpty()) {
+
+                model.addAttribute(
+                        "mensajeError",
+                        "No se encontraron órdenes de laboratorio pendientes de pago. "
+                                + "Verifique el DPI o número de orden e intente de nuevo."
+                );
+
+
+                return "caja/laboratorio";
+            }
+
+
+            Map<Long, Integer> cantidades =
+                    new LinkedHashMap<>();
+
+
+            for (
+                    OrdenLaboratorio orden
+                    :
+                    ordenes
+            ) {
+
+                cantidades.put(
+                        orden.getId(),
+                        cajaService
+                                .contarExamenesLaboratorio(
+                                        orden.getId()
+                                )
+                );
+            }
+
+
+            model.addAttribute(
+                    "ordenes",
+                    ordenes
+            );
+
+
+            model.addAttribute(
+                    "cantidadesExamenes",
+                    cantidades
+            );
+
+
+            return "caja/laboratorio";
+        }
+
+
+        // =================================================
+        // TIPO INVALIDO
+        // =================================================
+
+        model.addAttribute(
+                "mensajeError",
+                "Tipo de búsqueda no válido."
+        );
+
+
+        return "caja/laboratorio";
+    }
+
+
+// =====================================================
+// CU-10
+// MOSTRAR FORMULARIO DE COBRO
+// =====================================================
+
+    @GetMapping("/laboratorio/cobro")
+    public String mostrarFormularioCobroLaboratorio(
+
+            @RequestParam Long ordenId,
+
+            HttpSession session,
+
+            Model model
+    ) {
+
+        Usuario cajero =
+                obtenerCajero(
+                        session
+                );
+
+
+        if (cajero == null) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        OrdenLaboratorio orden =
+                cajaService
+                        .buscarOrdenLaboratorioPendientePorNumero(
+                                ordenId
+                        )
+                        .orElse(null);
+
+
+        if (orden == null) {
+
+            return "redirect:/caja/laboratorio";
+        }
+
+
+        model.addAttribute(
+                "cajero",
+                cajero
+        );
+
+
+        model.addAttribute(
+                "orden",
+                orden
+        );
+
+
+        model.addAttribute(
+                "cantidadExamenes",
+                cajaService
+                        .contarExamenesLaboratorio(
+                                ordenId
+                        )
+        );
+
+
+        model.addAttribute(
+                "monto",
+                orden.getMontoTotal()
+        );
+
+
+        return "caja/cobro-laboratorio";
+    }
+
+
+// =====================================================
+// CU-10
+// PROCESAR PAGO DE LABORATORIO
+// =====================================================
+
+    @PostMapping("/laboratorio/procesar")
+    public String procesarPagoLaboratorio(
+
+            @RequestParam Long ordenId,
+
+            @RequestParam String metodoPago,
+
+            @RequestParam(
+                    required = false
+            )
+            BigDecimal montoRecibido,
+
+            @RequestParam(
+                    required = false
+            )
+            String ultimosCuatro,
+
+            HttpSession session,
+
+            RedirectAttributes redirectAttributes
+    ) {
+
+        Usuario cajero =
+                obtenerCajero(
+                        session
+                );
+
+
+        if (cajero == null) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        try {
+
+            PagoLaboratorio pago =
+                    cajaService
+                            .procesarPagoLaboratorio(
+                                    ordenId,
+                                    cajero,
+                                    metodoPago,
+                                    montoRecibido,
+                                    ultimosCuatro
+                            );
+
+
+            redirectAttributes
+                    .addFlashAttribute(
+                            "mensajeExito",
+
+                            "¡Pago de laboratorio registrado exitosamente! Paciente: "
+                                    +
+                                    pago.getOrden()
+                                            .getCita()
+                                            .getPaciente()
+                                            .getNombreCompleto()
+                                    +
+                                    ". La orden ha sido actualizada a estado 'En proceso'."
+                    );
+
+
+            return "redirect:/caja/laboratorio/comprobante?pagoId="
+                    + pago.getId();
+
+
+        } catch (
+                IllegalArgumentException
+                |
+                IllegalStateException e
+        ) {
+
+            redirectAttributes
+                    .addFlashAttribute(
+                            "mensajeError",
+                            e.getMessage()
+                    );
+
+
+            return "redirect:/caja/laboratorio/cobro?ordenId="
+                    + ordenId;
+        }
+    }
+
+
+// =====================================================
+// CU-10
+// COMPROBANTE PAGO LABORATORIO
+// =====================================================
+
+    @GetMapping("/laboratorio/comprobante")
+    public String mostrarComprobanteLaboratorio(
+
+            @RequestParam Long pagoId,
+
+            HttpSession session,
+
+            Model model
+    ) {
+
+        Usuario cajero =
+                obtenerCajero(
+                        session
+                );
+
+
+        if (cajero == null) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        PagoLaboratorio pago =
+                cajaService
+                        .buscarPagoLaboratorio(
+                                pagoId
+                        );
+
+
+        model.addAttribute(
+                "cajero",
+                cajero
+        );
+
+
+        model.addAttribute(
+                "pago",
+                pago
+        );
+
+
+        model.addAttribute(
+                "cantidadExamenes",
+                cajaService
+                        .contarExamenesLaboratorio(
+                                pago.getOrden()
+                                        .getId()
+                        )
+        );
+
+
+        return "caja/comprobante-laboratorio";
     }
 }

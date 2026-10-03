@@ -2,6 +2,7 @@ package com.example.sistemamedico.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,10 +14,6 @@ public class OrdenLaboratorio {
     private Long id;
 
 
-    // ==========================================
-    // CITA
-    // ==========================================
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "cita_id",
@@ -24,10 +21,6 @@ public class OrdenLaboratorio {
     )
     private Cita cita;
 
-
-    // ==========================================
-    // MEDICO
-    // ==========================================
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -37,10 +30,6 @@ public class OrdenLaboratorio {
     private Usuario medico;
 
 
-    // ==========================================
-    // OBSERVACIONES
-    // ==========================================
-
     @Column(
             name = "observaciones",
             columnDefinition = "TEXT"
@@ -48,15 +37,35 @@ public class OrdenLaboratorio {
     private String observaciones;
 
 
-    // ==========================================
-    // FECHA DE CREACION
-    // ==========================================
-
     @Column(
             name = "fecha_creacion",
             nullable = false
     )
     private LocalDateTime fechaCreacion;
+
+
+    @Column(
+            name = "estado",
+            nullable = false,
+            length = 20
+    )
+    private String estado;
+
+
+    @Column(
+            name = "monto_total",
+            nullable = false,
+            precision = 10,
+            scale = 2
+    )
+    private BigDecimal montoTotal;
+
+
+    @Column(
+            name = "orden_externa",
+            nullable = false
+    )
+    private Boolean ordenExterna;
 
 
     public OrdenLaboratorio() {
@@ -69,6 +78,18 @@ public class OrdenLaboratorio {
         if (fechaCreacion == null) {
             fechaCreacion = LocalDateTime.now();
         }
+
+        if (estado == null) {
+            estado = "PENDIENTE";
+        }
+
+        if (montoTotal == null) {
+            montoTotal = BigDecimal.ZERO;
+        }
+
+        if (ordenExterna == null) {
+            ordenExterna = false;
+        }
     }
 
 
@@ -80,6 +101,7 @@ public class OrdenLaboratorio {
         this.id = id;
     }
 
+
     public Cita getCita() {
         return cita;
     }
@@ -88,6 +110,7 @@ public class OrdenLaboratorio {
         this.cita = cita;
     }
 
+
     public Usuario getMedico() {
         return medico;
     }
@@ -95,6 +118,7 @@ public class OrdenLaboratorio {
     public void setMedico(Usuario medico) {
         this.medico = medico;
     }
+
 
     public String getObservaciones() {
         return observaciones;
@@ -106,6 +130,7 @@ public class OrdenLaboratorio {
         this.observaciones = observaciones;
     }
 
+
     public LocalDateTime getFechaCreacion() {
         return fechaCreacion;
     }
@@ -114,5 +139,36 @@ public class OrdenLaboratorio {
             LocalDateTime fechaCreacion
     ) {
         this.fechaCreacion = fechaCreacion;
+    }
+
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+
+    public BigDecimal getMontoTotal() {
+        return montoTotal;
+    }
+
+    public void setMontoTotal(
+            BigDecimal montoTotal
+    ) {
+        this.montoTotal = montoTotal;
+    }
+
+
+    public Boolean getOrdenExterna() {
+        return ordenExterna;
+    }
+
+    public void setOrdenExterna(
+            Boolean ordenExterna
+    ) {
+        this.ordenExterna = ordenExterna;
     }
 }

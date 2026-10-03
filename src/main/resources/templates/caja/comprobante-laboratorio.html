@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Comprobante de Pago - Laboratorio</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .encabezado {
+            background: #1f4e79;
+            color: white;
+            padding: 20px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+        }
+
+        .usuario {
+            text-align: right;
+        }
+
+        .usuario p {
+            margin: 3px 0;
+        }
+
+        .contenedor {
+            width: 92%;
+            max-width: 850px;
+            margin: 30px auto;
+        }
+
+        .mensaje-exito {
+            background: #d1e7dd;
+            color: #0f5132;
+
+            border: 1px solid #badbcc;
+
+            padding: 15px;
+
+            border-radius: 7px;
+
+            margin-bottom: 20px;
+        }
+
+        .comprobante {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+
+            box-shadow:
+                    0 2px 8px rgba(0,0,0,0.10);
+        }
+
+        .titulo-comprobante {
+            text-align: center;
+            border-bottom: 2px solid #1f4e79;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .titulo-comprobante h2 {
+            margin: 0;
+            color: #1f4e79;
+        }
+
+        .titulo-comprobante p {
+            margin: 6px 0;
+        }
+
+        .datos {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+
+            gap: 15px;
+
+            margin-bottom: 25px;
+        }
+
+        .dato {
+            background: #f8f9fa;
+
+            padding: 14px;
+
+            border-radius: 7px;
+        }
+
+        .dato strong {
+            display: block;
+            color: #1f4e79;
+            margin-bottom: 5px;
+        }
+
+        .monto {
+            background: #e8f5e9;
+            color: #198754;
+
+            padding: 18px;
+
+            border-radius: 8px;
+
+            text-align: center;
+
+            font-size: 23px;
+            font-weight: bold;
+
+            margin-top: 20px;
+        }
+
+        .cambio {
+            background: #e7f1ff;
+            color: #084298;
+
+            padding: 14px;
+
+            border-radius: 7px;
+
+            margin-top: 15px;
+
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .botones {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-top: 25px;
+        }
+
+        .btn {
+            display: inline-block;
+
+            border: none;
+
+            padding: 11px 17px;
+
+            border-radius: 6px;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn-imprimir {
+            background: #1f4e79;
+            color: white;
+        }
+
+        .btn-nuevo {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-caja {
+            background: #6c757d;
+            color: white;
+        }
+
+        @media print {
+
+            body {
+                background: white;
+            }
+
+            .encabezado,
+            .mensaje-exito,
+            .botones {
+                display: none;
+            }
+
+            .contenedor {
+                width: 100%;
+                margin: 0;
+            }
+
+            .comprobante {
+                box-shadow: none;
+                border: none;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================================================= -->
+<!-- ENCABEZADO -->
+<!-- ================================================= -->
+
+<div class="encabezado">
+
+    <div>
+
+        <h1>
+            Comprobante de Pago
+        </h1>
+
+        <p>
+            Laboratorio
+        </p>
+
+    </div>
+
+
+    <div class="usuario">
+
+        <p>
+            <strong>Cajero:</strong>
+
+            <span th:text="${cajero.nombreCompleto}">
+                Cajero
+            </span>
+        </p>
+
+        <p>
+            Rol:
+            <strong>CAJERO</strong>
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<div class="contenedor">
+
+
+    <!-- ================================================= -->
+    <!-- MENSAJE DE EXITO -->
+    <!-- ================================================= -->
+
+    <div
+            class="mensaje-exito"
+            th:if="${mensajeExito}"
+            th:text="${mensajeExito}">
+
+        Pago realizado correctamente.
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- COMPROBANTE -->
+    <!-- ================================================= -->
+
+    <div class="comprobante">
+
+
+        <div class="titulo-comprobante">
+
+            <h2>
+                Sistema Médico Hospitalario
+            </h2>
+
+            <p>
+                <strong>
+                    Sucursal:
+                </strong>
+
+                Laboratorio
+            </p>
+
+            <p>
+                Comprobante de pago de laboratorio
+            </p>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- DATOS -->
+        <!-- ================================================= -->
+
+        <div class="datos">
+
+
+            <div class="dato">
+
+                <strong>
+                    Número de transacción
+                </strong>
+
+                <span th:text="${pago.numeroTransaccion}">
+                    LAB-XXXXXXXX
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    No. Orden
+                </strong>
+
+                #<span th:text="${pago.orden.id}">
+                    0
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Paciente
+                </strong>
+
+                <span
+                        th:text="${pago.orden.cita.paciente.nombreCompleto}">
+
+                    Paciente
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    DPI
+                </strong>
+
+                <span
+                        th:text="${pago.orden.cita.paciente.dpi}">
+
+                    DPI
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Cantidad de exámenes
+                </strong>
+
+                <span th:text="${cantidadExamenes}">
+                    0
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Médico solicitante
+                </strong>
+
+                <span th:text="${pago.orden.medico.nombreCompleto}">
+                    Médico
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Método de pago
+                </strong>
+
+                <span th:text="${pago.metodoPago}">
+                    Método
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Fecha de pago
+                </strong>
+
+                <span
+                        th:text="${#temporals.format(
+                            pago.fechaPago,
+                            'dd/MM/yyyy HH:mm'
+                        )}">
+
+                    Fecha
+
+                </span>
+
+            </div>
+
+
+            <div
+                    class="dato"
+                    th:if="${pago.ultimosCuatro != null}">
+
+                <strong>
+                    Tarjeta
+                </strong>
+
+                **** **** ****
+
+                <span th:text="${pago.ultimosCuatro}">
+                    0000
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- MONTO -->
+        <!-- ================================================= -->
+
+        <div class="monto">
+
+            Total pagado:
+
+            Q<span
+                th:text="${#numbers.formatDecimal(
+                    pago.monto,
+                    1,
+                    2
+                )}">
+
+                0.00
+
+            </span>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- EFECTIVO -->
+        <!-- ================================================= -->
+
+        <div
+                th:if="${pago.metodoPago == 'EFECTIVO'}">
+
+
+            <div class="datos"
+                 style="margin-top:20px;">
+
+
+                <div class="dato">
+
+                    <strong>
+                        Monto recibido
+                    </strong>
+
+                    Q<span
+                        th:text="${#numbers.formatDecimal(
+                            pago.montoRecibido,
+                            1,
+                            2
+                        )}">
+
+                        0.00
+
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>
+                        Cambio
+                    </strong>
+
+                    Q<span
+                        th:text="${#numbers.formatDecimal(
+                            pago.cambio,
+                            1,
+                            2
+                        )}">
+
+                        0.00
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- ESTADO -->
+        <!-- ================================================= -->
+
+        <div class="cambio">
+
+            Pago registrado correctamente.
+
+            <br>
+
+            La orden de laboratorio ahora se encuentra en estado:
+
+            <strong>
+                EN PROCESO
+            </strong>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- BOTONES -->
+        <!-- ================================================= -->
+
+        <div class="botones">
+
+
+            <button
+                    type="button"
+                    class="btn btn-imprimir"
+                    onclick="window.print()">
+
+                Imprimir Comprobante
+
+            </button>
+
+
+            <a
+                    th:href="@{/caja/laboratorio}"
+                    class="btn btn-nuevo">
+
+                Nuevo Cobro
+
+            </a>
+
+
+            <a
+                    th:href="@{/caja}"
+                    class="btn btn-caja">
+
+                Volver al Panel de Caja
+
+            </a>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

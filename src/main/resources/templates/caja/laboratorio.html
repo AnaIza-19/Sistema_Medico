@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Cobro de Laboratorio</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .encabezado {
+            background: #1f4e79;
+            color: white;
+            padding: 20px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+        }
+
+        .usuario {
+            text-align: right;
+        }
+
+        .usuario p {
+            margin: 3px 0;
+        }
+
+        .cerrar-sesion {
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .contenedor {
+            width: 95%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .tarjeta {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+
+            box-shadow:
+                    0 2px 8px rgba(0, 0, 0, 0.10);
+        }
+
+        h2 {
+            color: #1f4e79;
+            margin-top: 0;
+        }
+
+        .formulario-busqueda {
+            display: grid;
+
+            grid-template-columns:
+                220px 1fr auto;
+
+            gap: 12px;
+            align-items: end;
+        }
+
+        .campo label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .campo select,
+        .campo input {
+            width: 100%;
+            padding: 11px;
+
+            border:
+                    1px solid #bbb;
+
+            border-radius: 6px;
+        }
+
+        .btn {
+            display: inline-block;
+
+            border: none;
+            border-radius: 6px;
+
+            padding: 11px 17px;
+
+            cursor: pointer;
+
+            text-decoration: none;
+
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .btn-buscar {
+            background: #1f4e79;
+            color: white;
+        }
+
+        .btn-cobrar {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+        }
+
+        .mensaje-error {
+            background: #f8d7da;
+            color: #842029;
+
+            border:
+                    1px solid #f5c2c7;
+
+            padding: 14px;
+
+            border-radius: 7px;
+
+            margin-bottom: 20px;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1f4e79;
+            color: white;
+        }
+
+        th,
+        td {
+            padding: 12px;
+
+            text-align: left;
+
+            border-bottom:
+                    1px solid #ddd;
+        }
+
+        tbody tr:hover {
+            background: #f5f9fc;
+        }
+
+        .monto {
+            font-weight: bold;
+            color: #198754;
+        }
+
+        .estado {
+            display: inline-block;
+
+            background: #fff3cd;
+            color: #856404;
+
+            padding: 5px 9px;
+
+            border-radius: 12px;
+
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .acciones {
+            margin-top: 20px;
+        }
+
+        .ayuda {
+            color: #666;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        @media (
+        max-width: 750px
+        ) {
+
+            .formulario-busqueda {
+                grid-template-columns: 1fr;
+            }
+
+            .usuario {
+                text-align: left;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================================================= -->
+<!-- ENCABEZADO -->
+<!-- ================================================= -->
+
+<div class="encabezado">
+
+    <div>
+
+        <h1>
+            Cobro de Laboratorio en Caja
+        </h1>
+
+        <p>
+            Búsqueda de órdenes pendientes de pago
+        </p>
+
+    </div>
+
+
+    <div class="usuario">
+
+        <p>
+
+            <strong>
+                Cajero:
+            </strong>
+
+            <span th:text="${cajero.nombreCompleto}">
+                Cajero
+            </span>
+
+        </p>
+
+
+        <p>
+            Rol:
+            <strong>CAJERO</strong>
+        </p>
+
+
+        <a
+                class="cerrar-sesion"
+                th:href="@{/personal/cerrar-sesion}">
+
+            Cerrar sesión
+
+        </a>
+
+    </div>
+
+</div>
+
+
+
+<div class="contenedor">
+
+
+    <!-- ================================================= -->
+    <!-- MENSAJE ERROR -->
+    <!-- ================================================= -->
+
+    <div
+            class="mensaje-error"
+            th:if="${mensajeError}"
+            th:text="${mensajeError}">
+
+        Mensaje de error
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- BUSQUEDA -->
+    <!-- ================================================= -->
+
+    <div class="tarjeta">
+
+        <h2>
+            Buscar orden de laboratorio
+        </h2>
+
+
+        <form
+                th:action="@{/caja/laboratorio/buscar}"
+                method="get"
+                class="formulario-busqueda">
+
+
+            <!-- CRITERIO -->
+
+            <div class="campo">
+
+                <label for="tipo">
+                    Criterio de búsqueda
+                </label>
+
+
+                <select
+                        id="tipo"
+                        name="tipo"
+                        required
+                        onchange="actualizarCampo()">
+
+                    <option value="">
+                        Seleccione
+                    </option>
+
+
+                    <option
+                            value="DPI"
+
+                            th:selected="${
+                                tipoSeleccionado == 'DPI'
+                            }">
+
+                        Por DPI
+
+                    </option>
+
+
+                    <option
+                            value="ORDEN"
+
+                            th:selected="${
+                                tipoSeleccionado == 'ORDEN'
+                            }">
+
+                        Por No. Orden
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- VALOR -->
+
+            <div class="campo">
+
+                <label for="valor">
+                    Valor
+                </label>
+
+
+                <input
+                        type="text"
+                        id="valor"
+                        name="valor"
+
+                        th:value="${valorBuscado}"
+
+                        placeholder="Ingrese DPI o número de orden"
+
+                        autocomplete="off"
+
+                        required>
+
+            </div>
+
+
+
+            <!-- BOTON -->
+
+            <div>
+
+                <button
+                        type="submit"
+                        class="btn btn-buscar">
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <p
+                id="textoAyuda"
+                class="ayuda">
+
+            Seleccione si desea buscar por DPI
+            o por número de orden.
+
+        </p>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- RESULTADOS -->
+    <!-- ================================================= -->
+
+    <div
+            class="tarjeta"
+            th:if="${ordenes != null}">
+
+        <h2>
+            Órdenes pendientes encontradas
+        </h2>
+
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>
+                        No. Orden
+                    </th>
+
+                    <th>
+                        Paciente
+                    </th>
+
+                    <th>
+                        DPI
+                    </th>
+
+                    <th>
+                        Exámenes
+                    </th>
+
+                    <th>
+                        Fecha de creación
+                    </th>
+
+                    <th>
+                        Estado
+                    </th>
+
+                    <th>
+                        Monto total
+                    </th>
+
+                    <th>
+                        Acción
+                    </th>
+
+                </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                <tr
+                        th:each="orden : ${ordenes}">
+
+
+                    <!-- ORDEN -->
+
+                    <td>
+
+                        #<span
+                            th:text="${orden.id}">
+
+                            0
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- PACIENTE -->
+
+                    <td
+                            th:text="${
+                                orden.cita.paciente.nombreCompleto
+                            }">
+
+                        Paciente
+
+                    </td>
+
+
+                    <!-- DPI -->
+
+                    <td
+                            th:text="${
+                                orden.cita.paciente.dpi
+                            }">
+
+                        DPI
+
+                    </td>
+
+
+                    <!-- CANTIDAD EXAMENES -->
+
+                    <td
+                            th:text="${
+                                cantidadesExamenes[orden.id]
+                            }">
+
+                        0
+
+                    </td>
+
+
+                    <!-- FECHA -->
+
+                    <td>
+
+                        <span
+                                th:if="${
+                                    orden.fechaCreacion != null
+                                }"
+
+                                th:text="${
+                                    #temporals.format(
+                                        orden.fechaCreacion,
+                                        'dd/MM/yyyy HH:mm'
+                                    )
+                                }">
+
+                            Fecha
+
+                        </span>
+
+
+                        <span
+                                th:unless="${
+                                    orden.fechaCreacion != null
+                                }">
+
+                            -
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- ESTADO -->
+
+                    <td>
+
+                        <span class="estado">
+
+                            Pendiente
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- MONTO -->
+
+                    <td class="monto">
+
+                        Q<span
+                            th:text="${
+                                #numbers.formatDecimal(
+                                    orden.montoTotal,
+                                    1,
+                                    2
+                                )
+                            }">
+
+                            0.00
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- ACCION -->
+
+                    <td>
+
+                        <a
+                                class="btn btn-cobrar"
+
+                                th:href="@{
+                                    /caja/laboratorio/cobro
+                                    (
+                                        ordenId=${orden.id}
+                                    )
+                                }">
+
+                            Cobrar
+
+                        </a>
+
+                    </td>
+
+
+                </tr>
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- VOLVER -->
+    <!-- ================================================= -->
+
+    <div class="acciones">
+
+        <a
+                th:href="@{/caja}"
+                class="btn btn-volver">
+
+            Volver al Panel de Caja
+
+        </a>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- ================================================= -->
+<!-- AYUDA SEGUN CRITERIO -->
+<!-- ================================================= -->
+
+<script>
+
+    function actualizarCampo() {
+
+        const tipo =
+            document.getElementById(
+                "tipo"
+            ).value;
+
+
+        const valor =
+            document.getElementById(
+                "valor"
+            );
+
+
+        const ayuda =
+            document.getElementById(
+                "textoAyuda"
+            );
+
+
+        if (
+            tipo === "DPI"
+        ) {
+
+            valor.placeholder =
+                "Ingrese DPI de 13 dígitos";
+
+            valor.maxLength =
+                13;
+
+            valor.inputMode =
+                "numeric";
+
+            ayuda.textContent =
+                "Ingrese exactamente los 13 dígitos del DPI del paciente.";
+
+        } else if (
+            tipo === "ORDEN"
+        ) {
+
+            valor.placeholder =
+                "Ingrese número de orden";
+
+            valor.removeAttribute(
+                "maxlength"
+            );
+
+            valor.inputMode =
+                "numeric";
+
+            ayuda.textContent =
+                "Ingrese el número de la orden de laboratorio.";
+
+        } else {
+
+            valor.placeholder =
+                "Ingrese DPI o número de orden";
+
+            valor.removeAttribute(
+                "maxlength"
+            );
+
+            ayuda.textContent =
+                "Seleccione si desea buscar por DPI o por número de orden.";
+        }
+    }
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            actualizarCampo();
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

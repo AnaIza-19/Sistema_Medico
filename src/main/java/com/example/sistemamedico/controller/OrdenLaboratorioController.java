@@ -43,7 +43,7 @@ public class OrdenLaboratorioController {
 
 
     // =====================================================
-    // MOSTRAR FORMULARIO DE ORDEN DE LABORATORIO
+    // MOSTRAR FORMULARIO DE ORDEN
     // =====================================================
 
     @GetMapping("/{citaId}")
@@ -58,10 +58,6 @@ public class OrdenLaboratorioController {
             RedirectAttributes redirect
     ) {
 
-
-        // =============================================
-        // VALIDAR MEDICO EN SESION
-        // =============================================
 
         Usuario medico =
                 obtenerMedicoSesion(
@@ -78,10 +74,6 @@ public class OrdenLaboratorioController {
         try {
 
 
-            // =========================================
-            // BUSCAR CITA
-            // =========================================
-
             Cita cita =
                     ordenLaboratorioService
                             .obtenerCita(
@@ -90,7 +82,7 @@ public class OrdenLaboratorioController {
 
 
             // =========================================
-            // VALIDAR QUE LA CITA SEA DEL MEDICO
+            // VALIDAR MEDICO ASIGNADO
             // =========================================
 
             if (
@@ -133,17 +125,13 @@ public class OrdenLaboratorioController {
 
 
             // =========================================
-            // OBTENER CATALOGO DE EXAMENES
+            // CATALOGO
             // =========================================
 
             List<ExamenLaboratorio> examenes =
                     ordenLaboratorioService
                             .obtenerExamenesActivos();
 
-
-            // =========================================
-            // ENVIAR DATOS AL HTML
-            // =========================================
 
             model.addAttribute(
                     "medico",
@@ -181,7 +169,7 @@ public class OrdenLaboratorioController {
 
 
     // =====================================================
-    // GUARDAR ORDEN DE LABORATORIO
+    // GUARDAR ORDEN
     // =====================================================
 
     @PostMapping("/{citaId}")
@@ -201,15 +189,18 @@ public class OrdenLaboratorioController {
             )
             String observaciones,
 
+            @RequestParam(
+                    name = "ordenExterna",
+                    required = false,
+                    defaultValue = "false"
+            )
+            Boolean ordenExterna,
+
             HttpSession session,
 
             RedirectAttributes redirect
     ) {
 
-
-        // =============================================
-        // VALIDAR MEDICO EN SESION
-        // =============================================
 
         Usuario medico =
                 obtenerMedicoSesion(
@@ -226,23 +217,19 @@ public class OrdenLaboratorioController {
         try {
 
 
-            // =========================================
-            // GENERAR ORDEN
-            // =========================================
-
             OrdenLaboratorio orden =
                     ordenLaboratorioService
                             .generarOrden(
                                     citaId,
                                     medico,
                                     examenIds,
-                                    observaciones
+                                    observaciones,
+                                    ordenExterna
                             );
 
 
             // =========================================
-            // OBTENER NOMBRES DE LOS EXAMENES
-            // PARA MOSTRARLOS EN EL MENSAJE
+            // OBTENER NOMBRES DE EXAMENES
             // =========================================
 
             List<ExamenLaboratorio> catalogo =
@@ -275,7 +262,7 @@ public class OrdenLaboratorioController {
 
 
             // =========================================
-            // MENSAJE SEGUN FA01
+            // MENSAJE
             // =========================================
 
             String mensaje =
@@ -284,8 +271,28 @@ public class OrdenLaboratorioController {
                             + orden.getId()
                             + ". Exámenes: "
                             + listaExamenes
-                            + ". El paciente debe dirigirse "
-                            + "al área de laboratorio.";
+                            + ". Monto total: Q"
+                            + orden.getMontoTotal()
+                            + ".";
+
+
+            if (
+                    Boolean.TRUE.equals(
+                            orden.getOrdenExterna()
+                    )
+            ) {
+
+                mensaje =
+                        mensaje
+                                + " Orden marcada como externa.";
+
+            } else {
+
+                mensaje =
+                        mensaje
+                                + " El paciente debe dirigirse "
+                                + "al área de laboratorio.";
+            }
 
 
             redirect.addFlashAttribute(
@@ -302,10 +309,6 @@ public class OrdenLaboratorioController {
         ) {
 
 
-            // =========================================
-            // ERROR DE VALIDACION
-            // =========================================
-
             redirect.addFlashAttribute(
                     "error",
                     e.getMessage()
@@ -319,7 +322,7 @@ public class OrdenLaboratorioController {
 
 
     // =====================================================
-    // OBTENER MEDICO DE LA SESION
+    // OBTENER MEDICO DE SESION
     // =====================================================
 
     private Usuario obtenerMedicoSesion(
@@ -333,10 +336,6 @@ public class OrdenLaboratorioController {
                 );
 
 
-        // =============================================
-        // VERIFICAR QUE EXISTA USUARIO EN SESION
-        // =============================================
-
         if (
                 !(usuarioSesion instanceof Usuario)
         ) {
@@ -348,10 +347,6 @@ public class OrdenLaboratorioController {
         Usuario usuario =
                 (Usuario) usuarioSesion;
 
-
-        // =============================================
-        // VALIDAR ROL
-        // =============================================
 
         if (
                 usuario.getRol() == null
@@ -368,10 +363,6 @@ public class OrdenLaboratorioController {
             return null;
         }
 
-
-        // =============================================
-        // VALIDAR QUE ESTE ACTIVO
-        // =============================================
 
         if (
                 usuario.getActivo() == null

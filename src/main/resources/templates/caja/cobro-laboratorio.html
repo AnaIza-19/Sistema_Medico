@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Cobro de Laboratorio</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .encabezado {
+            background: #1f4e79;
+            color: white;
+            padding: 20px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+        }
+
+        .usuario {
+            text-align: right;
+        }
+
+        .usuario p {
+            margin: 3px 0;
+        }
+
+        .cerrar-sesion {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .contenedor {
+            width: 92%;
+            max-width: 900px;
+            margin: 30px auto;
+        }
+
+        .tarjeta {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1f4e79;
+        }
+
+        .datos {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .dato {
+            background: #f8f9fa;
+            padding: 14px;
+            border-radius: 7px;
+        }
+
+        .dato strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #1f4e79;
+        }
+
+        .monto-total {
+            background: #e8f5e9;
+            padding: 18px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            color: #198754;
+        }
+
+        .campo {
+            margin-bottom: 18px;
+        }
+
+        .campo label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        .campo select,
+        .campo input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+        }
+
+        .seccion-pago {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .cambio {
+            background: #e7f1ff;
+            color: #084298;
+            padding: 15px;
+            border-radius: 7px;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .mensaje-error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+            padding: 14px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+        }
+
+        .botones {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .btn {
+            border: none;
+            padding: 11px 17px;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .btn-confirmar {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================================================= -->
+<!-- ENCABEZADO -->
+<!-- ================================================= -->
+
+<div class="encabezado">
+
+    <div>
+
+        <h1>
+            Cobro de Laboratorio
+        </h1>
+
+        <p>
+            Confirmación de pago
+        </p>
+
+    </div>
+
+
+    <div class="usuario">
+
+        <p>
+            <strong>Cajero:</strong>
+
+            <span th:text="${cajero.nombreCompleto}">
+                Cajero
+            </span>
+        </p>
+
+        <p>
+            Rol:
+            <strong>CAJERO</strong>
+        </p>
+
+        <a class="cerrar-sesion"
+           th:href="@{/personal/cerrar-sesion}">
+
+            Cerrar sesión
+
+        </a>
+
+    </div>
+
+</div>
+
+
+
+<div class="contenedor">
+
+
+    <!-- ================================================= -->
+    <!-- MENSAJE ERROR -->
+    <!-- ================================================= -->
+
+    <div class="mensaje-error"
+         th:if="${mensajeError}"
+         th:text="${mensajeError}">
+
+        Mensaje de error
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- RESUMEN DE LA ORDEN -->
+    <!-- ================================================= -->
+
+    <div class="tarjeta">
+
+        <h2>
+            Resumen de la Orden
+        </h2>
+
+
+        <div class="datos">
+
+
+            <div class="dato">
+
+                <strong>
+                    No. Orden
+                </strong>
+
+                #<span th:text="${orden.id}">
+                    0
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Paciente
+                </strong>
+
+                <span th:text="${orden.cita.paciente.nombreCompleto}">
+                    Paciente
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    DPI
+                </strong>
+
+                <span th:text="${orden.cita.paciente.dpi}">
+                    DPI
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Cantidad de exámenes
+                </strong>
+
+                <span th:text="${cantidadExamenes}">
+                    0
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Médico
+                </strong>
+
+                <span th:text="${orden.medico.nombreCompleto}">
+                    Médico
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Estado
+                </strong>
+
+                <span>
+                    Pendiente
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="monto-total">
+
+            Total a cobrar:
+
+            Q<span th:text="${#numbers.formatDecimal(
+                    monto,
+                    1,
+                    2
+            )}">
+                0.00
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- FORMULARIO DE PAGO -->
+    <!-- ================================================= -->
+
+    <div class="tarjeta">
+
+        <h2>
+            Método de pago
+        </h2>
+
+
+        <form
+                th:action="@{/caja/laboratorio/procesar}"
+                method="post">
+
+
+            <input
+                    type="hidden"
+                    name="ordenId"
+                    th:value="${orden.id}">
+
+
+            <!-- ============================================= -->
+            <!-- MÉTODO -->
+            <!-- ============================================= -->
+
+            <div class="campo">
+
+                <label for="metodoPago">
+                    Seleccione método de pago
+                </label>
+
+
+                <select
+                        id="metodoPago"
+                        name="metodoPago"
+                        required
+                        onchange="mostrarCamposPago()">
+
+                    <option value="">
+                        Seleccione
+                    </option>
+
+                    <option value="EFECTIVO">
+                        Efectivo
+                    </option>
+
+                    <option value="VISA">
+                        Visa
+                    </option>
+
+                    <option value="MASTERCARD">
+                        Mastercard
+                    </option>
+
+                    <option value="DEBITO">
+                        Débito
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- ============================================= -->
+            <!-- EFECTIVO -->
+            <!-- ============================================= -->
+
+            <div
+                    id="camposEfectivo"
+                    class="seccion-pago"
+                    style="display:none;">
+
+
+                <div class="campo">
+
+                    <label for="montoRecibido">
+                        Monto Recibido (Q)
+                    </label>
+
+
+                    <input
+                            type="number"
+                            id="montoRecibido"
+                            name="montoRecibido"
+
+                            min="0"
+                            step="0.01"
+
+                            placeholder="Ejemplo: 200.00"
+
+                            oninput="calcularCambio()">
+
+                </div>
+
+
+                <div class="cambio">
+
+                    Cambio a devolver:
+
+                    Q<span id="cambio">
+                        0.00
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ============================================= -->
+            <!-- TARJETA -->
+            <!-- ============================================= -->
+
+            <div
+                    id="camposTarjeta"
+                    class="seccion-pago"
+                    style="display:none;">
+
+
+                <div class="campo">
+
+                    <label for="ultimosCuatro">
+                        Últimos 4 dígitos de la tarjeta
+                    </label>
+
+
+                    <input
+                            type="text"
+                            id="ultimosCuatro"
+                            name="ultimosCuatro"
+
+                            maxlength="4"
+
+                            inputmode="numeric"
+
+                            placeholder="Ejemplo: 4242"
+
+                            pattern="[0-9]{4}">
+
+                </div>
+
+
+                <p>
+                    Ingrese únicamente los últimos 4 dígitos.
+                </p>
+
+            </div>
+
+
+
+            <!-- ============================================= -->
+            <!-- BOTONES -->
+            <!-- ============================================= -->
+
+            <div class="botones">
+
+
+                <button
+                        type="submit"
+                        class="btn btn-confirmar">
+
+                    Confirmar Pago
+                    Q<span th:text="${#numbers.formatDecimal(
+                            monto,
+                            1,
+                            2
+                    )}">
+                        0.00
+                    </span>
+
+                </button>
+
+
+                <a
+                        th:href="@{/caja/laboratorio}"
+                        class="btn btn-volver">
+
+                    Cancelar
+
+                </a>
+
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+</div>
+
+
+
+<script th:inline="javascript">
+
+    const totalCobrar =
+        /*[[${monto}]]*/ 0;
+
+
+    function mostrarCamposPago() {
+
+        const metodo =
+            document.getElementById(
+                "metodoPago"
+            ).value;
+
+
+        const efectivo =
+            document.getElementById(
+                "camposEfectivo"
+            );
+
+
+        const tarjeta =
+            document.getElementById(
+                "camposTarjeta"
+            );
+
+
+        const montoRecibido =
+            document.getElementById(
+                "montoRecibido"
+            );
+
+
+        const ultimosCuatro =
+            document.getElementById(
+                "ultimosCuatro"
+            );
+
+
+        efectivo.style.display =
+            "none";
+
+
+        tarjeta.style.display =
+            "none";
+
+
+        montoRecibido.required =
+            false;
+
+
+        ultimosCuatro.required =
+            false;
+
+
+        if (
+            metodo === "EFECTIVO"
+        ) {
+
+            efectivo.style.display =
+                "block";
+
+
+            montoRecibido.required =
+                true;
+
+
+            calcularCambio();
+
+        } else if (
+            metodo === "VISA"
+            ||
+            metodo === "MASTERCARD"
+            ||
+            metodo === "DEBITO"
+        ) {
+
+            tarjeta.style.display =
+                "block";
+
+
+            ultimosCuatro.required =
+                true;
+        }
+    }
+
+
+    function calcularCambio() {
+
+        const input =
+            document.getElementById(
+                "montoRecibido"
+            );
+
+
+        const salida =
+            document.getElementById(
+                "cambio"
+            );
+
+
+        const recibido =
+            parseFloat(
+                input.value
+            );
+
+
+        if (
+            isNaN(recibido)
+        ) {
+
+            salida.textContent =
+                "0.00";
+
+            return;
+        }
+
+
+        let cambio =
+            recibido
+            -
+            parseFloat(
+                totalCobrar
+            );
+
+
+        if (
+            cambio < 0
+        ) {
+
+            cambio = 0;
+        }
+
+
+        salida.textContent =
+            cambio.toFixed(2);
+    }
+
+</script>
+
+
+</body>
+
+</html>

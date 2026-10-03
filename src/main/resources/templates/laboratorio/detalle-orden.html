@@ -1,0 +1,1284 @@
+
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Detalle de Orden de Laboratorio
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        /* ============================================== */
+        /* ENCABEZADO                                     */
+        /* ============================================== */
+
+        .encabezado {
+            background: #245985;
+            color: white;
+            padding: 20px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+        }
+
+        .encabezado p {
+            margin: 5px 0 0;
+        }
+
+        .usuario {
+            text-align: right;
+        }
+
+        .usuario p {
+            margin: 3px 0;
+        }
+
+        .cerrar-sesion {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* ============================================== */
+        /* CONTENIDO                                      */
+        /* ============================================== */
+
+        .contenedor {
+            width: 94%;
+            max-width: 1350px;
+            margin: 30px auto;
+        }
+
+        .tarjeta {
+            background: white;
+
+            border-radius: 12px;
+
+            padding: 25px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                    0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            color: #174f7d;
+            margin-top: 0;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #174f7d;
+        }
+
+        /* ============================================== */
+        /* RESUMEN                                        */
+        /* ============================================== */
+
+        .resumen {
+            display: grid;
+
+            grid-template-columns:
+                    repeat(auto-fit, minmax(220px, 1fr));
+
+            gap: 15px;
+        }
+
+        .dato {
+            background: #f7f8fa;
+
+            padding: 17px;
+
+            border-radius: 8px;
+        }
+
+        .dato strong {
+            display: block;
+
+            color: #174f7d;
+
+            margin-bottom: 7px;
+        }
+
+        /* ============================================== */
+        /* ESTADOS                                        */
+        /* ============================================== */
+
+        .estado {
+            display: inline-block;
+
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+
+            font-size: 14px;
+        }
+
+        .estado-pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .estado-proceso {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .estado-completada {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        /* ============================================== */
+        /* MENSAJES                                       */
+        /* ============================================== */
+
+        .mensaje-exito {
+            background: #d1e7dd;
+            color: #0f5132;
+
+            border: 1px solid #badbcc;
+
+            padding: 14px;
+
+            border-radius: 7px;
+
+            margin-bottom: 20px;
+        }
+
+        .mensaje-error {
+            background: #f8d7da;
+            color: #842029;
+
+            border: 1px solid #f5c2c7;
+
+            padding: 14px;
+
+            border-radius: 7px;
+
+            margin-bottom: 20px;
+        }
+
+        .mensaje-advertencia {
+            background: #fff3cd;
+            color: #664d03;
+
+            border: 1px solid #ffecb5;
+
+            padding: 15px;
+
+            border-radius: 7px;
+
+            margin-bottom: 20px;
+        }
+
+        .mensaje-info {
+            background: #cff4fc;
+            color: #055160;
+
+            border: 1px solid #b6effb;
+
+            padding: 15px;
+
+            border-radius: 7px;
+
+            margin-bottom: 20px;
+        }
+
+        /* ============================================== */
+        /* EXAMEN                                         */
+        /* ============================================== */
+
+        .examen {
+            border: 1px solid #dfe3e7;
+
+            border-radius: 10px;
+
+            overflow: hidden;
+
+            margin-bottom: 25px;
+        }
+
+        .examen-encabezado {
+            background: #245985;
+            color: white;
+
+            padding: 16px 20px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .examen-encabezado h3 {
+            margin: 0;
+            color: white;
+        }
+
+        .precio {
+            font-weight: bold;
+        }
+
+        .examen-contenido {
+            padding: 20px;
+        }
+
+        /* ============================================== */
+        /* FORMULARIO                                     */
+        /* ============================================== */
+
+        .form-grid {
+            display: grid;
+
+            grid-template-columns:
+                    repeat(2, 1fr);
+
+            gap: 18px;
+        }
+
+        .campo label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-weight: bold;
+
+            color: #333;
+        }
+
+        .campo input[type="text"],
+        .campo input[type="datetime-local"],
+        .campo textarea {
+            width: 100%;
+
+            padding: 11px;
+
+            border: 1px solid #bbb;
+
+            border-radius: 6px;
+
+            font-family: inherit;
+
+            font-size: 15px;
+        }
+
+        .campo textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .campo-completo {
+            grid-column: 1 / -1;
+        }
+
+        .checkbox-contenedor {
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            padding-top: 8px;
+        }
+
+        .checkbox-contenedor input {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ============================================== */
+        /* BOTONES                                        */
+        /* ============================================== */
+
+        .acciones {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-top: 20px;
+        }
+
+        .btn {
+            border: none;
+
+            padding: 11px 18px;
+
+            border-radius: 6px;
+
+            text-decoration: none;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            font-size: 14px;
+        }
+
+        .btn-guardar {
+            background: #245985;
+            color: white;
+        }
+
+        .btn-publicar {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+        }
+
+        /* ============================================== */
+        /* BADGES                                         */
+        /* ============================================== */
+
+        .badge-publicado {
+            display: inline-block;
+
+            background: #d1e7dd;
+            color: #0f5132;
+
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+        }
+
+        .badge-guardado {
+            display: inline-block;
+
+            background: #cfe2ff;
+            color: #084298;
+
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+        }
+
+        .badge-pendiente {
+            display: inline-block;
+
+            background: #fff3cd;
+            color: #856404;
+
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+        }
+
+        .badge-rango {
+            display: inline-block;
+
+            background: #f8d7da;
+            color: #842029;
+
+            border: 1px solid #f5c2c7;
+
+            padding: 7px 11px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+
+            margin-bottom: 15px;
+        }
+
+        /* ============================================== */
+        /* RESULTADO PUBLICADO                            */
+        /* ============================================== */
+
+        .resultado-grid {
+            display: grid;
+
+            grid-template-columns:
+                    repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: 15px;
+
+            margin-top: 15px;
+        }
+
+        .resultado-dato {
+            background: #f7f8fa;
+
+            padding: 14px;
+
+            border-radius: 7px;
+        }
+
+        .resultado-dato strong {
+            display: block;
+
+            color: #174f7d;
+
+            margin-bottom: 5px;
+        }
+
+        /* ============================================== */
+        /* RESPONSIVE                                     */
+        /* ============================================== */
+
+        @media (max-width: 750px) {
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .campo-completo {
+                grid-column: auto;
+            }
+
+            .usuario {
+                text-align: left;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================================================= -->
+<!-- ENCABEZADO                                        -->
+<!-- ================================================= -->
+
+<div class="encabezado">
+
+    <div>
+
+        <h1>
+            Detalle de Orden de Laboratorio
+        </h1>
+
+        <p>
+            CU-09 Gestión de Laboratorio
+        </p>
+
+    </div>
+
+
+    <div class="usuario">
+
+        <p>
+
+            <strong>
+                Personal:
+            </strong>
+
+            <span th:text="${personalLaboratorio.nombreCompleto}">
+                Usuario
+            </span>
+
+        </p>
+
+        <p>
+            Rol:
+            <strong>LABORATORIO</strong>
+        </p>
+
+        <a
+                th:href="@{/personal/cerrar-sesion}"
+                class="cerrar-sesion">
+
+            Cerrar sesión
+
+        </a>
+
+    </div>
+
+</div>
+
+
+
+<div class="contenedor">
+
+
+    <!-- ================================================= -->
+    <!-- MENSAJES                                         -->
+    <!-- ================================================= -->
+
+    <div
+            class="mensaje-exito"
+            th:if="${mensajeExito != null}"
+            th:text="${mensajeExito}">
+
+        Resultado guardado exitosamente.
+
+    </div>
+
+
+    <div
+            class="mensaje-error"
+            th:if="${mensajeError != null}"
+            th:text="${mensajeError}">
+
+        Error
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- RESUMEN DE LA ORDEN                              -->
+    <!-- ================================================= -->
+
+    <div class="tarjeta">
+
+
+        <h2>
+
+            Orden #
+
+            <span th:text="${orden.id}">
+                0
+            </span>
+
+        </h2>
+
+
+        <div class="resumen">
+
+
+            <div class="dato">
+
+                <strong>
+                    Paciente
+                </strong>
+
+                <span
+                        th:text="${orden.cita.paciente.nombreCompleto}">
+
+                    Paciente
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Médico
+                </strong>
+
+                <span th:text="${orden.medico.nombreCompleto}">
+                    Médico
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Estado
+                </strong>
+
+
+                <span
+                        th:if="${orden.estado == 'PENDIENTE'}"
+                        class="estado estado-pendiente">
+
+                    Pendiente
+
+                </span>
+
+
+                <span
+                        th:if="${orden.estado == 'EN_PROCESO'}"
+                        class="estado estado-proceso">
+
+                    En proceso
+
+                </span>
+
+
+                <span
+                        th:if="${orden.estado == 'COMPLETADA'}"
+                        class="estado estado-completada">
+
+                    Completada
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Tipo de Orden
+                </strong>
+
+                <span
+                        th:text="${orden.ordenExterna
+                        ? 'Externa'
+                        : 'Interna'}">
+
+                    Interna
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Monto Total
+                </strong>
+
+                Q<span
+                    th:text="${#numbers.formatDecimal(
+                        orden.montoTotal,
+                        1,
+                        2
+                    )}">
+
+                    0.00
+
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Observaciones
+                </strong>
+
+                <span
+                        th:text="${orden.observaciones != null
+                        and !orden.observaciones.isBlank()
+                        ? orden.observaciones
+                        : 'Sin observaciones'}">
+
+                    Observaciones
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- ORDEN PENDIENTE                                  -->
+    <!-- ================================================= -->
+
+    <div
+            class="mensaje-advertencia"
+            th:if="${orden.estado == 'PENDIENTE'
+            and !orden.ordenExterna}">
+
+        <strong>
+            Orden pendiente de pago.
+        </strong>
+
+        El paciente debe dirigirse a caja para realizar
+        el pago de los exámenes antes de continuar
+        con la toma de muestras.
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- ORDEN EXTERNA                                    -->
+    <!-- ================================================= -->
+
+    <div
+            class="mensaje-info"
+            th:if="${orden.ordenExterna}">
+
+        <strong>
+            Orden Externa.
+        </strong>
+
+        Los exámenes serán realizados fuera del laboratorio
+        de la clínica. No corresponde registrar resultados
+        desde este módulo.
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- ORDEN COMPLETADA                                 -->
+    <!-- ================================================= -->
+
+    <div
+            class="mensaje-exito"
+            th:if="${orden.estado == 'COMPLETADA'}">
+
+        Todos los resultados de esta orden fueron publicados.
+
+        <strong>
+            Orden completada.
+        </strong>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- EXÁMENES                                         -->
+    <!-- ================================================= -->
+
+    <div class="tarjeta">
+
+        <h2>
+            Exámenes solicitados
+        </h2>
+
+
+        <div
+                class="examen"
+                th:each="detalle : ${detalles}">
+
+
+            <!-- ============================================= -->
+            <!-- ENCABEZADO DEL EXAMEN                        -->
+            <!-- ============================================= -->
+
+            <div class="examen-encabezado">
+
+                <h3 th:text="${detalle.examen.nombre}">
+                    Examen
+                </h3>
+
+
+                <span class="precio">
+
+                    Q<span
+                        th:text="${#numbers.formatDecimal(
+                            detalle.monto,
+                            1,
+                            2
+                        )}">
+
+                        0.00
+
+                    </span>
+
+                </span>
+
+            </div>
+
+
+
+            <div class="examen-contenido">
+
+
+                <!-- ========================================= -->
+                <!-- FUERA DE RANGO                           -->
+                <!-- ========================================= -->
+
+                <div
+                        class="badge-rango"
+                        th:if="${detalle.fueraRango}">
+
+                    Fuera de rango
+
+                    <span
+                            th:if="${detalle.examen.rangoReferencia != null
+                            and !detalle.examen.rangoReferencia.isBlank()}">
+
+                        (
+
+                        <span
+                                th:text="${detalle.examen.rangoReferencia}">
+                            Rango
+                        </span>
+
+                        )
+
+                    </span>
+
+                </div>
+
+
+
+                <!-- ========================================= -->
+                <!-- ESTADO DEL RESULTADO                      -->
+                <!-- ========================================= -->
+
+                <div>
+
+
+                    <span
+                            class="badge-publicado"
+                            th:if="${detalle.publicado}">
+
+                        Publicado
+
+                    </span>
+
+
+                    <span
+                            class="badge-guardado"
+                            th:if="${!detalle.publicado
+                            and detalle.valorResultado != null
+                            and !detalle.valorResultado.isBlank()}">
+
+                        Resultado guardado
+
+                    </span>
+
+
+                    <span
+                            class="badge-pendiente"
+                            th:if="${!detalle.publicado
+                            and (detalle.valorResultado == null
+                            or detalle.valorResultado.isBlank())}">
+
+                        Pendiente
+
+                    </span>
+
+
+                </div>
+
+
+
+                <!-- ========================================= -->
+                <!-- FORMULARIO DE RESULTADO                   -->
+                <!-- SOLO EN PROCESO Y NO PUBLICADO            -->
+                <!-- ========================================= -->
+
+                <form
+                        th:if="${orden.estado == 'EN_PROCESO'
+                        and !orden.ordenExterna
+                        and !detalle.publicado}"
+
+                        th:action="@{/laboratorio/resultado/guardar}"
+
+                        method="post"
+
+                        style="margin-top:20px;">
+
+
+                    <input
+                            type="hidden"
+                            name="detalleId"
+                            th:value="${detalle.id}">
+
+
+                    <div class="form-grid">
+
+
+                        <!-- ================================= -->
+                        <!-- VALOR                             -->
+                        <!-- ================================= -->
+
+                        <div class="campo">
+
+                            <label>
+                                Valor del Resultado
+                            </label>
+
+
+                            <input
+                                    type="text"
+
+                                    name="valorResultado"
+
+                                    th:value="${detalle.valorResultado}"
+
+                                    placeholder="Ingrese resultado"
+
+                                    required>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- UNIDAD                            -->
+                        <!-- ================================= -->
+
+                        <div class="campo">
+
+                            <label>
+                                Unidad
+                            </label>
+
+
+                            <input
+                                    type="text"
+
+                                    name="unidad"
+
+                                    th:value="${detalle.unidad}"
+
+                                    placeholder="Ejemplo: mg/dL"
+
+                                    required>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- FECHA                             -->
+                        <!-- ================================= -->
+
+                        <div class="campo">
+
+                            <label>
+                                Fecha del Resultado
+                            </label>
+
+
+                            <input
+                                    type="datetime-local"
+
+                                    name="fechaResultado"
+
+                                    th:value="${detalle.fechaResultado}"
+
+                                    required>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- FUERA DE RANGO                    -->
+                        <!-- ================================= -->
+
+                        <div class="campo">
+
+                            <label>
+                                Estado del valor
+                            </label>
+
+
+                            <div class="checkbox-contenedor">
+
+                                <input
+                                        type="checkbox"
+
+                                        name="fueraRango"
+
+                                        value="true"
+
+                                        th:checked="${detalle.fueraRango}">
+
+
+                                <span>
+                                    Fuera de Rango
+                                </span>
+
+                            </div>
+
+
+                            <small
+                                    th:if="${detalle.examen.rangoReferencia != null
+                                    and !detalle.examen.rangoReferencia.isBlank()}">
+
+                                Rango de referencia:
+
+                                <strong
+                                        th:text="${detalle.examen.rangoReferencia}">
+
+                                    Rango
+
+                                </strong>
+
+                            </small>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- NOTAS                             -->
+                        <!-- ================================= -->
+
+                        <div class="campo campo-completo">
+
+                            <label>
+                                Notas del Resultado
+                            </label>
+
+
+                            <textarea
+                                    name="notasResultado"
+
+                                    placeholder="Observaciones adicionales..."
+                                    th:text="${detalle.notasResultado}">
+                            </textarea>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="acciones">
+
+                        <button
+                                type="submit"
+                                class="btn btn-guardar">
+
+                            Guardar Resultado
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+
+
+                <!-- ========================================= -->
+                <!-- PUBLICAR                                 -->
+                <!-- SOLO SI YA EXISTE RESULTADO GUARDADO     -->
+                <!-- ========================================= -->
+
+                <form
+                        th:if="${orden.estado == 'EN_PROCESO'
+                        and !orden.ordenExterna
+                        and !detalle.publicado
+                        and detalle.valorResultado != null
+                        and !detalle.valorResultado.isBlank()}"
+
+                        th:action="@{/laboratorio/resultado/publicar}"
+
+                        method="post">
+
+
+                    <input
+                            type="hidden"
+                            name="detalleId"
+                            th:value="${detalle.id}">
+
+
+                    <div class="acciones">
+
+                        <button
+                                type="submit"
+                                class="btn btn-publicar">
+
+                            Publicar resultado
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+
+
+                <!-- ========================================= -->
+                <!-- RESULTADO PUBLICADO / COMPLETADO          -->
+                <!-- ========================================= -->
+
+                <div
+                        th:if="${detalle.publicado
+                        or orden.estado == 'COMPLETADA'}">
+
+
+                    <div class="resultado-grid">
+
+
+                        <div class="resultado-dato">
+
+                            <strong>
+                                Valor del Resultado
+                            </strong>
+
+                            <span
+                                    th:text="${detalle.valorResultado != null
+                                    ? detalle.valorResultado
+                                    : '-'}">
+
+                                Resultado
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="resultado-dato">
+
+                            <strong>
+                                Unidad
+                            </strong>
+
+                            <span
+                                    th:text="${detalle.unidad != null
+                                    ? detalle.unidad
+                                    : '-'}">
+
+                                Unidad
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="resultado-dato">
+
+                            <strong>
+                                Fecha del Resultado
+                            </strong>
+
+
+                            <span
+                                    th:if="${detalle.fechaResultado != null}"
+
+                                    th:text="${#temporals.format(
+                                        detalle.fechaResultado,
+                                        'dd/MM/yyyy HH:mm'
+                                    )}">
+
+                                Fecha
+
+                            </span>
+
+
+                            <span
+                                    th:unless="${detalle.fechaResultado != null}">
+
+                                -
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="resultado-dato">
+
+                            <strong>
+                                Notas
+                            </strong>
+
+                            <span
+                                    th:text="${detalle.notasResultado != null
+                                    and !detalle.notasResultado.isBlank()
+                                    ? detalle.notasResultado
+                                    : 'Sin notas'}">
+
+                                Notas
+
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- TOTAL                                            -->
+        <!-- ================================================= -->
+
+        <div style="
+            text-align:right;
+            font-size:22px;
+            font-weight:bold;
+            margin-top:20px;
+        ">
+
+            Total:
+
+            Q<span
+                th:text="${#numbers.formatDecimal(
+                    orden.montoTotal,
+                    1,
+                    2
+                )}">
+
+                0.00
+
+            </span>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- VOLVER                                           -->
+        <!-- ================================================= -->
+
+        <div class="acciones">
+
+            <a
+                    th:href="@{/laboratorio}"
+                    class="btn btn-volver">
+
+                Volver a Órdenes
+
+            </a>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

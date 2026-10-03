@@ -14,6 +14,7 @@ import com.example.sistemamedico.model.Usuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -121,7 +122,7 @@ public class OrdenLaboratorioService {
 
     // =====================================================
     // GENERAR ORDEN DE LABORATORIO
-    // FA01 - CU08
+    // CU-08 + PREPARACION CU-09
     // =====================================================
 
     @Transactional
@@ -133,8 +134,11 @@ public class OrdenLaboratorioService {
 
             List<Long> examenIds,
 
-            String observaciones
+            String observaciones,
+
+            Boolean ordenExterna
     ) {
+
 
         // =============================================
         // VALIDAR MEDICO
@@ -211,7 +215,7 @@ public class OrdenLaboratorioService {
 
 
         // =============================================
-        // VALIDAR QUE SE SELECCIONE AL MENOS UN EXAMEN
+        // VALIDAR EXAMENES
         // =============================================
 
         if (
@@ -227,7 +231,7 @@ public class OrdenLaboratorioService {
 
 
         // =============================================
-        // ELIMINAR IDs REPETIDOS
+        // ELIMINAR IDS REPETIDOS
         // =============================================
 
         Set<Long> idsUnicos =
@@ -278,8 +282,13 @@ public class OrdenLaboratorioService {
 
 
         // =============================================
-        // VALIDAR QUE TODOS ESTEN ACTIVOS
+        // VALIDAR EXAMENES ACTIVOS
+        // Y CALCULAR MONTO TOTAL
         // =============================================
+
+        BigDecimal montoTotal =
+                BigDecimal.ZERO;
+
 
         for (
                 ExamenLaboratorio examen
@@ -299,6 +308,23 @@ public class OrdenLaboratorioService {
                                 + " no está disponible."
                 );
             }
+
+
+            BigDecimal precio =
+                    examen.getPrecio();
+
+
+            if (precio == null) {
+
+                precio =
+                        BigDecimal.ZERO;
+            }
+
+
+            montoTotal =
+                    montoTotal.add(
+                            precio
+                    );
         }
 
 
@@ -326,7 +352,36 @@ public class OrdenLaboratorioService {
 
 
         // =============================================
-        // GUARDAR ORDEN PARA OBTENER SU ID
+        // ESTADO INICIAL CU-09
+        // =============================================
+
+        orden.setEstado(
+                "PENDIENTE"
+        );
+
+
+        // =============================================
+        // MONTO TOTAL
+        // =============================================
+
+        orden.setMontoTotal(
+                montoTotal
+        );
+
+
+        // =============================================
+        // ORDEN EXTERNA
+        // =============================================
+
+        orden.setOrdenExterna(
+                Boolean.TRUE.equals(
+                        ordenExterna
+                )
+        );
+
+
+        // =============================================
+        // GUARDAR ORDEN
         // =============================================
 
         OrdenLaboratorio ordenGuardada =
@@ -363,6 +418,56 @@ public class OrdenLaboratorioService {
             );
 
 
+            // =========================================
+            // GUARDAR PRECIO DEL EXAMEN
+            // =========================================
+
+            BigDecimal precio =
+                    examen.getPrecio();
+
+
+            if (precio == null) {
+
+                precio =
+                        BigDecimal.ZERO;
+            }
+
+
+            detalle.setMonto(
+                    precio
+            );
+
+
+            // =========================================
+            // CAMPOS DE RESULTADO
+            // AUN VACIOS
+            // =========================================
+
+            detalle.setValorResultado(
+                    null
+            );
+
+            detalle.setUnidad(
+                    null
+            );
+
+            detalle.setFechaResultado(
+                    null
+            );
+
+            detalle.setFueraRango(
+                    false
+            );
+
+            detalle.setNotasResultado(
+                    null
+            );
+
+            detalle.setPublicado(
+                    false
+            );
+
+
             detalles.add(
                     detalle
             );
@@ -370,7 +475,7 @@ public class OrdenLaboratorioService {
 
 
         // =============================================
-        // GUARDAR TODOS LOS EXAMENES DE LA ORDEN
+        // GUARDAR DETALLES
         // =============================================
 
         ordenLaboratorioDetalleRepository

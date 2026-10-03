@@ -32,7 +32,7 @@ public class PersonalLoginController {
 
     // =====================================================
     // MOSTRAR LOGIN DEL PERSONAL INTERNO
-    // CU-05 / CU-06 / CU-07 / CU-08
+    // CU-05 / CU-06 / CU-07 / CU-08 / CU-09
     // =====================================================
 
     @GetMapping("/personal/login")
@@ -245,10 +245,22 @@ public class PersonalLoginController {
 
 
         // =================================================
+        // LABORATORIO
+        // CU-09
+        // =================================================
+
+        if (
+                "LABORATORIO".equalsIgnoreCase(
+                        rol
+                )
+        ) {
+
+            return "redirect:/laboratorio";
+        }
+
+
+        // =================================================
         // ROL NO AUTORIZADO
-        //
-        // Eliminamos la sesión porque no tiene acceso
-        // al módulo de personal.
         // =================================================
 
         session.removeAttribute(

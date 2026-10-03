@@ -60,7 +60,7 @@
         .catalogo {
             display: grid;
             grid-template-columns:
-                    repeat(auto-fit, minmax(260px, 1fr));
+                    repeat(auto-fit, minmax(300px, 1fr));
 
             gap: 12px;
 
@@ -77,6 +77,34 @@
 
         .examen label {
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .examen-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .precio {
+            font-weight: bold;
+            color: #198754;
+        }
+
+        .orden-externa {
+            background: #fff3cd;
+            border: 1px solid #ffe69c;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .orden-externa label {
+            cursor: pointer;
+            font-weight: bold;
         }
 
         textarea {
@@ -88,6 +116,15 @@
             border-radius: 6px;
             font-family: Arial, sans-serif;
             resize: vertical;
+        }
+
+        .total {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
         }
 
         .botones {
@@ -160,7 +197,7 @@
 
 
         <!-- ======================================= -->
-        <!-- INFORMACION DE LA CITA -->
+        <!-- INFORMACION -->
         <!-- ======================================= -->
 
         <div class="info">
@@ -200,7 +237,7 @@
 
 
             <p>
-                <strong>Estado:</strong>
+                <strong>Estado de cita:</strong>
 
                 <span th:text="${cita.estado}">
                 </span>
@@ -219,17 +256,42 @@
               method="post">
 
 
+            <!-- =================================== -->
+            <!-- ORDEN EXTERNA -->
+            <!-- =================================== -->
+
+            <div class="orden-externa">
+
+                <label>
+
+                    <input type="checkbox"
+                           name="ordenExterna"
+                           value="true">
+
+                    Orden Externa
+
+                </label>
+
+                <p>
+                    Marque esta opción si el paciente
+                    realizará los exámenes en un
+                    laboratorio externo.
+                </p>
+
+            </div>
+
+
+
+            <!-- =================================== -->
+            <!-- EXAMENES -->
+            <!-- =================================== -->
+
             <h2>Exámenes disponibles</h2>
 
             <p>
-                Seleccione uno o varios exámenes
-                requeridos para el paciente.
+                Seleccione uno o varios exámenes.
             </p>
 
-
-            <!-- =================================== -->
-            <!-- CATALOGO DE EXAMENES -->
-            <!-- =================================== -->
 
             <div class="catalogo">
 
@@ -240,19 +302,56 @@
 
                     <label>
 
-                        <input type="checkbox"
-                               name="examenIds"
-                               th:value="${examen.id}">
 
-                        <span th:text="${examen.nombre}">
-                            Examen
+                        <span class="examen-info">
+
+                            <input type="checkbox"
+                                   name="examenIds"
+                                   th:value="${examen.id}"
+                                   th:attr="data-precio=${examen.precio}"
+                                   onchange="calcularTotal()">
+
+
+                            <span th:text="${examen.nombre}">
+                                Examen
+                            </span>
+
                         </span>
+
+
+                        <span class="precio">
+
+                            Q<span th:text="${#numbers.formatDecimal(
+                                    examen.precio,
+                                    1,
+                                    2
+                            )}">
+                            </span>
+
+                        </span>
+
 
                     </label>
 
 
                 </div>
 
+
+            </div>
+
+
+
+            <!-- =================================== -->
+            <!-- MONTO TOTAL -->
+            <!-- =================================== -->
+
+            <div class="total">
+
+                Monto total estimado:
+
+                Q<span id="montoTotal">
+                    0.00
+                </span>
 
             </div>
 
@@ -304,6 +403,48 @@
     </div>
 
 </div>
+
+
+
+<!-- ======================================= -->
+<!-- CALCULAR TOTAL VISUALMENTE -->
+<!-- ======================================= -->
+
+<script>
+
+    function calcularTotal() {
+
+        const examenes =
+            document.querySelectorAll(
+                'input[name="examenIds"]:checked'
+            );
+
+
+        let total = 0;
+
+
+        examenes.forEach(
+            function (examen) {
+
+                const precio =
+                    parseFloat(
+                        examen.dataset.precio
+                    );
+
+                if (!isNaN(precio)) {
+                    total += precio;
+                }
+            }
+        );
+
+
+        document.getElementById(
+            "montoTotal"
+        ).textContent =
+            total.toFixed(2);
+    }
+
+</script>
 
 
 </body>
