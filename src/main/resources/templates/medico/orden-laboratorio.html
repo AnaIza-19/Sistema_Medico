@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Orden de Laboratorio</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+        }
+
+        .header {
+            background: #1f4e79;
+            color: white;
+            padding: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto;
+        }
+
+        .tarjeta {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+        }
+
+        .info {
+            background: #eef5fb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .info p {
+            margin: 6px 0;
+        }
+
+        h2 {
+            color: #1f4e79;
+        }
+
+        .catalogo {
+            display: grid;
+            grid-template-columns:
+                    repeat(auto-fit, minmax(260px, 1fr));
+
+            gap: 12px;
+
+            margin-top: 15px;
+            margin-bottom: 25px;
+        }
+
+        .examen {
+            border: 1px solid #d9d9d9;
+            padding: 12px;
+            border-radius: 7px;
+            background: #fafafa;
+        }
+
+        .examen label {
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+        }
+
+        .botones {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button,
+        .boton {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-guardar {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ======================================= -->
+<!-- ENCABEZADO -->
+<!-- ======================================= -->
+
+<div class="header">
+
+    <h1>Generar Orden de Laboratorio</h1>
+
+</div>
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <!-- ======================================= -->
+        <!-- ERROR -->
+        <!-- ======================================= -->
+
+        <div class="error"
+             th:if="${error}"
+             th:text="${error}">
+        </div>
+
+
+        <!-- ======================================= -->
+        <!-- INFORMACION DE LA CITA -->
+        <!-- ======================================= -->
+
+        <div class="info">
+
+            <p>
+                <strong>Cita:</strong>
+
+                #<span th:text="${cita.id}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Paciente:</strong>
+
+                <span th:text="${cita.paciente.nombreCompleto}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Médico:</strong>
+
+                <span th:text="${medico.nombreCompleto}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Especialidad:</strong>
+
+                <span th:text="${cita.especialidad != null
+                        ? cita.especialidad.nombre
+                        : 'Sin especialidad'}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Estado:</strong>
+
+                <span th:text="${cita.estado}">
+                </span>
+            </p>
+
+        </div>
+
+
+
+        <!-- ======================================= -->
+        <!-- FORMULARIO -->
+        <!-- ======================================= -->
+
+        <form th:action="@{/medico/laboratorio/{id}
+              (id=${cita.id})}"
+              method="post">
+
+
+            <h2>Exámenes disponibles</h2>
+
+            <p>
+                Seleccione uno o varios exámenes
+                requeridos para el paciente.
+            </p>
+
+
+            <!-- =================================== -->
+            <!-- CATALOGO DE EXAMENES -->
+            <!-- =================================== -->
+
+            <div class="catalogo">
+
+
+                <div class="examen"
+                     th:each="examen : ${examenes}">
+
+
+                    <label>
+
+                        <input type="checkbox"
+                               name="examenIds"
+                               th:value="${examen.id}">
+
+                        <span th:text="${examen.nombre}">
+                            Examen
+                        </span>
+
+                    </label>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================== -->
+            <!-- OBSERVACIONES -->
+            <!-- =================================== -->
+
+            <h2>Observaciones</h2>
+
+
+            <textarea
+                    name="observaciones"
+                    placeholder="Ingrese observaciones para laboratorio...">
+            </textarea>
+
+
+
+            <!-- =================================== -->
+            <!-- BOTONES -->
+            <!-- =================================== -->
+
+            <div class="botones">
+
+
+                <button type="submit"
+                        class="btn-guardar">
+
+                    Guardar Orden
+
+                </button>
+
+
+                <a th:href="@{/medico}"
+                   class="boton btn-volver">
+
+                    Volver al Panel
+
+                </a>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+</body>
+
+</html>

@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+
+<html
+        lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Registrar Signos Vitales
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6f9;
+            color: #1f2937;
+        }
+
+
+        /* ================================================= */
+        /* ENCABEZADO */
+        /* ================================================= */
+
+        .encabezado {
+            background: #146ba8;
+            color: white;
+            padding: 22px 0;
+        }
+
+
+        .contenedor {
+            width: 90%;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+
+        .barra {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+
+        .barra h1 {
+            margin: 0;
+            font-size: 27px;
+        }
+
+
+        .volver {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        .volver:hover {
+            text-decoration: underline;
+        }
+
+
+        /* ================================================= */
+        /* CONTENIDO */
+        /* ================================================= */
+
+        .principal {
+            padding: 40px 0 60px;
+        }
+
+
+        .tarjeta {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+        }
+
+
+        .titulo {
+            margin-top: 0;
+            color: #0f5f99;
+            font-size: 34px;
+        }
+
+
+        /* ================================================= */
+        /* CONTEXTO DE CITA */
+        /* ================================================= */
+
+        .contexto {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 25px;
+        }
+
+
+        .contexto p {
+            margin: 6px 0;
+        }
+
+
+        .prioridad-emergencia {
+            color: #b91c1c;
+            font-weight: bold;
+        }
+
+
+        /* ================================================= */
+        /* MENSAJES */
+        /* ================================================= */
+
+        .mensaje-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+
+        /* ================================================= */
+        /* FORMULARIO */
+        /* ================================================= */
+
+        .grid {
+            display: grid;
+            grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+
+        .grupo {
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .grupo-completo {
+            grid-column: 1 / -1;
+        }
+
+
+        label {
+            font-weight: bold;
+            margin-bottom: 7px;
+            color: #374151;
+        }
+
+
+        input[type="number"] {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #1476b8;
+            box-shadow: 0 0 0 3px rgba(20, 118, 184, 0.12);
+        }
+
+
+        .campo-alerta {
+            border-color: #f59e0b !important;
+            background: #fffbeb !important;
+        }
+
+
+        .ayuda {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+
+        /* ================================================= */
+        /* ALERTAS CLÍNICAS FA03 */
+        /* ================================================= */
+
+        .alerta {
+            display: none;
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 7px;
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            color: #92400e;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+
+        .panel-alertas {
+            display: none;
+            grid-column: 1 / -1;
+            background: #fffbeb;
+            border: 1px solid #f59e0b;
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+
+        .panel-alertas h3 {
+            margin-top: 0;
+            color: #92400e;
+        }
+
+
+        .panel-alertas ul {
+            margin-bottom: 0;
+        }
+
+
+        /* ================================================= */
+        /* EMERGENCIA */
+        /* ================================================= */
+
+        .emergencia {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 5px;
+        }
+
+
+        .emergencia input {
+            width: 21px;
+            height: 21px;
+        }
+
+
+        .emergencia label {
+            margin: 0;
+        }
+
+
+        /* ================================================= */
+        /* BOTONES */
+        /* ================================================= */
+
+        .acciones {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+
+        .boton {
+            padding: 13px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+
+        .boton-secundario {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+
+        .boton-secundario:hover {
+            background: #d1d5db;
+        }
+
+
+        .boton-principal {
+            background: #16803d;
+            color: white;
+        }
+
+
+        .boton-principal:hover {
+            background: #126c34;
+        }
+
+
+        /* ================================================= */
+        /* RESPONSIVE */
+        /* ================================================= */
+
+        @media (max-width: 700px) {
+
+            .barra {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .grupo-completo,
+            .panel-alertas {
+                grid-column: auto;
+            }
+
+
+            .acciones {
+                flex-direction: column;
+            }
+
+
+            .boton {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ===================================================== -->
+<!-- ENCABEZADO -->
+<!-- ===================================================== -->
+
+<header class="encabezado">
+
+    <div class="contenedor barra">
+
+        <h1>
+            Registro de Signos Vitales
+        </h1>
+
+
+        <a
+                th:href="@{/enfermeria}"
+                class="volver"
+        >
+            Volver al panel
+        </a>
+
+    </div>
+
+</header>
+
+
+<!-- ===================================================== -->
+<!-- CONTENIDO -->
+<!-- ===================================================== -->
+
+<main class="principal">
+
+    <div class="contenedor">
+
+        <section class="tarjeta">
+
+
+            <h1 class="titulo">
+                Registrar Signos Vitales
+            </h1>
+
+
+            <!-- ================================================= -->
+            <!-- ERROR DEL SERVIDOR -->
+            <!-- ================================================= -->
+
+            <div
+                    class="mensaje-error"
+                    th:if="${error}"
+                    th:text="${error}"
+            >
+                Error
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- CONTEXTO -->
+            <!-- ================================================= -->
+
+            <div class="contexto">
+
+                <p>
+
+                    <strong>
+                        Paciente:
+                    </strong>
+
+                    <span
+                            th:text="${cita.paciente.nombreCompleto}"
+                    >
+                        Paciente
+                    </span>
+
+                </p>
+
+
+                <p>
+
+                    <strong>
+                        No. de cita:
+                    </strong>
+
+                    <span
+                            th:text="${cita.id}"
+                    >
+                        1
+                    </span>
+
+                </p>
+
+
+                <p>
+
+                    <strong>
+                        Enfermero:
+                    </strong>
+
+                    <span
+                            th:text="${enfermero.nombreCompleto}"
+                    >
+                        Enfermero
+                    </span>
+
+                </p>
+
+
+                <p>
+
+                    <strong>
+                        Prioridad:
+                    </strong>
+
+                    <span
+                            th:text="${cita.prioridad}"
+                            th:classappend="${cita.prioridad != null
+                            and #strings.equalsIgnoreCase(
+                                cita.prioridad,
+                                'EMERGENCIA'
+                            )} ? 'prioridad-emergencia' : ''"
+                    >
+                        NORMAL
+                    </span>
+
+                </p>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- FORMULARIO -->
+            <!-- ================================================= -->
+
+            <form
+                    id="formSignos"
+                    method="post"
+                    th:action="@{/enfermeria/signos/{id}(id=${cita.id})}"
+            >
+
+
+                <div class="grid">
+
+
+                    <!-- ================================================= -->
+                    <!-- PRESIÓN SISTÓLICA -->
+                    <!-- ================================================= -->
+
+                    <div class="grupo">
+
+                        <label for="presionSistolica">
+                            Presión sistólica (mmHg)
+                        </label>
+
+
+                        <input
+                                type="number"
+                                id="presionSistolica"
+                                name="presionSistolica"
+                                min="60"
+                                max="250"
+                                required
+                        >
+
+
+                        <span class="ayuda">
+                            Rango permitido: 60 - 250 mmHg
+                        </span>
+
+
+                        <div
+                                id="alertaSistolica"
+                                class="alerta"
+                        >
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- PRESIÓN DIASTÓLICA -->
+                    <!-- ================================================= -->
+
+                    <div class="grupo">
+
+                        <label for="presionDiastolica">
+                            Presión diastólica (mmHg)
+                        </label>
+
+
+                        <input
+                                type="number"
+                                id="presionDiastolica"
+                                name="presionDiastolica"
+                                min="40"
+                                max="150"
+                                required
+                        >
+
+
+                        <span class="ayuda">
+                            Rango permitido: 40 - 150 mmHg
+                        </span>
+
+
+                        <div
+                                id="alertaDiastolica"
+                                class="alerta"
+                        >
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- TEMPERATURA -->
+                    <!-- ================================================= -->
+
+                    <div class="grupo">
+
+                        <label for="temperatura">
+                            Temperatura (°C)
+                        </label>
+
+
+                        <input
+                                type="number"
+                                id="temperatura"
+                                name="temperatura"
+                                min="34"
+                                max="42"
+                                step="0.1"
+                                required
+                        >
+
+
+                        <span class="ayuda">
+                            Rango permitido: 34 - 42 °C
+                        </span>
+
+
+                        <div
+                                id="alertaTemperatura"
+                                class="alerta"
+                        >
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- PESO -->
+                    <!-- ================================================= -->
+
+                    <div class="grupo">
+
+                        <label for="peso">
+                            Peso (kg)
+                        </label>
+
+
+                        <input
+                                type="number"
+                                id="peso"
+                                name="peso"
+                                min="0.5"
+                                max="300"
+                                step="0.01"
+                                required
+                        >
+
+
+                        <span class="ayuda">
+                            Rango permitido: 0.5 - 300 kg
+                        </span>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- TALLA -->
+                    <!-- ================================================= -->
+
+                    <div class="grupo">
+
+                        <label for="talla">
+                            Talla (cm)
+                        </label>
+
+
+                        <input
+                                type="number"
+                                id="talla"
+                                name="talla"
+                                min="30"
+                                max="250"
+                                step="0.01"
+                                required
+                        >
+
+
+                        <span class="ayuda">
+                            Rango permitido: 30 - 250 cm
+                        </span>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- FRECUENCIA CARDÍACA -->
+                    <!-- ================================================= -->
+
+                    <div class="grupo">
+
+                        <label for="frecuenciaCardiaca">
+                            Frecuencia cardíaca (lpm)
+                        </label>
+
+
+                        <input
+                                type="number"
+                                id="frecuenciaCardiaca"
+                                name="frecuenciaCardiaca"
+                                min="30"
+                                max="220"
+                                required
+                        >
+
+
+                        <span class="ayuda">
+                            Rango permitido: 30 - 220 lpm
+                        </span>
+
+
+                        <div
+                                id="alertaFrecuencia"
+                                class="alerta"
+                        >
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- PANEL GENERAL DE ALERTAS -->
+                    <!-- ================================================= -->
+
+                    <div
+                            id="panelAlertas"
+                            class="panel-alertas"
+                    >
+
+                        <h3>
+                            Alertas clínicas
+                        </h3>
+
+
+                        <ul id="listaAlertas">
+                        </ul>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- EMERGENCIA -->
+                    <!-- ================================================= -->
+
+                    <div class="grupo grupo-completo">
+
+                        <div class="emergencia">
+
+                            <input
+                                    type="checkbox"
+                                    id="esEmergencia"
+                                    name="esEmergencia"
+                                    value="true"
+                                    th:checked="${cita.prioridad != null
+                                    and #strings.equalsIgnoreCase(
+                                        cita.prioridad,
+                                        'EMERGENCIA'
+                                    )}"
+                            >
+
+
+                            <label for="esEmergencia">
+                                ¿Emergencia?
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- ACCIONES -->
+                <!-- ================================================= -->
+
+                <div class="acciones">
+
+                    <a
+                            th:href="@{/enfermeria}"
+                            class="boton boton-secundario"
+                    >
+                        Cancelar
+                    </a>
+
+
+                    <button
+                            type="submit"
+                            class="boton boton-principal"
+                    >
+                        Registrar Signos Vitales
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<!-- ===================================================== -->
+<!-- ALERTAS CLÍNICAS EN TIEMPO REAL -->
+<!-- CU-07 FA03 -->
+<!-- ===================================================== -->
+
+<script>
+
+    const sistolica =
+        document.getElementById(
+            "presionSistolica"
+        );
+
+
+    const diastolica =
+        document.getElementById(
+            "presionDiastolica"
+        );
+
+
+    const temperatura =
+        document.getElementById(
+            "temperatura"
+        );
+
+
+    const frecuencia =
+        document.getElementById(
+            "frecuenciaCardiaca"
+        );
+
+
+    const alertaSistolica =
+        document.getElementById(
+            "alertaSistolica"
+        );
+
+
+    const alertaDiastolica =
+        document.getElementById(
+            "alertaDiastolica"
+        );
+
+
+    const alertaTemperatura =
+        document.getElementById(
+            "alertaTemperatura"
+        );
+
+
+    const alertaFrecuencia =
+        document.getElementById(
+            "alertaFrecuencia"
+        );
+
+
+    const panelAlertas =
+        document.getElementById(
+            "panelAlertas"
+        );
+
+
+    const listaAlertas =
+        document.getElementById(
+            "listaAlertas"
+        );
+
+
+    // =====================================================
+    // MOSTRAR ALERTA
+    // =====================================================
+
+    function mostrarAlerta(
+        input,
+        contenedor,
+        texto
+    ) {
+
+        contenedor.textContent =
+            texto;
+
+
+        contenedor.style.display =
+            "block";
+
+
+        input.classList.add(
+            "campo-alerta"
+        );
+    }
+
+
+    // =====================================================
+    // OCULTAR ALERTA
+    // =====================================================
+
+    function ocultarAlerta(
+        input,
+        contenedor
+    ) {
+
+        contenedor.textContent =
+            "";
+
+
+        contenedor.style.display =
+            "none";
+
+
+        input.classList.remove(
+            "campo-alerta"
+        );
+    }
+
+
+    // =====================================================
+    // VALIDAR ALERTAS CLÍNICAS
+    // =====================================================
+
+    function validarAlertasClinicas() {
+
+        const alertas =
+            [];
+
+
+        // =================================================
+        // SISTÓLICA
+        // RANGO CLÍNICO NORMAL USADO POR EL BACKEND:
+        // 90 - 140
+        // =================================================
+
+        const valorSistolica =
+            parseFloat(
+                sistolica.value
+            );
+
+
+        if (
+            sistolica.value !== ""
+            &&
+            valorSistolica >= 60
+            &&
+            valorSistolica <= 250
+            &&
+            (
+                valorSistolica < 90
+                ||
+                valorSistolica > 140
+            )
+        ) {
+
+            const texto =
+                "Presión sistólica anormal: "
+                +
+                valorSistolica
+                +
+                " mmHg. Rango esperado: 90 - 140 mmHg.";
+
+
+            mostrarAlerta(
+                sistolica,
+                alertaSistolica,
+                texto
+            );
+
+
+            alertas.push(
+                texto
+            );
+
+        } else {
+
+            ocultarAlerta(
+                sistolica,
+                alertaSistolica
+            );
+        }
+
+
+        // =================================================
+        // DIASTÓLICA
+        // NORMAL: 60 - 90
+        // =================================================
+
+        const valorDiastolica =
+            parseFloat(
+                diastolica.value
+            );
+
+
+        if (
+            diastolica.value !== ""
+            &&
+            valorDiastolica >= 40
+            &&
+            valorDiastolica <= 150
+            &&
+            (
+                valorDiastolica < 60
+                ||
+                valorDiastolica > 90
+            )
+        ) {
+
+            const texto =
+                "Presión diastólica anormal: "
+                +
+                valorDiastolica
+                +
+                " mmHg. Rango esperado: 60 - 90 mmHg.";
+
+
+            mostrarAlerta(
+                diastolica,
+                alertaDiastolica,
+                texto
+            );
+
+
+            alertas.push(
+                texto
+            );
+
+        } else {
+
+            ocultarAlerta(
+                diastolica,
+                alertaDiastolica
+            );
+        }
+
+
+        // =================================================
+        // TEMPERATURA
+        // NORMAL: 36 - 37.5
+        // =================================================
+
+        const valorTemperatura =
+            parseFloat(
+                temperatura.value
+            );
+
+
+        if (
+            temperatura.value !== ""
+            &&
+            valorTemperatura >= 34
+            &&
+            valorTemperatura <= 42
+            &&
+            (
+                valorTemperatura < 36
+                ||
+                valorTemperatura > 37.5
+            )
+        ) {
+
+            const texto =
+                "Temperatura anormal: "
+                +
+                valorTemperatura
+                +
+                " °C. Rango esperado: 36 - 37.5 °C.";
+
+
+            mostrarAlerta(
+                temperatura,
+                alertaTemperatura,
+                texto
+            );
+
+
+            alertas.push(
+                texto
+            );
+
+        } else {
+
+            ocultarAlerta(
+                temperatura,
+                alertaTemperatura
+            );
+        }
+
+
+        // =================================================
+        // FRECUENCIA CARDÍACA
+        // NORMAL: 60 - 100
+        // =================================================
+
+        const valorFrecuencia =
+            parseFloat(
+                frecuencia.value
+            );
+
+
+        if (
+            frecuencia.value !== ""
+            &&
+            valorFrecuencia >= 30
+            &&
+            valorFrecuencia <= 220
+            &&
+            (
+                valorFrecuencia < 60
+                ||
+                valorFrecuencia > 100
+            )
+        ) {
+
+            const texto =
+                "Frecuencia cardíaca anormal: "
+                +
+                valorFrecuencia
+                +
+                " lpm. Rango esperado: 60 - 100 lpm.";
+
+
+            mostrarAlerta(
+                frecuencia,
+                alertaFrecuencia,
+                texto
+            );
+
+
+            alertas.push(
+                texto
+            );
+
+        } else {
+
+            ocultarAlerta(
+                frecuencia,
+                alertaFrecuencia
+            );
+        }
+
+
+        // =================================================
+        // PANEL GENERAL
+        // =================================================
+
+        listaAlertas.innerHTML =
+            "";
+
+
+        if (alertas.length > 0) {
+
+            panelAlertas.style.display =
+                "block";
+
+
+            alertas.forEach(
+                function (texto) {
+
+                    const elemento =
+                        document.createElement(
+                            "li"
+                        );
+
+
+                    elemento.textContent =
+                        texto;
+
+
+                    listaAlertas.appendChild(
+                        elemento
+                    );
+                }
+            );
+
+        } else {
+
+            panelAlertas.style.display =
+                "none";
+        }
+    }
+
+
+    // =====================================================
+    // EVENTOS EN TIEMPO REAL
+    // =====================================================
+
+    sistolica.addEventListener(
+        "input",
+        validarAlertasClinicas
+    );
+
+
+    diastolica.addEventListener(
+        "input",
+        validarAlertasClinicas
+    );
+
+
+    temperatura.addEventListener(
+        "input",
+        validarAlertasClinicas
+    );
+
+
+    frecuencia.addEventListener(
+        "input",
+        validarAlertasClinicas
+    );
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Registro de Paciente</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 850px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .fila {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .campo {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .campo-error {
+            border: 2px solid red !important;
+            background-color: #fff5f5;
+        }
+
+        .mensaje-error {
+            color: red;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .mensaje-error-general {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .nota {
+            font-size: 13px;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .obligatorio {
+            color: red;
+        }
+
+        .botones {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        button,
+        .btn-volver {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .btn-registrar {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-volver {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .enlace-login {
+            display: inline-block;
+            margin-top: 8px;
+            color: #1976d2;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .enlace-login:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 700px) {
+
+            .fila {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .contenedor {
+                width: 92%;
+                padding: 20px;
+            }
+
+            .botones {
+                flex-direction: column;
+            }
+
+            .btn-volver,
+            .btn-registrar {
+                text-align: center;
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>Registro de Paciente</h1>
+
+
+    <!-- ===================================== -->
+    <!-- ERROR GENERAL -->
+    <!-- ===================================== -->
+
+    <div
+            class="mensaje-error-general"
+            th:if="${errorGeneral}"
+            th:text="${errorGeneral}">
+    </div>
+
+
+    <form
+            method="post"
+            th:action="@{/registro}">
+
+        <input
+                type="hidden"
+                name="origen"
+                th:value="${origen}"
+        >
+        <!-- ===================================== -->
+        <!-- NOMBRE COMPLETO -->
+        <!-- ===================================== -->
+
+        <div class="campo">
+
+            <label>
+                Nombre Completo
+                <span class="obligatorio">*</span>
+            </label>
+
+            <div class="fila">
+
+                <!-- NOMBRE -->
+                <div>
+
+                    <input
+                            type="text"
+                            id="nombre"
+                            name="nombre"
+                            maxlength="100"
+                            placeholder="Nombre"
+                            required
+                            th:value="${nombre}"
+                            th:classappend="${errorNombre != null} ? 'campo-error'">
+
+                    <div
+                            class="mensaje-error"
+                            th:if="${errorNombre}"
+                            th:text="${errorNombre}">
+                    </div>
+
+                </div>
+
+
+                <!-- APELLIDO -->
+                <div>
+
+                    <input
+                            type="text"
+                            id="apellido"
+                            name="apellido"
+                            maxlength="100"
+                            placeholder="Apellido"
+                            required
+                            th:value="${apellido}"
+                            th:classappend="${errorApellido != null} ? 'campo-error'">
+
+                    <div
+                            class="mensaje-error"
+                            th:if="${errorApellido}"
+                            th:text="${errorApellido}">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- DPI Y NIT -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+
+            <!-- DPI -->
+            <div class="campo">
+
+                <label for="dpi">
+                    DPI
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="text"
+                        id="dpi"
+                        name="dpi"
+                        maxlength="13"
+                        required
+                        th:value="${dpi}"
+                        th:classappend="${errorDpi != null} ? 'campo-error'">
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorDpi}"
+                        th:text="${errorDpi}">
+                </div>
+
+
+                <!-- APARECE SOLO SI EL DPI YA EXISTE -->
+
+                <div th:if="${dpiDuplicado}">
+
+                    <a
+                            th:href="@{/login}"
+                            class="enlace-login">
+
+                        Iniciar sesión
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- NIT -->
+            <div class="campo">
+
+                <label for="nit">
+                    NIT
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="text"
+                        id="nit"
+                        name="nit"
+                        maxlength="20"
+                        required
+                        th:value="${nit}"
+                        th:classappend="${errorNit != null} ? 'campo-error'">
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorNit}"
+                        th:text="${errorNit}">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- TELÉFONO Y SEGURO -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+
+            <!-- TELÉFONO -->
+            <div class="campo">
+
+                <label for="telefono">
+                    Número de Teléfono
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="text"
+                        id="telefono"
+                        name="telefono"
+                        maxlength="20"
+                        required
+                        th:value="${telefono}"
+                        th:classappend="${errorTelefono != null} ? 'campo-error'">
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorTelefono}"
+                        th:text="${errorTelefono}">
+                </div>
+
+            </div>
+
+
+            <!-- SEGURO -->
+            <div class="campo">
+
+                <label for="numeroSeguro">
+                    Número de Afiliado del Seguro Médico
+                </label>
+
+                <input
+                        type="text"
+                        id="numeroSeguro"
+                        name="numeroSeguro"
+                        maxlength="50"
+                        placeholder="Opcional"
+                        th:value="${numeroSeguro}">
+
+                <div class="nota">
+                    Campo opcional.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- CORREO -->
+        <!-- ===================================== -->
+
+        <div class="campo">
+
+            <label for="correo">
+                Correo Electrónico
+                <span class="obligatorio">*</span>
+            </label>
+
+            <input
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    maxlength="150"
+                    required
+                    th:value="${correo}"
+                    th:classappend="${errorCorreo != null} ? 'campo-error'">
+
+            <div
+                    class="mensaje-error"
+                    th:if="${errorCorreo}"
+                    th:text="${errorCorreo}">
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- USUARIO Y CONTRASEÑA -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+
+            <!-- USUARIO -->
+            <div class="campo">
+
+                <label for="nombreUsuario">
+                    Nombre de Usuario
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="text"
+                        id="nombreUsuario"
+                        name="nombreUsuario"
+                        minlength="8"
+                        maxlength="9"
+                        required
+                        th:value="${nombreUsuario}"
+                        th:classappend="${errorNombreUsuario != null} ? 'campo-error'">
+
+                <div class="nota">
+                    Debe contener entre 8 y 9 caracteres.
+                </div>
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorNombreUsuario}"
+                        th:text="${errorNombreUsuario}">
+                </div>
+
+            </div>
+
+
+            <!-- CONTRASEÑA -->
+            <div class="campo">
+
+                <label for="contrasena">
+                    Contraseña
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="password"
+                        id="contrasena"
+                        name="contrasena"
+                        minlength="12"
+                        maxlength="255"
+                        required
+                        th:classappend="${errorContrasena != null} ? 'campo-error'">
+
+                <div class="nota">
+                    Debe contener como mínimo 12 caracteres.
+                </div>
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorContrasena}"
+                        th:text="${errorContrasena}">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- BOTONES -->
+        <!-- ===================================== -->
+
+        <div class="botones">
+
+            <a
+                    th:href="@{/}"
+                    class="btn-volver">
+
+                Volver al portal
+
+            </a>
+
+
+            <button
+                    type="submit"
+                    class="btn-registrar">
+
+                Registrarse
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- JAVASCRIPT -->
+<!-- ===================================== -->
+
+<script>
+
+    // =====================================
+    // DPI SOLO NÚMEROS
+    // =====================================
+
+    const dpi =
+        document.getElementById("dpi");
+
+    dpi.addEventListener(
+        "input",
+        function () {
+
+            this.value =
+                this.value.replace(/\D/g, "");
+
+        }
+    );
+
+</script>
+
+</body>
+
+</html>

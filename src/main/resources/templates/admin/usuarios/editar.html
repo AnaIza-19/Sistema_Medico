@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Editar Usuario</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 900px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .fila {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .campo {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .campo-error {
+            border: 2px solid red !important;
+            background-color: #fff5f5;
+        }
+
+        .mensaje-error {
+            color: red;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .nota {
+            font-size: 13px;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .obligatorio {
+            color: red;
+        }
+
+        .botones {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        button,
+        .btn-cancelar {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .btn-actualizar {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-cancelar {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>Editar Usuario</h1>
+
+    <form
+            method="post"
+            th:action="@{/admin/usuarios/editar/{id}(id=${usuarioEditar.id})}">
+
+
+        <!-- ===================================== -->
+        <!-- NOMBRE COMPLETO -->
+        <!-- ===================================== -->
+
+        <div class="campo">
+
+            <label>
+                Nombre Completo
+                <span class="obligatorio">*</span>
+            </label>
+
+            <div class="fila">
+
+                <div>
+
+                    <input
+                            type="text"
+                            id="nombre"
+                            name="nombre"
+                            maxlength="100"
+                            placeholder="Nombre"
+                            required
+                            th:value="${usuarioEditar.nombre}"
+                            th:classappend="${errorNombre != null} ? 'campo-error'">
+
+                    <div
+                            class="mensaje-error"
+                            th:if="${errorNombre}"
+                            th:text="${errorNombre}">
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <input
+                            type="text"
+                            id="apellido"
+                            name="apellido"
+                            maxlength="100"
+                            placeholder="Apellido"
+                            required
+                            th:value="${usuarioEditar.apellido}"
+                            th:classappend="${errorApellido != null} ? 'campo-error'">
+
+                    <div
+                            class="mensaje-error"
+                            th:if="${errorApellido}"
+                            th:text="${errorApellido}">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- CORREO Y NOMBRE DE USUARIO -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+            <div class="campo">
+
+                <label for="correo">
+                    Correo Electrónico
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="email"
+                        id="correo"
+                        name="correo"
+                        maxlength="150"
+                        required
+                        th:value="${usuarioEditar.correo}"
+                        th:classappend="${errorCorreo != null} ? 'campo-error'">
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorCorreo}"
+                        th:text="${errorCorreo}">
+                </div>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="nombreUsuario">
+                    Nombre de Usuario
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="text"
+                        id="nombreUsuario"
+                        name="nombreUsuario"
+                        maxlength="50"
+                        required
+                        th:value="${usuarioEditar.nombreUsuario}"
+                        th:classappend="${errorNombreUsuario != null} ? 'campo-error'">
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorNombreUsuario}"
+                        th:text="${errorNombreUsuario}">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- CONTRASEÑA Y DPI -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+            <div class="campo">
+
+                <label for="nuevaContrasena">
+                    Nueva Contraseña
+                </label>
+
+                <input
+                        type="password"
+                        id="nuevaContrasena"
+                        name="nuevaContrasena"
+                        maxlength="255"
+                        placeholder="Dejar vacío para conservar la actual">
+
+                <div class="nota">
+                    La contraseña actual se conserva si este campo queda vacío.
+                </div>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="dpi">
+                    Documento de Identificación
+                </label>
+
+                <input
+                        type="text"
+                        id="dpi"
+                        name="dpi"
+                        maxlength="13"
+                        placeholder="Opcional"
+                        th:value="${usuarioEditar.dpi}"
+                        th:classappend="${errorDpi != null} ? 'campo-error'">
+
+                <div class="nota">
+                    Si se ingresa, debe contener exactamente 13 dígitos.
+                </div>
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorDpi}"
+                        th:text="${errorDpi}">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- TELÉFONO Y NIT -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+            <div class="campo">
+
+                <label for="telefono">
+                    Número de Teléfono
+                </label>
+
+                <input
+                        type="text"
+                        id="telefono"
+                        name="telefono"
+                        maxlength="20"
+                        placeholder="Opcional"
+                        th:value="${usuarioEditar.telefono}">
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="nit">
+                    NIT
+                </label>
+
+                <input
+                        type="text"
+                        id="nit"
+                        name="nit"
+                        maxlength="20"
+                        placeholder="Opcional"
+                        th:value="${usuarioEditar.nit}">
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- SEGURO Y ROL -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+            <div class="campo">
+
+                <label for="numeroSeguro">
+                    Número de Seguro
+                </label>
+
+                <input
+                        type="text"
+                        id="numeroSeguro"
+                        name="numeroSeguro"
+                        maxlength="50"
+                        placeholder="Opcional"
+                        th:value="${usuarioEditar.numeroSeguro}">
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="rolId">
+                    Rol
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <select
+                        id="rolId"
+                        name="rolId"
+                        required
+                        th:classappend="${errorRol != null} ? 'campo-error'">
+
+                    <option
+                            th:each="rol : ${roles}"
+                            th:value="${rol.id}"
+                            th:text="${rol.nombre}"
+                            th:selected="${usuarioEditar.rol != null and usuarioEditar.rol.id == rol.id}">
+                    </option>
+
+                </select>
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorRol}"
+                        th:text="${errorRol}">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- SUCURSAL Y ESPECIALIDAD -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+            <div class="campo">
+
+                <label for="sucursalId">
+                    Sucursal
+                </label>
+
+                <select
+                        id="sucursalId"
+                        name="sucursalId">
+
+                    <option value="">
+                        Sin sucursal
+                    </option>
+
+                    <option
+                            th:each="sucursal : ${sucursales}"
+                            th:value="${sucursal.id}"
+                            th:text="${sucursal.nombre}"
+                            th:selected="${usuarioEditar.sucursal != null and usuarioEditar.sucursal.id == sucursal.id}">
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- SOLO PARA MEDICO -->
+
+            <div
+                    class="campo"
+                    id="contenedorEspecialidad"
+                    style="display: none;">
+
+                <label for="especialidadId">
+                    Especialidad
+                </label>
+
+                <select
+                        id="especialidadId"
+                        name="especialidadId"
+                        disabled>
+
+                    <option value="">
+                        Sin especialidad
+                    </option>
+
+                    <option
+                            th:each="especialidad : ${especialidades}"
+                            th:value="${especialidad.id}"
+                            th:text="${especialidad.nombre}"
+                            th:selected="${usuarioEditar.especialidad != null and usuarioEditar.especialidad.id == especialidad.id}">
+                    </option>
+
+                </select>
+
+                <div class="nota">
+                    Disponible únicamente para usuarios con rol MÉDICO.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- ESTADO -->
+        <!-- ===================================== -->
+
+        <div class="campo">
+
+            <label for="activo">
+                Estado
+                <span class="obligatorio">*</span>
+            </label>
+
+            <select
+                    id="activo"
+                    name="activo"
+                    required>
+
+                <option
+                        value="true"
+                        th:selected="${usuarioEditar.activo}">
+                    Activo
+                </option>
+
+                <option
+                        value="false"
+                        th:selected="${!usuarioEditar.activo}">
+                    Inactivo
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- BOTONES -->
+        <!-- ===================================== -->
+
+        <div class="botones">
+
+            <a
+                    href="/admin/usuarios"
+                    class="btn-cancelar">
+
+                Cancelar
+
+            </a>
+
+            <button
+                    type="submit"
+                    class="btn-actualizar">
+
+                Actualizar
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+
+<script>
+
+    // =============================================
+    // DPI SOLO NÚMEROS
+    // =============================================
+
+    const dpi =
+        document.getElementById("dpi");
+
+    dpi.addEventListener(
+        "input",
+        function () {
+
+            this.value =
+                this.value.replace(/\D/g, "");
+
+        }
+    );
+
+
+    // =============================================
+    // ESPECIALIDAD SOLO PARA MÉDICO
+    // =============================================
+
+    const rolSelect =
+        document.getElementById("rolId");
+
+    const especialidadSelect =
+        document.getElementById("especialidadId");
+
+    const contenedorEspecialidad =
+        document.getElementById("contenedorEspecialidad");
+
+
+    function controlarEspecialidad() {
+
+        const opcionSeleccionada =
+            rolSelect.options[
+                rolSelect.selectedIndex
+                ];
+
+
+        const nombreRol =
+            opcionSeleccionada
+                ? opcionSeleccionada.text
+                    .trim()
+                    .toUpperCase()
+                : "";
+
+
+        if (nombreRol === "MEDICO") {
+
+            contenedorEspecialidad.style.display =
+                "block";
+
+            especialidadSelect.disabled =
+                false;
+
+        } else {
+
+            especialidadSelect.value =
+                "";
+
+            especialidadSelect.disabled =
+                true;
+
+            contenedorEspecialidad.style.display =
+                "none";
+        }
+    }
+
+
+    rolSelect.addEventListener(
+        "change",
+        controlarEspecialidad
+    );
+
+
+    controlarEspecialidad();
+
+</script>
+
+
+</body>
+
+</html>

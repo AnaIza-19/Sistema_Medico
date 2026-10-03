@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Recepción y Verificación de Cita
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #1261a0;
+            margin-top: 0;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .selector label {
+            padding: 10px 18px;
+            background: #e9ecef;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .busqueda {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+        button,
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 7px;
+            background: #1261a0;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        button:hover,
+        .btn:hover {
+            opacity: 0.92;
+        }
+
+        .btn-secundario {
+            background: #6c757d;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+            padding: 15px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .exito {
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+            padding: 15px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .indicador-presente {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            color: #0c5460;
+            border-radius: 7px;
+            font-weight: bold;
+        }
+
+        .dato {
+            margin-bottom: 12px;
+        }
+
+        .dato strong {
+            display: inline-block;
+            min-width: 180px;
+        }
+
+        .estado {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .CONFIRMADA {
+            background: #dff0ff;
+            color: #145f9b;
+        }
+
+        .PACIENTE_PRESENTE {
+            background: #d1e7dd;
+            color: #0f7a3e;
+        }
+
+        .PENDIENTE_PAGO {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .CANCELADA {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .EXPIRADA {
+            background: #e9ecef;
+            color: #555;
+        }
+
+        .EMERGENCIA {
+            background: #dc3545;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .acciones {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 700px) {
+
+            .busqueda {
+                flex-direction: column;
+            }
+
+            .dato strong {
+                display: block;
+                margin-bottom: 4px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- ================================================= -->
+    <!-- BUSCADOR -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h1>
+            Recepción y Verificación de Cita
+        </h1>
+
+
+        <form
+                th:action="@{/recepcion/buscar}"
+                method="get"
+        >
+
+            <div class="selector">
+
+                <label>
+
+                    <input
+                            type="radio"
+                            name="tipo"
+                            value="DPI"
+                            th:checked="${tipoSeleccionado == null || tipoSeleccionado == 'DPI'}"
+                    >
+
+                    Por DPI
+
+                </label>
+
+
+                <label>
+
+                    <input
+                            type="radio"
+                            name="tipo"
+                            value="CITA"
+                            th:checked="${tipoSeleccionado == 'CITA'}"
+                    >
+
+                    Por No. Cita
+
+                </label>
+
+            </div>
+
+
+            <div class="busqueda">
+
+                <input
+                        type="text"
+                        name="valor"
+                        placeholder="Ingrese DPI o número de cita"
+                        required
+                >
+
+                <button type="submit">
+                    Buscar
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- BOTÓN REGISTRAR EMERGENCIA -->
+    <!-- ================================================= -->
+
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+
+        <a
+                th:href="@{/recepcion/emergencia}"
+                class="btn"
+                style="background: #dc3545;"
+        >
+            Registrar Emergencia
+        </a>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- MENSAJE DE ÉXITO -->
+    <!-- ================================================= -->
+
+    <div
+            class="exito"
+            th:if="${mensajeExito}"
+    >
+
+        <span th:text="${mensajeExito}">
+            Operación realizada exitosamente.
+        </span>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- MENSAJE DE ERROR -->
+    <!-- ================================================= -->
+
+    <div
+            class="error"
+            th:if="${mensajeError}"
+    >
+
+        <span th:text="${mensajeError}">
+            Error
+        </span>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- FA03 - PACIENTE NO REGISTRADO -->
+    <!-- ================================================= -->
+
+    <div
+            class="card"
+            th:if="${pacienteNoExiste}"
+    >
+
+        <h3>
+            No se encontró ningún paciente con ese DPI.
+        </h3>
+
+        <p>
+            Es necesario registrar al paciente antes de continuar.
+        </p>
+
+        <a
+                th:href="@{/registro(origen='recepcion')}"
+                class="btn"
+        >
+            Registrar Paciente
+        </a>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- FA04 - PACIENTE SIN CITAS -->
+    <!-- ================================================= -->
+
+    <div
+            class="card"
+            th:if="${pacienteSinCitas}"
+    >
+
+        <h3
+                th:text="'El paciente '
+                + ${pacienteSinCitas.nombre}
+                + ' '
+                + ${pacienteSinCitas.apellido}
+                + ' está registrado pero no tiene citas activas.'"
+        >
+            Paciente sin citas activas.
+        </h3>
+
+        <p>
+            Puede crear una nueva cita para este paciente.
+        </p>
+
+        <a
+                th:href="@{/citas/agendar(
+                    pacienteId=${pacienteSinCitas.id},
+                    origen='recepcion'
+                )}"
+                class="btn"
+        >
+            Nueva Cita (Walk-in)
+        </a>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- DATOS DE LA CITA -->
+    <!-- ================================================= -->
+
+    <div
+            class="card"
+            th:if="${cita}"
+    >
+
+        <h2>
+            Datos de la Cita
+        </h2>
+
+
+        <!-- ================================================= -->
+        <!-- EMERGENCIA -->
+        <!-- ================================================= -->
+
+        <div
+                th:if="${cita.prioridad == 'EMERGENCIA'}"
+                style="margin-bottom: 20px;"
+        >
+
+            <span class="EMERGENCIA">
+                EMERGENCIA
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- NÚMERO DE CITA -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                No. de cita:
+            </strong>
+
+            <span th:text="${cita.id}">
+                1
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PACIENTE -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                Paciente:
+            </strong>
+
+            <span
+                    th:text="${cita.paciente.nombre + ' ' + cita.paciente.apellido}"
+            >
+                Paciente
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- ESTADO -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                Estado:
+            </strong>
+
+            <span
+                    class="estado"
+                    th:classappend="${cita.estado}"
+                    th:text="${cita.estado}"
+            >
+                CONFIRMADA
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PRIORIDAD -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                Prioridad:
+            </strong>
+
+            <span th:text="${cita.prioridad}">
+                NORMAL
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- ESPECIALIDAD -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                Especialidad:
+            </strong>
+
+            <span th:text="${cita.especialidad.nombre}">
+                Especialidad
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- SUCURSAL -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                Sucursal:
+            </strong>
+
+            <span th:text="${cita.sucursal.nombre}">
+                Sucursal
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- FECHA -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                Fecha:
+            </strong>
+
+            <span
+                    th:text="${#temporals.format(cita.horario.fecha, 'dd/MM/yyyy')}"
+            >
+                21/08/2026
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- HORA -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                Hora:
+            </strong>
+
+            <span
+                    th:text="${#temporals.format(cita.horario.horaInicio, 'HH:mm')}"
+            >
+                08:00
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- MOTIVO -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                Motivo de consulta:
+            </strong>
+
+            <span th:text="${cita.motivoConsulta}">
+                Motivo
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- HORA DE LLEGADA -->
+        <!-- ================================================= -->
+
+        <div class="dato">
+
+            <strong>
+                Hora de llegada:
+            </strong>
+
+
+            <span
+                    th:if="${cita.horaLlegada != null}"
+                    th:text="${#temporals.format(cita.horaLlegada, 'dd/MM/yyyy HH:mm:ss')}"
+            >
+                21/08/2026 15:00:00
+            </span>
+
+
+            <span
+                    th:if="${cita.horaLlegada == null}"
+            >
+                No registrada
+            </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- FA05 - CITA PENDIENTE DE PAGO -->
+        <!-- ================================================= -->
+
+        <div
+                th:if="${cita.estado == 'PENDIENTE_PAGO'}"
+                style="
+                    margin-top: 20px;
+                    padding: 15px;
+                    background: #fff3cd;
+                    color: #664d03;
+                    border: 1px solid #ffecb5;
+                    border-radius: 7px;
+                    font-weight: bold;
+                "
+        >
+
+            La cita del paciente tiene estado 'Pendiente de pago'.
+            Debe realizar el pago en caja antes de ser atendido.
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- FA06 - CITA CANCELADA -->
+        <!-- ================================================= -->
+
+        <div
+                th:if="${cita.estado == 'CANCELADA'}"
+                style="
+                    margin-top: 20px;
+                    padding: 15px;
+                    background: #f8d7da;
+                    color: #842029;
+                    border: 1px solid #f5c2c7;
+                    border-radius: 7px;
+                    font-weight: bold;
+                "
+        >
+
+            La cita fue cancelada. El paciente debe agendar una nueva cita.
+
+            <div style="margin-top: 15px;">
+
+                <a
+                        th:href="@{/citas/agendar(
+                            pacienteId=${cita.paciente.id},
+                            origen='recepcion'
+                        )}"
+                        class="btn"
+                >
+                    Nueva Cita
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- CITA CONFIRMADA - REGISTRAR LLEGADA -->
+        <!-- ================================================= -->
+
+        <div
+                th:if="${cita.estado == 'CONFIRMADA'}"
+                class="acciones"
+        >
+
+            <form
+                    th:action="@{/recepcion/registrar-llegada}"
+                    method="post"
+            >
+
+                <input
+                        type="hidden"
+                        name="citaId"
+                        th:value="${cita.id}"
+                >
+
+                <button type="submit">
+                    Registrar llegada
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- FA07 - REASIGNAR MÉDICO -->
+        <!-- ================================================= -->
+
+        <div
+                class="acciones"
+                th:if="${cita.estado == 'CONFIRMADA'
+                || cita.estado == 'PACIENTE_PRESENTE'}"
+        >
+
+            <a
+                    th:href="@{/recepcion/reasignar-medico(citaId=${cita.id})}"
+                    class="btn"
+            >
+                Reasignar Médico
+            </a>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- FA08 - SIGNOS VITALES URGENTE -->
+        <!-- ================================================= -->
+
+        <div
+                class="acciones"
+                th:if="${cita.prioridad == 'EMERGENCIA'
+                && cita.estado == 'PACIENTE_PRESENTE'}"
+        >
+
+            <a
+                    th:href="@{/recepcion/signos-vitales-urgente(citaId=${cita.id})}"
+                    class="btn"
+                    style="background: #dc3545;"
+            >
+                Signos Vitales (Urgente)
+            </a>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PACIENTE PRESENTE NORMAL -->
+        <!-- ================================================= -->
+
+        <div
+                th:if="${cita.estado == 'PACIENTE_PRESENTE'
+                && cita.prioridad != 'EMERGENCIA'}"
+                class="indicador-presente"
+        >
+
+            Llegada registrada — esperando llamado de enfermería
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PACIENTE PRESENTE DE EMERGENCIA -->
+        <!-- ================================================= -->
+
+        <div
+                th:if="${cita.estado == 'PACIENTE_PRESENTE'
+                && cita.prioridad == 'EMERGENCIA'}"
+                style="
+                    margin-top: 20px;
+                    padding: 15px;
+                    background: #f8d7da;
+                    color: #842029;
+                    border: 1px solid #f5c2c7;
+                    border-radius: 7px;
+                    font-weight: bold;
+                "
+        >
+
+            Paciente con prioridad de EMERGENCIA —
+            pasar directamente a toma de signos vitales.
+
+        </div>
+
+
+    </div>
+    <!-- FIN DATOS DE LA CITA -->
+
+
+</div>
+<!-- FIN CONTAINER -->
+
+
+</body>
+
+</html>

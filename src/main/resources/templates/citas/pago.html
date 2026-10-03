@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <h1>Pago de Consulta</h1>
+
+
+    <div th:if="${mensajeError}"
+         style="
+        background: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: bold;
+     ">
+
+    <span th:text="${mensajeError}">
+        Error al procesar el pago.
+    </span>
+
+    </div>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 900px;
+            margin: 35px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        /* ================================ */
+        /* TEMPORIZADOR */
+        /* ================================ */
+
+        .temporizador {
+            text-align: center;
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 7px;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .reloj {
+            display: block;
+            font-size: 30px;
+            margin-top: 8px;
+        }
+
+        /* ================================ */
+        /* RESUMEN */
+        /* ================================ */
+
+        .resumen {
+            background-color: #f8f9fa;
+            padding: 22px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .fila {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .etiqueta {
+            width: 180px;
+            font-weight: bold;
+        }
+
+        .total {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ccc;
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+        /* ================================ */
+        /* FORMULARIO */
+        /* ================================ */
+
+        .datos-pago {
+            margin-top: 20px;
+        }
+
+        .campo {
+            margin-bottom: 20px;
+        }
+
+        .fila-campos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            border-color: #1976d2;
+            outline: none;
+        }
+
+        .campo-error {
+            border: 2px solid #dc3545 !important;
+            background-color: #fff5f5;
+        }
+
+        .mensaje-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .mensaje-error.visible {
+            display: block;
+        }
+
+        .nota {
+            color: #555;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .nota-seguridad {
+            background-color: #eaf3fc;
+            color: #34495e;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        /* ================================ */
+        /* BOTÓN */
+        /* ================================ */
+
+        .acciones {
+            margin-top: 30px;
+        }
+
+        .btn-pagar {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            background-color: #1976d2;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-pagar:hover {
+            background-color: #125ea8;
+        }
+
+        .btn-pagar:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        /* ================================ */
+        /* EXPIRACIÓN */
+        /* ================================ */
+
+        .banner-expirado {
+            display: none;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .banner-expirado.visible {
+            display: block;
+        }
+
+        @media (max-width: 700px) {
+
+            .fila-campos {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .fila {
+                display: block;
+            }
+
+            .etiqueta {
+                width: auto;
+                margin-bottom: 4px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>
+        Pago de Consulta
+    </h1>
+
+
+    <!-- ===================================== -->
+    <!-- BANNER DE EXPIRACIÓN -->
+    <!-- ===================================== -->
+
+    <div
+            id="bannerExpirado"
+            class="banner-expirado">
+
+        El tiempo para confirmar su cita ha expirado.
+        El horario seleccionado ha sido liberado.
+        Por favor, seleccione un nuevo horario.
+        Será redirigido en unos segundos...
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- TEMPORIZADOR -->
+    <!-- ===================================== -->
+
+    <div
+            class="temporizador"
+            id="contenedorTemporizador">
+
+        Tiempo restante para completar el pago:
+
+        <span
+                class="reloj"
+                id="temporizador">
+
+            05:00
+
+        </span>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- RESUMEN DE CITA -->
+    <!-- ===================================== -->
+
+    <div class="resumen">
+
+        <h2>
+            Resumen de la cita
+        </h2>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Médico:
+            </div>
+
+            <div th:text="${cita.medico.nombre + ' ' + cita.medico.apellido}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Especialidad:
+            </div>
+
+            <div th:text="${cita.especialidad.nombre}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Sede:
+            </div>
+
+            <div th:text="${cita.sucursal.nombre}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Fecha:
+            </div>
+
+            <div th:text="${cita.horario.fecha}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Hora:
+            </div>
+
+            <div th:text="${cita.horario.horaInicio + ' - ' + cita.horario.horaFin}">
+            </div>
+
+        </div>
+
+
+        <div class="total">
+
+            Total a pagar:
+            Q<span th:text="${monto}">
+                0.00
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- DATOS DE PAGO -->
+    <!-- ===================================== -->
+
+    <div class="datos-pago">
+
+        <h2>
+            Datos de pago
+        </h2>
+
+
+        <form
+                id="formPago"
+                method="post"
+                th:action="@{/citas/pago/procesar}"
+                novalidate>
+
+
+            <!-- CITA -->
+            <input
+                    type="hidden"
+                    name="citaId"
+                    th:value="${cita.id}">
+
+
+            <!-- IDEMPOTENCIA -->
+            <input
+                    type="hidden"
+                    name="idempotencyKey"
+                    th:value="${idempotencyKey}">
+
+
+            <!-- ===================================== -->
+            <!-- NÚMERO DE TARJETA -->
+            <!-- ===================================== -->
+
+            <div class="campo">
+
+                <label for="numeroTarjeta">
+                    Número de tarjeta
+                </label>
+
+                <input
+                        type="text"
+                        id="numeroTarjeta"
+                        name="numeroTarjeta"
+                        inputmode="numeric"
+                        autocomplete="cc-number"
+                        maxlength="23"
+                        placeholder="0000 0000 0000 0000"
+                        required>
+
+                <div
+                        id="errorNumeroTarjeta"
+                        class="mensaje-error">
+                </div>
+
+                <div class="nota">
+                    Debe contener entre 13 y 19 dígitos.
+                </div>
+
+            </div>
+
+
+            <!-- ===================================== -->
+            <!-- TITULAR -->
+            <!-- ===================================== -->
+
+            <div class="campo">
+
+                <label for="titular">
+                    Nombre del titular
+                </label>
+
+                <input
+                        type="text"
+                        id="titular"
+                        name="titular"
+                        minlength="5"
+                        maxlength="100"
+                        autocomplete="cc-name"
+                        placeholder="NOMBRE DEL TITULAR"
+                        required>
+
+                <div
+                        id="errorTitular"
+                        class="mensaje-error">
+                </div>
+
+                <div class="nota">
+                    Mínimo 5 y máximo 100 caracteres.
+                </div>
+
+            </div>
+
+
+            <!-- ===================================== -->
+            <!-- VENCIMIENTO Y CVV -->
+            <!-- ===================================== -->
+
+            <div class="fila-campos">
+
+
+                <!-- VENCIMIENTO -->
+
+                <div class="campo">
+
+                    <label for="vencimiento">
+                        Vencimiento
+                    </label>
+
+                    <input
+                            type="text"
+                            id="vencimiento"
+                            name="vencimiento"
+                            inputmode="numeric"
+                            autocomplete="cc-exp"
+                            maxlength="5"
+                            placeholder="MM/AA"
+                            required>
+
+                    <div
+                            id="errorVencimiento"
+                            class="mensaje-error">
+                    </div>
+
+                </div>
+
+
+                <!-- CVV -->
+
+                <div class="campo">
+
+                    <label for="cvv">
+                        CVV
+                    </label>
+
+                    <input
+                            type="password"
+                            id="cvv"
+                            name="cvv"
+                            inputmode="numeric"
+                            autocomplete="cc-csc"
+                            minlength="3"
+                            maxlength="4"
+                            placeholder="***"
+                            required>
+
+                    <div
+                            id="errorCvv"
+                            class="mensaje-error">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ===================================== -->
+            <!-- NOTA DE SEGURIDAD -->
+            <!-- ===================================== -->
+
+            <div class="nota-seguridad">
+
+                Tu información de pago está protegida.
+                El CVV nunca se almacena en la base de datos.
+
+            </div>
+
+
+            <!-- ===================================== -->
+            <!-- BOTÓN PAGAR -->
+            <!-- ===================================== -->
+
+            <div class="acciones">
+
+                <button
+                        type="submit"
+                        id="btnPagar"
+                        class="btn-pagar">
+
+                    Pagar Q<span th:text="${monto}">
+                        0.00
+                    </span>
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ===================================== -->
+<!-- DATOS PARA TEMPORIZADOR -->
+<!-- ===================================== -->
+
+<input
+        type="hidden"
+        id="citaIdTemporizador"
+        th:value="${cita.id}">
+
+<input
+        type="hidden"
+        id="reservadoHasta"
+        th:value="${reservadoHasta}">
+
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+
+            // =========================================
+            // ELEMENTOS
+            // =========================================
+
+            const formPago =
+                document.getElementById("formPago");
+
+            const numeroTarjeta =
+                document.getElementById("numeroTarjeta");
+
+            const titular =
+                document.getElementById("titular");
+
+            const vencimiento =
+                document.getElementById("vencimiento");
+
+            const cvv =
+                document.getElementById("cvv");
+
+            const btnPagar =
+                document.getElementById("btnPagar");
+
+
+            let numeroTarjetaReal = "";
+
+            let formularioEnviado = false;
+
+
+            // =========================================
+            // NÚMERO DE TARJETA
+            // SOLO NÚMEROS + ESPACIOS VISUALES
+            // =========================================
+
+            numeroTarjeta.addEventListener(
+                "input",
+                function () {
+
+                    let numeros =
+                        this.value.replace(/\D/g, "");
+
+                    numeros =
+                        numeros.substring(0, 19);
+
+                    numeroTarjetaReal =
+                        numeros;
+
+                    this.value =
+                        numeros.replace(
+                            /(\d{4})(?=\d)/g,
+                            "$1 "
+                        );
+                }
+            );
+
+
+            // =========================================
+            // ENMASCARAR AL PERDER EL FOCO
+            // =========================================
+
+            numeroTarjeta.addEventListener(
+                "blur",
+                function () {
+
+                    if (numeroTarjetaReal.length >= 4) {
+
+                        const ultimos =
+                            numeroTarjetaReal.slice(-4);
+
+                        this.value =
+                            "**** **** **** "
+                            + ultimos;
+                    }
+                }
+            );
+
+
+            // =========================================
+            // RECUPERAR PARA EDITAR
+            // =========================================
+
+            numeroTarjeta.addEventListener(
+                "focus",
+                function () {
+
+                    if (numeroTarjetaReal !== "") {
+
+                        this.value =
+                            numeroTarjetaReal.replace(
+                                /(\d{4})(?=\d)/g,
+                                "$1 "
+                            );
+                    }
+                }
+            );
+
+
+            // =========================================
+            // TITULAR EN MAYÚSCULAS
+            // =========================================
+
+            titular.addEventListener(
+                "input",
+                function () {
+
+                    this.value =
+                        this.value.toUpperCase();
+                }
+            );
+
+
+            // =========================================
+            // VENCIMIENTO MM/AA
+            // =========================================
+
+            vencimiento.addEventListener(
+                "input",
+                function () {
+
+                    let numeros =
+                        this.value.replace(/\D/g, "");
+
+                    numeros =
+                        numeros.substring(0, 4);
+
+
+                    if (numeros.length >= 3) {
+
+                        this.value =
+                            numeros.substring(0, 2)
+                            +
+                            "/"
+                            +
+                            numeros.substring(2);
+
+                    } else {
+
+                        this.value =
+                            numeros;
+                    }
+                }
+            );
+
+
+            // =========================================
+            // CVV SOLO NÚMEROS
+            // =========================================
+
+            cvv.addEventListener(
+                "input",
+                function () {
+
+                    this.value =
+                        this.value
+                            .replace(/\D/g, "")
+                            .substring(0, 4);
+                }
+            );
+
+
+            // =========================================
+            // LUHN
+            // =========================================
+
+            function validarLuhn(numero) {
+
+                let suma = 0;
+                let duplicar = false;
+
+
+                for (
+                    let i = numero.length - 1;
+                    i >= 0;
+                    i--
+                ) {
+
+                    let digito =
+                        parseInt(
+                            numero.charAt(i),
+                            10
+                        );
+
+
+                    if (duplicar) {
+
+                        digito *= 2;
+
+                        if (digito > 9) {
+                            digito -= 9;
+                        }
+                    }
+
+
+                    suma += digito;
+
+                    duplicar =
+                        !duplicar;
+                }
+
+
+                return suma % 10 === 0;
+            }
+
+
+            // =========================================
+            // MOSTRAR ERROR
+            // =========================================
+
+            function mostrarError(
+                input,
+                elementoError,
+                mensaje
+            ) {
+
+                input.classList.add(
+                    "campo-error"
+                );
+
+                elementoError.textContent =
+                    mensaje;
+
+                elementoError.classList.add(
+                    "visible"
+                );
+            }
+
+
+            function limpiarError(
+                input,
+                elementoError
+            ) {
+
+                input.classList.remove(
+                    "campo-error"
+                );
+
+                elementoError.textContent =
+                    "";
+
+                elementoError.classList.remove(
+                    "visible"
+                );
+            }
+
+
+            // =========================================
+            // VALIDAR FECHA VENCIMIENTO
+            // =========================================
+
+            function validarFechaVencimiento(
+                valor
+            ) {
+
+                if (
+                    !/^\d{2}\/\d{2}$/.test(valor)
+                ) {
+                    return "Formato inválido. Use MM/AA.";
+                }
+
+
+                const partes =
+                    valor.split("/");
+
+                const mes =
+                    parseInt(
+                        partes[0],
+                        10
+                    );
+
+                const anio =
+                    parseInt(
+                        partes[1],
+                        10
+                    );
+
+
+                if (
+                    mes < 1
+                    ||
+                    mes > 12
+                ) {
+
+                    return "El mes de vencimiento no es válido.";
+                }
+
+
+                const ahora =
+                    new Date();
+
+                const anioActual =
+                    ahora.getFullYear() % 100;
+
+                const mesActual =
+                    ahora.getMonth() + 1;
+
+
+                if (
+                    anio < anioActual
+                    ||
+                    (
+                        anio === anioActual
+                        &&
+                        mes < mesActual
+                    )
+                ) {
+
+                    return "La tarjeta está vencida.";
+                }
+
+
+                return null;
+            }
+
+
+            // =========================================
+            // VALIDAR FORMULARIO
+            // =========================================
+
+            formPago.addEventListener(
+                "submit",
+                function (event) {
+
+                    let valido =
+                        true;
+
+
+                    const errorNumero =
+                        document.getElementById(
+                            "errorNumeroTarjeta"
+                        );
+
+                    const errorTitular =
+                        document.getElementById(
+                            "errorTitular"
+                        );
+
+                    const errorVencimiento =
+                        document.getElementById(
+                            "errorVencimiento"
+                        );
+
+                    const errorCvv =
+                        document.getElementById(
+                            "errorCvv"
+                        );
+
+
+                    // LIMPIAR ERRORES
+
+                    limpiarError(
+                        numeroTarjeta,
+                        errorNumero
+                    );
+
+                    limpiarError(
+                        titular,
+                        errorTitular
+                    );
+
+                    limpiarError(
+                        vencimiento,
+                        errorVencimiento
+                    );
+
+                    limpiarError(
+                        cvv,
+                        errorCvv
+                    );
+
+
+                    // =================================
+                    // TARJETA
+                    // =================================
+
+                    if (
+                        !/^\d{13,19}$/.test(
+                            numeroTarjetaReal
+                        )
+                    ) {
+
+                        mostrarError(
+                            numeroTarjeta,
+                            errorNumero,
+                            "El número de tarjeta debe contener entre 13 y 19 dígitos."
+                        );
+
+                        valido =
+                            false;
+
+                    } else if (
+                        !validarLuhn(
+                            numeroTarjetaReal
+                        )
+                    ) {
+
+                        mostrarError(
+                            numeroTarjeta,
+                            errorNumero,
+                            "El número de tarjeta no es válido."
+                        );
+
+                        valido =
+                            false;
+                    }
+
+
+                    // =================================
+                    // TITULAR
+                    // =================================
+
+                    const titularValor =
+                        titular.value.trim();
+
+
+                    if (
+                        titularValor.length < 5
+                        ||
+                        titularValor.length > 100
+                    ) {
+
+                        mostrarError(
+                            titular,
+                            errorTitular,
+                            "El nombre del titular debe contener entre 5 y 100 caracteres."
+                        );
+
+                        valido =
+                            false;
+                    }
+
+
+                    // =================================
+                    // VENCIMIENTO
+                    // =================================
+
+                    const errorFecha =
+                        validarFechaVencimiento(
+                            vencimiento.value
+                        );
+
+
+                    if (errorFecha !== null) {
+
+                        mostrarError(
+                            vencimiento,
+                            errorVencimiento,
+                            errorFecha
+                        );
+
+                        valido =
+                            false;
+                    }
+
+
+                    // =================================
+                    // CVV
+                    // =================================
+
+                    if (
+                        !/^\d{3,4}$/.test(
+                            cvv.value
+                        )
+                    ) {
+
+                        mostrarError(
+                            cvv,
+                            errorCvv,
+                            "El CVV debe contener 3 o 4 dígitos."
+                        );
+
+                        valido =
+                            false;
+                    }
+
+
+                    // =================================
+                    // SI HAY ERRORES
+                    // =================================
+
+                    if (!valido) {
+
+                        event.preventDefault();
+
+                        return;
+                    }
+
+
+                    // =================================
+                    // EVITAR DOBLE ENVÍO
+                    // =================================
+
+                    if (formularioEnviado) {
+
+                        event.preventDefault();
+
+                        return;
+                    }
+
+
+                    formularioEnviado =
+                        true;
+
+
+                    // Restauramos el número real
+                    // antes de enviarlo al backend
+
+                    numeroTarjeta.value =
+                        numeroTarjetaReal;
+
+
+                    btnPagar.disabled =
+                        true;
+
+                    btnPagar.textContent =
+                        "Procesando pago...";
+                }
+            );
+
+
+            // =========================================
+            // TEMPORIZADOR
+            // =========================================
+
+            const elementoTemporizador =
+                document.getElementById(
+                    "temporizador"
+                );
+
+            const reservadoHastaTexto =
+                document.getElementById(
+                    "reservadoHasta"
+                ).value;
+
+            const citaId =
+                document.getElementById(
+                    "citaIdTemporizador"
+                ).value;
+
+            const bannerExpirado =
+                document.getElementById(
+                    "bannerExpirado"
+                );
+
+            const contenedorTemporizador =
+                document.getElementById(
+                    "contenedorTemporizador"
+                );
+
+
+            const reservadoHasta =
+                new Date(
+                    reservadoHastaTexto
+                );
+
+
+            let intervalo;
+
+
+            function actualizarTemporizador() {
+
+                const ahora =
+                    new Date();
+
+                let diferencia =
+                    reservadoHasta.getTime()
+                    -
+                    ahora.getTime();
+
+
+                // =====================================
+                // RESERVA EXPIRADA
+                // =====================================
+
+                if (diferencia <= 0) {
+
+                    elementoTemporizador.textContent =
+                        "00:00";
+
+                    clearInterval(
+                        intervalo
+                    );
+
+
+                    btnPagar.disabled =
+                        true;
+
+
+                    bannerExpirado.classList.add(
+                        "visible"
+                    );
+
+
+                    contenedorTemporizador.style.display =
+                        "none";
+
+
+                    // Esperar 4 segundos,
+                    // tal como pide FA02
+
+                    setTimeout(
+                        function () {
+
+                            window.location.href =
+                                "/citas/reserva-expirada?citaId="
+                                + citaId;
+
+                        },
+                        4000
+                    );
+
+
+                    return;
+                }
+
+
+                const segundosTotales =
+                    Math.floor(
+                        diferencia / 1000
+                    );
+
+
+                const minutos =
+                    Math.floor(
+                        segundosTotales / 60
+                    );
+
+
+                const segundos =
+                    segundosTotales % 60;
+
+
+                elementoTemporizador.textContent =
+                    String(minutos)
+                        .padStart(2, "0")
+                    +
+                    ":"
+                    +
+                    String(segundos)
+                        .padStart(2, "0");
+            }
+
+
+            actualizarTemporizador();
+
+
+            intervalo =
+                setInterval(
+                    actualizarTemporizador,
+                    1000
+                );
+
+        }
+    );
+
+</script>
+
+</body>
+
+</html>

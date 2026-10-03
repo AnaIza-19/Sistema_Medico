@@ -1,0 +1,71 @@
+# ==============================
+# MAVEN
+# ==============================
+target/
+
+# Maven Wrapper
+!.mvn/wrapper/maven-wrapper.jar
+
+# ==============================
+# INTELLIJ IDEA
+# ==============================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# ==============================
+# ECLIPSE
+# ==============================
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# ==============================
+# NETBEANS
+# ==============================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+# ==============================
+# VS CODE
+# ==============================
+.vscode/
+
+# ==============================
+# KOTLIN
+# ==============================
+.kotlin/
+
+# ==============================
+# SISTEMA OPERATIVO
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# LOGS
+# ==============================
+*.log
+logs/
+
+# ==============================
+# ARCHIVOS TEMPORALES
+# ==============================
+*.tmp
+*.temp
+
+# ==============================
+# VARIABLES Y CONFIGURACION LOCAL
+# ==============================
+.env
+application-local.properties

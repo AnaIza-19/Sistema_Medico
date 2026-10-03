@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+
+<html
+        lang="es"
+        xmlns:th="http://www.thymeleaf.org"
+>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Panel de Enfermería
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6f9;
+            color: #1f2937;
+        }
+
+
+        /* ================================================= */
+        /* ENCABEZADO */
+        /* ================================================= */
+
+        .encabezado {
+            background: #146ba8;
+            color: white;
+            padding: 22px 0;
+        }
+
+
+        .contenedor {
+            width: 90%;
+            max-width: 1250px;
+            margin: auto;
+        }
+
+
+        .barra {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+
+        .barra h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+
+        .usuario {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-weight: bold;
+        }
+
+
+        .cerrar {
+            color: white;
+            text-decoration: none;
+        }
+
+
+        .cerrar:hover {
+            text-decoration: underline;
+        }
+
+
+        /* ================================================= */
+        /* CONTENIDO */
+        /* ================================================= */
+
+        .principal {
+            padding: 40px 0 60px;
+        }
+
+
+        .titulo {
+            margin-bottom: 8px;
+            color: #0f5f99;
+            font-size: 36px;
+        }
+
+
+        .subtitulo {
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 17px;
+        }
+
+
+        /* ================================================= */
+        /* MENSAJES */
+        /* ================================================= */
+
+        .mensaje-exito {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+
+        .mensaje-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+
+        /* ================================================= */
+        /* SECCIONES */
+        /* ================================================= */
+
+        .seccion {
+            background: white;
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+        }
+
+
+        .seccion h2 {
+            margin-top: 0;
+            color: #155f96;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+
+        .contador {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #075985;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+
+        /* ================================================= */
+        /* TARJETAS */
+        /* ================================================= */
+
+        .grid {
+            display: grid;
+            grid-template-columns:
+                    repeat(auto-fit, minmax(290px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+
+        .tarjeta {
+            border: 1px solid #dbe3ea;
+            border-radius: 12px;
+            padding: 20px;
+            background: #ffffff;
+        }
+
+
+        .tarjeta h3 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            color: #111827;
+            font-size: 21px;
+        }
+
+
+        .dato {
+            margin: 7px 0;
+            color: #4b5563;
+            font-size: 15px;
+        }
+
+
+        .etiqueta {
+            font-weight: bold;
+            color: #374151;
+        }
+
+
+        /* ================================================= */
+        /* PRIORIDAD */
+        /* ================================================= */
+
+        .prioridad-normal {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 12px;
+            background: #e0f2fe;
+            color: #075985;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+
+        .prioridad-emergencia {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 12px;
+            background: #fee2e2;
+            color: #b91c1c;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+
+        /* ================================================= */
+        /* BOTONES */
+        /* ================================================= */
+
+        .boton {
+            display: block;
+            width: 100%;
+            margin-top: 18px;
+            border: none;
+            border-radius: 8px;
+            padding: 13px;
+            background: #1476b8;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+
+
+        .boton:hover {
+            background: #0f6096;
+        }
+
+
+        .boton-verde {
+            background: #16803d;
+        }
+
+
+        .boton-verde:hover {
+            background: #126c34;
+        }
+
+
+        .boton:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+
+        .vacio {
+            color: #64748b;
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 18px;
+            text-align: center;
+        }
+
+
+        /* ================================================= */
+        /* RESPONSIVE */
+        /* ================================================= */
+
+        @media (max-width: 700px) {
+
+            .barra {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+
+            .usuario {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+
+            .titulo {
+                font-size: 28px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ===================================================== -->
+<!-- ENCABEZADO -->
+<!-- ===================================================== -->
+
+<header class="encabezado">
+
+    <div class="contenedor barra">
+
+
+        <h1>
+            Enfermería - Signos Vitales
+        </h1>
+
+
+        <div class="usuario">
+
+            <span>
+
+                Enfermero:
+
+                <span
+                        th:text="${enfermero.nombreCompleto}"
+                >
+                    Enfermero
+                </span>
+
+            </span>
+
+
+            <a
+                    th:href="@{/personal/cerrar-sesion}"
+                    class="cerrar"
+            >
+                Cerrar sesión
+            </a>
+
+        </div>
+
+
+    </div>
+
+</header>
+
+
+<!-- ===================================================== -->
+<!-- CONTENIDO PRINCIPAL -->
+<!-- ===================================================== -->
+
+<main class="principal">
+
+    <div class="contenedor">
+
+
+        <h1 class="titulo">
+            Panel de Enfermería
+        </h1>
+
+
+        <p class="subtitulo">
+            Pacientes pendientes y pacientes actualmente
+            en proceso de toma de signos vitales.
+        </p>
+
+
+        <!-- ================================================= -->
+        <!-- MENSAJE DE ÉXITO -->
+        <!-- ================================================= -->
+
+        <div
+                class="mensaje-exito"
+                th:if="${exito}"
+                th:text="${exito}"
+        >
+            Operación realizada correctamente.
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- MENSAJE DE ERROR -->
+        <!-- ================================================= -->
+
+        <div
+                class="mensaje-error"
+                th:if="${error}"
+                th:text="${error}"
+        >
+            Ocurrió un error.
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PACIENTES PRESENTES -->
+        <!-- ================================================= -->
+
+        <section class="seccion">
+
+
+            <h2>
+
+                Pacientes en sala de espera
+
+                <span
+                        class="contador"
+                        th:text="${#lists.size(pacientesPresentes)}"
+                >
+                    0
+                </span>
+
+            </h2>
+
+
+            <!-- ================================================= -->
+            <!-- SIN PACIENTES -->
+            <!-- ================================================= -->
+
+            <div
+                    class="vacio"
+                    th:if="${#lists.isEmpty(pacientesPresentes)}"
+            >
+                No hay pacientes pendientes para toma de signos vitales.
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- LISTA -->
+            <!-- ================================================= -->
+
+            <div
+                    class="grid"
+                    th:if="${!#lists.isEmpty(pacientesPresentes)}"
+            >
+
+
+                <article
+                        class="tarjeta"
+                        th:each="cita : ${pacientesPresentes}"
+                >
+
+
+                    <h3
+                            th:text="${cita.paciente.nombreCompleto}"
+                    >
+                        Nombre del paciente
+                    </h3>
+
+
+                    <!-- NÚMERO DE CITA -->
+
+                    <p class="dato">
+
+                        <span class="etiqueta">
+                            No. de cita:
+                        </span>
+
+                        <span
+                                th:text="${cita.id}"
+                        >
+                            1
+                        </span>
+
+                    </p>
+
+
+                    <!-- MÉDICO -->
+
+                    <p class="dato">
+
+                        <span class="etiqueta">
+                            Médico:
+                        </span>
+
+                        <span
+                                th:text="${cita.medico.nombreCompleto}"
+                        >
+                            Médico
+                        </span>
+
+                    </p>
+
+
+                    <!-- ESPECIALIDAD -->
+
+                    <p class="dato">
+
+                        <span class="etiqueta">
+                            Especialidad:
+                        </span>
+
+                        <span
+                                th:text="${cita.especialidad.nombre}"
+                        >
+                            Especialidad
+                        </span>
+
+                    </p>
+
+
+                    <!-- PRIORIDAD -->
+
+                    <p class="dato">
+
+                        <span class="etiqueta">
+                            Prioridad:
+                        </span>
+
+
+                        <span
+                                th:if="${cita.prioridad != null
+                                and #strings.equalsIgnoreCase(
+                                    cita.prioridad,
+                                    'EMERGENCIA'
+                                )}"
+                                class="prioridad-emergencia"
+                                th:text="${cita.prioridad}"
+                        >
+                            EMERGENCIA
+                        </span>
+
+
+                        <span
+                                th:unless="${cita.prioridad != null
+                                and #strings.equalsIgnoreCase(
+                                    cita.prioridad,
+                                    'EMERGENCIA'
+                                )}"
+                                class="prioridad-normal"
+                                th:text="${cita.prioridad}"
+                        >
+                            NORMAL
+                        </span>
+
+                    </p>
+
+
+                    <!-- ================================================= -->
+                    <!-- LLAMAR Y TOMAR SIGNOS -->
+                    <!-- ================================================= -->
+
+                    <form
+                            th:action="@{/enfermeria/llamar}"
+                            method="post"
+                            class="form-llamar"
+                            th:attr="
+                                data-turno=${cita.id},
+                                data-paciente=${cita.paciente.nombreCompleto}
+                            "
+                    >
+
+
+                        <input
+                                type="hidden"
+                                name="citaId"
+                                th:value="${cita.id}"
+                        >
+
+
+                        <button
+                                type="submit"
+                                class="boton btn-llamar"
+                        >
+                            Llamar y Tomar Signos
+                        </button>
+
+
+                    </form>
+
+
+                </article>
+
+
+            </div>
+
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- PACIENTES EN SIGNOS VITALES -->
+        <!-- ================================================= -->
+
+        <section class="seccion">
+
+
+            <h2>
+
+                En proceso de toma de signos
+
+                <span
+                        class="contador"
+                        th:text="${#lists.size(pacientesEnSignos)}"
+                >
+                    0
+                </span>
+
+            </h2>
+
+
+            <!-- ================================================= -->
+            <!-- VACÍO -->
+            <!-- ================================================= -->
+
+            <div
+                    class="vacio"
+                    th:if="${#lists.isEmpty(pacientesEnSignos)}"
+            >
+                No hay pacientes actualmente en toma de signos vitales.
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- LISTA -->
+            <!-- ================================================= -->
+
+            <div
+                    class="grid"
+                    th:if="${!#lists.isEmpty(pacientesEnSignos)}"
+            >
+
+
+                <article
+                        class="tarjeta"
+                        th:each="cita : ${pacientesEnSignos}"
+                >
+
+
+                    <h3
+                            th:text="${cita.paciente.nombreCompleto}"
+                    >
+                        Nombre del paciente
+                    </h3>
+
+
+                    <!-- NÚMERO DE CITA -->
+
+                    <p class="dato">
+
+                        <span class="etiqueta">
+                            No. de cita:
+                        </span>
+
+                        <span
+                                th:text="${cita.id}"
+                        >
+                            1
+                        </span>
+
+                    </p>
+
+
+                    <!-- MÉDICO -->
+
+                    <p class="dato">
+
+                        <span class="etiqueta">
+                            Médico:
+                        </span>
+
+                        <span
+                                th:text="${cita.medico.nombreCompleto}"
+                        >
+                            Médico
+                        </span>
+
+                    </p>
+
+
+                    <!-- ESPECIALIDAD -->
+
+                    <p class="dato">
+
+                        <span class="etiqueta">
+                            Especialidad:
+                        </span>
+
+                        <span
+                                th:text="${cita.especialidad.nombre}"
+                        >
+                            Especialidad
+                        </span>
+
+                    </p>
+
+
+                    <!-- PRIORIDAD -->
+
+                    <p class="dato">
+
+                        <span class="etiqueta">
+                            Prioridad:
+                        </span>
+
+
+                        <span
+                                th:if="${cita.prioridad != null
+                                and #strings.equalsIgnoreCase(
+                                    cita.prioridad,
+                                    'EMERGENCIA'
+                                )}"
+                                class="prioridad-emergencia"
+                                th:text="${cita.prioridad}"
+                        >
+                            EMERGENCIA
+                        </span>
+
+
+                        <span
+                                th:unless="${cita.prioridad != null
+                                and #strings.equalsIgnoreCase(
+                                    cita.prioridad,
+                                    'EMERGENCIA'
+                                )}"
+                                class="prioridad-normal"
+                                th:text="${cita.prioridad}"
+                        >
+                            NORMAL
+                        </span>
+
+                    </p>
+
+
+                    <!-- ================================================= -->
+                    <!-- REGISTRAR SIGNOS -->
+                    <!-- ================================================= -->
+
+                    <a
+                            th:href="@{/enfermeria/signos/{id}(id=${cita.id})}"
+                            class="boton boton-verde"
+                    >
+                        Registrar Signos Vitales
+                    </a>
+
+
+                </article>
+
+
+            </div>
+
+
+        </section>
+
+
+    </div>
+
+</main>
+
+
+<!-- ===================================================== -->
+<!-- TTS EN ESPAÑOL -->
+<!-- CU-07 -->
+<!-- ===================================================== -->
+
+<script>
+
+    // =====================================================
+    // GUARDAR LAS VOCES DISPONIBLES
+    // =====================================================
+
+    let vocesDisponibles = [];
+
+
+    function cargarVoces() {
+
+        if (
+            "speechSynthesis" in window
+        ) {
+
+            vocesDisponibles =
+                window.speechSynthesis.getVoices();
+
+        }
+
+    }
+
+
+    // Intentamos cargar las voces al abrir la página
+    cargarVoces();
+
+
+    // Chrome muchas veces carga las voces después
+    if (
+        "speechSynthesis" in window
+    ) {
+
+        window.speechSynthesis.onvoiceschanged =
+            function () {
+
+                cargarVoces();
+
+            };
+
+    }
+
+
+    // =====================================================
+    // BUSCAR UNA VOZ EN ESPAÑOL
+    // =====================================================
+
+    function obtenerVozEspanol() {
+
+        cargarVoces();
+
+
+        let voz = null;
+
+
+        // =================================================
+        // 1. ESPAÑOL DE GUATEMALA
+        // =================================================
+
+        voz =
+            vocesDisponibles.find(
+                function (v) {
+
+                    return (
+                        v.lang
+                        &&
+                        v.lang
+                            .toLowerCase()
+                        ===
+                        "es-gt"
+                    );
+
+                }
+            );
+
+
+        if (voz) {
+
+            return voz;
+
+        }
+
+
+        // =================================================
+        // 2. ESPAÑOL DE MÉXICO
+        // =================================================
+
+        voz =
+            vocesDisponibles.find(
+                function (v) {
+
+                    return (
+                        v.lang
+                        &&
+                        v.lang
+                            .toLowerCase()
+                        ===
+                        "es-mx"
+                    );
+
+                }
+            );
+
+
+        if (voz) {
+
+            return voz;
+
+        }
+
+
+        // =================================================
+        // 3. ESPAÑOL DE ESTADOS UNIDOS
+        // =================================================
+
+        voz =
+            vocesDisponibles.find(
+                function (v) {
+
+                    return (
+                        v.lang
+                        &&
+                        v.lang
+                            .toLowerCase()
+                        ===
+                        "es-us"
+                    );
+
+                }
+            );
+
+
+        if (voz) {
+
+            return voz;
+
+        }
+
+
+        // =================================================
+        // 4. ESPAÑOL DE ESPAÑA
+        // =================================================
+
+        voz =
+            vocesDisponibles.find(
+                function (v) {
+
+                    return (
+                        v.lang
+                        &&
+                        v.lang
+                            .toLowerCase()
+                        ===
+                        "es-es"
+                    );
+
+                }
+            );
+
+
+        if (voz) {
+
+            return voz;
+
+        }
+
+
+        // =================================================
+        // 5. CUALQUIER OTRA VOZ EN ESPAÑOL
+        // =================================================
+
+        voz =
+            vocesDisponibles.find(
+                function (v) {
+
+                    return (
+                        v.lang
+                        &&
+                        v.lang
+                            .toLowerCase()
+                            .startsWith(
+                                "es"
+                            )
+                    );
+
+                }
+            );
+
+
+        return voz;
+
+    }
+
+
+    // =====================================================
+    // FORMULARIOS "LLAMAR Y TOMAR SIGNOS"
+    // =====================================================
+
+    document
+        .querySelectorAll(
+            ".form-llamar"
+        )
+        .forEach(
+            function (formulario) {
+
+
+                formulario.addEventListener(
+                    "submit",
+                    function (event) {
+
+
+                        // =====================================
+                        // DETENER ENVÍO MOMENTÁNEAMENTE
+                        // =====================================
+
+                        event.preventDefault();
+
+
+                        // =====================================
+                        // EVITAR DOBLE CLIC
+                        // =====================================
+
+                        if (
+                            formulario.dataset.procesando
+                            ===
+                            "true"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        formulario.dataset.procesando =
+                            "true";
+
+
+                        const boton =
+                            formulario.querySelector(
+                                ".btn-llamar"
+                            );
+
+
+                        if (boton) {
+
+                            boton.disabled =
+                                true;
+
+
+                            boton.textContent =
+                                "Llamando paciente...";
+
+                        }
+
+
+                        // =====================================
+                        // DATOS DEL PACIENTE
+                        // =====================================
+
+                        const turno =
+                            formulario.dataset.turno;
+
+
+                        const paciente =
+                            formulario.dataset.paciente;
+
+
+                        const texto =
+                            "Turno número "
+                            +
+                            turno
+                            +
+                            ". Paciente "
+                            +
+                            paciente
+                            +
+                            ", favor pasar a toma de signos vitales.";
+
+
+                        // =====================================
+                        // CONTROL PARA NO ENVIAR DOS VECES
+                        // =====================================
+
+                        let enviado =
+                            false;
+
+
+                        function enviarFormulario() {
+
+                            if (enviado) {
+
+                                return;
+
+                            }
+
+
+                            enviado =
+                                true;
+
+
+                            formulario.submit();
+
+                        }
+
+
+                        // =====================================
+                        // COMPROBAR SOPORTE DE VOZ
+                        // =====================================
+
+                        if (
+                            "speechSynthesis" in window
+                            &&
+                            "SpeechSynthesisUtterance" in window
+                        ) {
+
+
+                            // Detener cualquier voz anterior
+                            window
+                                .speechSynthesis
+                                .cancel();
+
+
+                            const mensaje =
+                                new SpeechSynthesisUtterance(
+                                    texto
+                                );
+
+
+                            // =================================
+                            // CONFIGURACIÓN DEL IDIOMA
+                            // =================================
+
+                            mensaje.lang =
+                                "es-MX";
+
+
+                            mensaje.rate =
+                                0.9;
+
+
+                            mensaje.pitch =
+                                1;
+
+
+                            mensaje.volume =
+                                1;
+
+
+                            // =================================
+                            // SELECCIONAR VOZ EN ESPAÑOL
+                            // =================================
+
+                            const vozEspanol =
+                                obtenerVozEspanol();
+
+
+                            if (vozEspanol) {
+
+                                mensaje.voice =
+                                    vozEspanol;
+
+
+                                mensaje.lang =
+                                    vozEspanol.lang;
+
+
+                                console.log(
+                                    "Voz utilizada:",
+                                    vozEspanol.name,
+                                    vozEspanol.lang
+                                );
+
+                            } else {
+
+                                console.warn(
+                                    "No se encontró una voz instalada en español."
+                                );
+
+                            }
+
+
+                            // =================================
+                            // CUANDO TERMINE DE HABLAR
+                            // =================================
+
+                            mensaje.onend =
+                                function () {
+
+                                    enviarFormulario();
+
+                                };
+
+
+                            // =================================
+                            // SI OCURRE ERROR
+                            // =================================
+
+                            mensaje.onerror =
+                                function (event) {
+
+                                    console.error(
+                                        "Error TTS:",
+                                        event
+                                    );
+
+
+                                    enviarFormulario();
+
+                                };
+
+
+                            // =================================
+                            // REPRODUCIR EL ANUNCIO
+                            // =================================
+
+                            window
+                                .speechSynthesis
+                                .speak(
+                                    mensaje
+                                );
+
+
+                            // =================================
+                            // RESPALDO
+                            //
+                            // Si el navegador no activa onend
+                            // ni onerror, continuamos después.
+                            // =================================
+
+                            setTimeout(
+                                function () {
+
+                                    enviarFormulario();
+
+                                },
+                                15000
+                            );
+
+
+                        } else {
+
+
+                            console.warn(
+                                "El navegador no soporta síntesis de voz."
+                            );
+
+
+                            enviarFormulario();
+
+                        }
+
+                    }
+
+                );
+
+            }
+
+        );
+
+</script>
+
+
+</body>
+
+</html>

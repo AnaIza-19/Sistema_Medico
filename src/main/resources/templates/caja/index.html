@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Caja - Cobro de Consulta
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #333;
+        }
+
+
+        .header {
+            background: #1261a0;
+            color: white;
+            padding: 20px;
+        }
+
+
+        .header-contenido {
+            max-width: 1100px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+
+        .usuario {
+            font-size: 15px;
+        }
+
+
+        .cerrar-sesion {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            margin-left: 15px;
+        }
+
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+
+        h2 {
+            margin-top: 0;
+            color: #1261a0;
+        }
+
+
+        h3 {
+            color: #1261a0;
+            margin-top: 0;
+        }
+
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+
+        select,
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+
+        .busqueda-grid {
+            display: grid;
+            grid-template-columns: 220px 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+
+        button {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 7px;
+            background: #1261a0;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+
+        button:hover {
+            background: #0d4f83;
+        }
+
+
+        .error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+            padding: 15px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+        }
+
+
+        .info {
+            background: #cff4fc;
+            color: #055160;
+            border: 1px solid #b6effb;
+            padding: 15px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+        }
+
+
+        .detalle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 30px;
+        }
+
+
+        .dato {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+
+        .dato strong {
+            display: block;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+
+        .estado {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #fff3cd;
+            color: #664d03;
+            font-weight: bold;
+        }
+
+
+        .monto-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: #e7f3ff;
+            border: 1px solid #b6d4fe;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+
+        .monto-box span {
+            display: block;
+        }
+
+
+        .monto-titulo {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+
+        .monto {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1261a0;
+        }
+
+
+        .acciones {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+
+        .btn-cobrar {
+            padding: 12px 22px;
+            border-radius: 7px;
+            background: #1261a0;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+
+        .btn-cobrar:hover {
+            background: #0d4f83;
+        }
+
+
+        .btn-secundario {
+            background: #6c757d;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+
+        /* ================================================= */
+        /* RESULTADOS MÚLTIPLES POR DPI                       */
+        /* ================================================= */
+
+        .lista-citas {
+            display: grid;
+            gap: 20px;
+        }
+
+
+        .cita-item {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #1261a0;
+        }
+
+
+        .encabezado-cita {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+
+        .numero-cita {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1261a0;
+        }
+
+
+        .monto-pequeno {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1261a0;
+        }
+
+
+        .resumen-citas {
+            margin-bottom: 20px;
+        }
+
+
+        @media (max-width: 750px) {
+
+            .busqueda-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .detalle-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .encabezado-cita {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+    <div class="header-contenido">
+
+        <h1>
+            Caja - Cobro de Consulta
+        </h1>
+
+
+        <div class="usuario">
+
+            Cajero:
+
+            <strong
+                    th:text="${cajero != null
+                    ? cajero.nombre + ' ' + cajero.apellido
+                    : 'Usuario'}"
+            >
+                Cajero
+            </strong>
+
+
+            <a
+                    th:href="@{/personal/cerrar-sesion}"
+                    class="cerrar-sesion"
+            >
+                Cerrar sesión
+            </a>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<div class="container">
+
+
+    <!-- ================================================= -->
+    <!-- BUSCAR CITA                                      -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2>
+            Buscar cita pendiente de pago
+        </h2>
+
+
+        <form
+                th:action="@{/caja/buscar}"
+                method="get"
+        >
+
+            <div class="busqueda-grid">
+
+
+                <div>
+
+                    <label for="tipo">
+                        Buscar por
+                    </label>
+
+
+                    <select
+                            id="tipo"
+                            name="tipo"
+                            required
+                    >
+
+                        <option
+                                value="CITA"
+                                th:selected="${tipoSeleccionado == 'CITA'}"
+                        >
+                            No. de cita
+                        </option>
+
+
+                        <option
+                                value="DPI"
+                                th:selected="${tipoSeleccionado == 'DPI'}"
+                        >
+                            DPI
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div>
+
+                    <label for="valor">
+                        Criterio de búsqueda
+                    </label>
+
+
+                    <input
+                            id="valor"
+                            name="valor"
+                            type="text"
+                            th:value="${valorBuscado}"
+                            placeholder="Ingrese número de cita o DPI"
+                            required
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <button type="submit">
+                        Buscar
+                    </button>
+
+                </div>
+
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- MENSAJE DE ERROR                                  -->
+    <!-- ================================================= -->
+
+    <div
+            class="error"
+            th:if="${mensajeError != null}"
+            th:text="${mensajeError}"
+    >
+        Mensaje de error
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- UNA SOLA CITA - BÚSQUEDA POR NÚMERO               -->
+    <!-- ================================================= -->
+
+    <div
+            class="card"
+            th:if="${cita != null}"
+    >
+
+        <h2>
+            Detalle de la Cita
+        </h2>
+
+
+        <div class="detalle-grid">
+
+
+            <div class="dato">
+
+                <strong>
+                    No. de cita
+                </strong>
+
+                <span th:text="${cita.id}">
+                    0
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Paciente
+                </strong>
+
+                <span
+                        th:text="${cita.paciente.nombre
+                        + ' '
+                        + cita.paciente.apellido}"
+                >
+                    Paciente
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    DPI
+                </strong>
+
+                <span th:text="${cita.paciente.dpi}">
+                    DPI
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Estado
+                </strong>
+
+                <span
+                        class="estado"
+                        th:text="${cita.estado}"
+                >
+                    PENDIENTE_PAGO
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Especialidad
+                </strong>
+
+                <span th:text="${cita.especialidad.nombre}">
+                    Especialidad
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Médico
+                </strong>
+
+                <span
+                        th:text="${cita.medico.nombre
+                        + ' '
+                        + cita.medico.apellido}"
+                >
+                    Médico
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Sede
+                </strong>
+
+                <span th:text="${cita.sucursal.nombre}">
+                    Sede
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Fecha
+                </strong>
+
+                <span
+                        th:text="${#temporals.format(
+                        cita.horario.fecha,
+                        'dd/MM/yyyy'
+                        )}"
+                >
+                    Fecha
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Hora
+                </strong>
+
+                <span
+                        th:text="${#temporals.format(
+                        cita.horario.horaInicio,
+                        'HH:mm'
+                        )
+                        + ' - '
+                        + #temporals.format(
+                        cita.horario.horaFin,
+                        'HH:mm'
+                        )}"
+                >
+                    Hora
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>
+                    Motivo de consulta
+                </strong>
+
+                <span th:text="${cita.motivoConsulta}">
+                    Motivo
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="monto-box">
+
+            <span class="monto-titulo">
+                Monto total a cobrar
+            </span>
+
+
+            <span
+                    class="monto"
+                    th:text="'Q'
+                    + ${#numbers.formatDecimal(
+                    monto,
+                    1,
+                    2
+                    )}"
+            >
+                Q0.00
+            </span>
+
+        </div>
+
+
+        <div class="acciones">
+
+            <a
+                    th:href="@{/caja/cobro(citaId=${cita.id})}"
+                    class="btn-cobrar"
+            >
+                Continuar al Cobro
+            </a>
+
+
+            <a
+                    th:href="@{/caja}"
+                    class="btn-secundario"
+            >
+                Nueva búsqueda
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- VARIAS CITAS - BÚSQUEDA POR DPI                   -->
+    <!-- ================================================= -->
+
+    <div
+            th:if="${citas != null and !citas.isEmpty()}"
+    >
+
+        <div
+                class="info resumen-citas"
+                th:text="'Se encontraron '
+                + ${cantidadCitas}
+                + ' cita(s) pendiente(s) de pago para este paciente. Seleccione la cita que desea cobrar.'"
+        >
+            Se encontraron citas pendientes.
+        </div>
+
+
+        <div class="lista-citas">
+
+
+            <div
+                    class="cita-item"
+                    th:each="item : ${citas}"
+            >
+
+                <!-- ===================================== -->
+                <!-- ENCABEZADO                           -->
+                <!-- ===================================== -->
+
+                <div class="encabezado-cita">
+
+
+                    <div class="numero-cita">
+
+                        Cita No.
+
+                        <span th:text="${item.id}">
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <span
+                            class="estado"
+                            th:text="${item.estado}"
+                    >
+                        PENDIENTE_PAGO
+                    </span>
+
+                </div>
+
+
+                <!-- ===================================== -->
+                <!-- DATOS                                -->
+                <!-- ===================================== -->
+
+                <div class="detalle-grid">
+
+
+                    <div class="dato">
+
+                        <strong>
+                            Paciente
+                        </strong>
+
+                        <span
+                                th:text="${item.paciente.nombre
+                                + ' '
+                                + item.paciente.apellido}"
+                        >
+                            Paciente
+                        </span>
+
+                    </div>
+
+
+                    <div class="dato">
+
+                        <strong>
+                            DPI
+                        </strong>
+
+                        <span th:text="${item.paciente.dpi}">
+                            DPI
+                        </span>
+
+                    </div>
+
+
+                    <div class="dato">
+
+                        <strong>
+                            Especialidad
+                        </strong>
+
+                        <span th:text="${item.especialidad.nombre}">
+                            Especialidad
+                        </span>
+
+                    </div>
+
+
+                    <div class="dato">
+
+                        <strong>
+                            Médico
+                        </strong>
+
+                        <span
+                                th:text="${item.medico.nombre
+                                + ' '
+                                + item.medico.apellido}"
+                        >
+                            Médico
+                        </span>
+
+                    </div>
+
+
+                    <div class="dato">
+
+                        <strong>
+                            Sede
+                        </strong>
+
+                        <span th:text="${item.sucursal.nombre}">
+                            Sede
+                        </span>
+
+                    </div>
+
+
+                    <div class="dato">
+
+                        <strong>
+                            Fecha
+                        </strong>
+
+                        <span
+                                th:text="${#temporals.format(
+                                item.horario.fecha,
+                                'dd/MM/yyyy'
+                                )}"
+                        >
+                            Fecha
+                        </span>
+
+                    </div>
+
+
+                    <div class="dato">
+
+                        <strong>
+                            Hora
+                        </strong>
+
+                        <span
+                                th:text="${#temporals.format(
+                                item.horario.horaInicio,
+                                'HH:mm'
+                                )
+                                + ' - '
+                                + #temporals.format(
+                                item.horario.horaFin,
+                                'HH:mm'
+                                )}"
+                        >
+                            Hora
+                        </span>
+
+                    </div>
+
+
+                    <div class="dato">
+
+                        <strong>
+                            Motivo de consulta
+                        </strong>
+
+                        <span th:text="${item.motivoConsulta}">
+                            Motivo
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ===================================== -->
+                <!-- MONTO                                -->
+                <!-- ===================================== -->
+
+                <div class="monto-box">
+
+                    <span class="monto-titulo">
+                        Monto total a cobrar
+                    </span>
+
+
+                    <span
+                            class="monto-pequeno"
+                            th:text="'Q'
+                            + ${#numbers.formatDecimal(
+                            montos[item.id],
+                            1,
+                            2
+                            )}"
+                    >
+                        Q0.00
+                    </span>
+
+                </div>
+
+
+                <!-- ===================================== -->
+                <!-- COBRAR ESTA CITA                     -->
+                <!-- ===================================== -->
+
+                <div class="acciones">
+
+                    <a
+                            th:href="@{/caja/cobro(citaId=${item.id})}"
+                            class="btn-cobrar"
+                    >
+                        Continuar al Cobro
+                    </a>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <div class="acciones">
+
+            <a
+                    th:href="@{/caja}"
+                    class="btn-secundario"
+            >
+                Nueva búsqueda
+            </a>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

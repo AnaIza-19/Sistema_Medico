@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Portal del Paciente</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.12);
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .bienvenida {
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .acciones {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-agendar {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-agendar:hover {
+            background-color: #125ea8;
+        }
+
+        .btn-salir {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-salir:hover {
+            background-color: #cfcfcf;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>
+        Portal del Paciente
+    </h1>
+
+
+    <div class="bienvenida">
+
+        <h2>
+            Bienvenida,
+            <span th:text="${nombre}">
+                Paciente
+            </span>
+        </h2>
+
+        <p>
+            Ha iniciado sesión correctamente.
+        </p>
+
+    </div>
+
+
+    <div class="acciones">
+
+        <a
+                th:href="@{/citas/agendar}"
+                class="btn btn-agendar">
+
+            Agendar Cita
+
+        </a>
+
+
+        <a
+                th:href="@{/cerrar-sesion}"
+                class="btn btn-salir">
+
+            Cerrar sesión
+
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

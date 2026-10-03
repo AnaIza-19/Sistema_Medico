@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Pago Exitoso</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 800px;
+            margin: 45px auto;
+            background-color: white;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            color: #155724;
+            margin-top: 0;
+        }
+
+        .mensaje-exito {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 7px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .comprobante {
+            background-color: #f8f9fa;
+            padding: 22px;
+            border-radius: 8px;
+        }
+
+        .fila {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .etiqueta {
+            width: 190px;
+            font-weight: bold;
+        }
+
+        .monto {
+            margin-top: 18px;
+            padding-top: 15px;
+            border-top: 1px solid #ccc;
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .correo {
+            background-color: #eaf3fc;
+            color: #34495e;
+            padding: 14px;
+            border-radius: 6px;
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .botones {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .btn-portal {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-citas {
+            background-color: #1976d2;
+            color: white;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>
+        ¡Pago Exitoso!
+    </h1>
+
+
+    <div class="mensaje-exito">
+
+        ¡Pago realizado exitosamente!
+        Número de transacción:
+
+        <span th:text="${pago.numeroTransaccion}">
+        </span>
+
+        <br>
+
+        Su cita ha sido confirmada.
+
+    </div>
+
+
+    <div class="comprobante">
+
+        <h2>
+            Comprobante de pago
+        </h2>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Número de transacción:
+            </div>
+
+            <div th:text="${pago.numeroTransaccion}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Médico:
+            </div>
+
+            <div
+                    th:text="${pago.cita.medico.nombre + ' ' + pago.cita.medico.apellido}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Especialidad:
+            </div>
+
+            <div th:text="${pago.cita.especialidad.nombre}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Sucursal:
+            </div>
+
+            <div th:text="${pago.cita.sucursal.nombre}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Fecha:
+            </div>
+
+            <div th:text="${pago.cita.horario.fecha}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Hora:
+            </div>
+
+            <div
+                    th:text="${pago.cita.horario.horaInicio + ' - ' + pago.cita.horario.horaFin}">
+            </div>
+
+        </div>
+
+
+        <div class="fila">
+
+            <div class="etiqueta">
+                Tarjeta:
+            </div>
+
+            <div>
+                **** **** ****
+                <span th:text="${pago.ultimosCuatro}">
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="monto">
+
+            Monto pagado:
+            Q<span th:text="${pago.monto}">
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="correo">
+
+        Se ha enviado un correo de confirmación
+        al correo electrónico registrado del paciente.
+
+    </div>
+
+
+    <div class="botones">
+
+        <a
+                th:href="@{/dashboard}"
+                class="btn btn-portal">
+
+            Volver al Portal
+
+        </a>
+
+
+        <a
+                th:href="@{/citas/mis-citas}"
+                class="btn btn-citas">
+
+            Ver Mis Citas
+
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

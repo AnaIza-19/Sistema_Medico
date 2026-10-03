@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Crear Usuario</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 900px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
+        }
+
+        h1 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .fila {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .campo {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .campo-error {
+            border: 2px solid red !important;
+            background-color: #fff5f5;
+        }
+
+        .mensaje-error {
+            color: red;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .obligatorio {
+            color: red;
+        }
+
+        .nota {
+            font-size: 13px;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .botones {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        button,
+        .btn-cancelar {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .btn-crear {
+            background-color: #2e7d32;
+            color: white;
+        }
+
+        .btn-cancelar {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>Crear Usuario</h1>
+
+    <form
+            method="post"
+            th:action="@{/admin/usuarios/crear}">
+
+
+        <!-- ===================================== -->
+        <!-- NOMBRE COMPLETO -->
+        <!-- ===================================== -->
+
+        <div class="campo">
+
+            <label>
+                Nombre Completo
+                <span class="obligatorio">*</span>
+            </label>
+
+            <div class="fila">
+
+                <div>
+
+                    <input
+                            type="text"
+                            id="nombre"
+                            name="nombre"
+                            maxlength="100"
+                            placeholder="Nombre"
+                            required
+                            th:value="${nombre}"
+                            th:classappend="${errorNombre != null} ? 'campo-error'">
+
+                    <div
+                            class="mensaje-error"
+                            th:if="${errorNombre}"
+                            th:text="${errorNombre}">
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <input
+                            type="text"
+                            id="apellido"
+                            name="apellido"
+                            maxlength="100"
+                            placeholder="Apellido"
+                            required
+                            th:value="${apellido}"
+                            th:classappend="${errorApellido != null} ? 'campo-error'">
+
+                    <div
+                            class="mensaje-error"
+                            th:if="${errorApellido}"
+                            th:text="${errorApellido}">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- CORREO Y NOMBRE DE USUARIO -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+
+            <div class="campo">
+
+                <label for="correo">
+                    Correo Electrónico
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="email"
+                        id="correo"
+                        name="correo"
+                        maxlength="150"
+                        required
+                        th:value="${correo}"
+                        th:classappend="${errorCorreo != null} ? 'campo-error'">
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorCorreo}"
+                        th:text="${errorCorreo}">
+                </div>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="nombreUsuario">
+                    Nombre de Usuario
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="text"
+                        id="nombreUsuario"
+                        name="nombreUsuario"
+                        maxlength="50"
+                        required
+                        th:value="${nombreUsuario}"
+                        th:classappend="${errorNombreUsuario != null} ? 'campo-error'">
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorNombreUsuario}"
+                        th:text="${errorNombreUsuario}">
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- CONTRASEÑA Y DOCUMENTO -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+
+            <div class="campo">
+
+                <label for="contrasena">
+                    Contraseña
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <input
+                        type="password"
+                        id="contrasena"
+                        name="contrasena"
+                        maxlength="255"
+                        required
+                        th:classappend="${errorContrasena != null} ? 'campo-error'">
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorContrasena}"
+                        th:text="${errorContrasena}">
+                </div>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="dpi">
+                    Documento de Identificación
+                </label>
+
+                <input
+                        type="text"
+                        id="dpi"
+                        name="dpi"
+                        maxlength="13"
+                        placeholder="Opcional"
+                        th:value="${dpi}"
+                        th:classappend="${errorDpi != null} ? 'campo-error'">
+
+                <div class="nota">
+                    Si se ingresa, debe contener exactamente 13 dígitos.
+                </div>
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorDpi}"
+                        th:text="${errorDpi}">
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- TELÉFONO Y NIT -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+
+            <div class="campo">
+
+                <label for="telefono">
+                    Número de Teléfono
+                </label>
+
+                <input
+                        type="text"
+                        id="telefono"
+                        name="telefono"
+                        maxlength="20"
+                        placeholder="Opcional"
+                        th:value="${telefono}">
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="nit">
+                    NIT
+                </label>
+
+                <input
+                        type="text"
+                        id="nit"
+                        name="nit"
+                        maxlength="20"
+                        placeholder="Opcional"
+                        th:value="${nit}">
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- SEGURO Y ROL -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+
+            <div class="campo">
+
+                <label for="numeroSeguro">
+                    Número de Seguro
+                </label>
+
+                <input
+                        type="text"
+                        id="numeroSeguro"
+                        name="numeroSeguro"
+                        maxlength="50"
+                        placeholder="Opcional"
+                        th:value="${numeroSeguro}">
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="rolId">
+                    Rol
+                    <span class="obligatorio">*</span>
+                </label>
+
+                <select
+                        id="rolId"
+                        name="rolId"
+                        required
+                        th:classappend="${errorRol != null} ? 'campo-error'">
+
+                    <option value="">
+                        Seleccione un rol
+                    </option>
+
+                    <option
+                            th:each="rol : ${roles}"
+                            th:value="${rol.id}"
+                            th:text="${rol.nombre}"
+                            th:selected="${rolId != null and rol.id == rolId}">
+                    </option>
+
+                </select>
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorRol}"
+                        th:text="${errorRol}">
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- SUCURSAL Y ESPECIALIDAD -->
+        <!-- ===================================== -->
+
+        <div class="fila">
+
+
+            <div class="campo">
+
+                <label for="sucursalId">
+                    Sucursal
+                </label>
+
+                <select
+                        id="sucursalId"
+                        name="sucursalId"
+                        th:classappend="${errorSucursal != null} ? 'campo-error'">
+
+                    <option value="">
+                        Sin sucursal
+                    </option>
+
+                    <option
+                            th:each="sucursal : ${sucursales}"
+                            th:value="${sucursal.id}"
+                            th:text="${sucursal.nombre}"
+                            th:selected="${sucursalId != null and sucursal.id == sucursalId}">
+                    </option>
+
+                </select>
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorSucursal}"
+                        th:text="${errorSucursal}">
+                </div>
+
+            </div>
+
+
+            <!-- SOLO PARA MEDICO -->
+
+            <div
+                    class="campo"
+                    id="contenedorEspecialidad"
+                    style="display: none;">
+
+                <label for="especialidadId">
+                    Especialidad
+                </label>
+
+                <select
+                        id="especialidadId"
+                        name="especialidadId"
+                        disabled
+                        th:classappend="${errorEspecialidad != null} ? 'campo-error'">
+
+                    <option value="">
+                        Sin especialidad
+                    </option>
+
+                    <option
+                            th:each="especialidad : ${especialidades}"
+                            th:value="${especialidad.id}"
+                            th:text="${especialidad.nombre}"
+                            th:selected="${especialidadId != null and especialidad.id == especialidadId}">
+                    </option>
+
+                </select>
+
+                <div class="nota">
+                    Disponible únicamente para usuarios con rol MÉDICO.
+                </div>
+
+                <div
+                        class="mensaje-error"
+                        th:if="${errorEspecialidad}"
+                        th:text="${errorEspecialidad}">
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- ESTADO -->
+        <!-- ===================================== -->
+
+        <div class="campo">
+
+            <label for="activo">
+                Estado
+                <span class="obligatorio">*</span>
+            </label>
+
+            <select
+                    id="activo"
+                    name="activo"
+                    required>
+
+                <option
+                        value="true"
+                        th:selected="${activoSeleccionado == null or activoSeleccionado == true}">
+                    Activo
+                </option>
+
+                <option
+                        value="false"
+                        th:selected="${activoSeleccionado == false}">
+                    Inactivo
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- BOTONES -->
+        <!-- ===================================== -->
+
+        <div class="botones">
+
+            <a
+                    href="/admin/usuarios"
+                    class="btn-cancelar">
+
+                Cancelar
+
+            </a>
+
+            <button
+                    type="submit"
+                    class="btn-crear">
+
+                Crear
+
+            </button>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+
+<script>
+
+    // =============================================
+    // DPI SOLO NÚMEROS
+    // =============================================
+
+    const dpi =
+        document.getElementById("dpi");
+
+    dpi.addEventListener(
+        "input",
+        function () {
+
+            this.value =
+                this.value.replace(/\D/g, "");
+
+        }
+    );
+
+
+    // =============================================
+    // ESPECIALIDAD SOLO PARA MÉDICO
+    // =============================================
+
+    const rolSelect =
+        document.getElementById("rolId");
+
+    const especialidadSelect =
+        document.getElementById("especialidadId");
+
+    const contenedorEspecialidad =
+        document.getElementById("contenedorEspecialidad");
+
+
+    function controlarEspecialidad() {
+
+        const opcionSeleccionada =
+            rolSelect.options[
+                rolSelect.selectedIndex
+                ];
+
+
+        const nombreRol =
+            opcionSeleccionada
+                ? opcionSeleccionada.text
+                    .trim()
+                    .toUpperCase()
+                : "";
+
+
+        if (nombreRol === "MEDICO") {
+
+            contenedorEspecialidad.style.display =
+                "block";
+
+            especialidadSelect.disabled =
+                false;
+
+        } else {
+
+            especialidadSelect.value =
+                "";
+
+            especialidadSelect.disabled =
+                true;
+
+            contenedorEspecialidad.style.display =
+                "none";
+        }
+    }
+
+
+    rolSelect.addEventListener(
+        "change",
+        controlarEspecialidad
+    );
+
+
+    controlarEspecialidad();
+
+</script>
+
+
+</body>
+
+</html>

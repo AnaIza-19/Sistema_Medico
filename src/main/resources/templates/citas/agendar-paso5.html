@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Agendar Cita - Paso 5</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 850px;
+            margin: 40px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .progreso {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .paso {
+            width: 18%;
+            text-align: center;
+            padding: 10px 5px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .paso.activo {
+            background-color: #1976d2;
+            color: white;
+            font-weight: bold;
+        }
+
+        .modo-recepcion {
+            background-color: #e7f3ff;
+            color: #0c5460;
+            border: 1px solid #b6d4fe;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .resumen {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .resumen-fila {
+            margin-bottom: 12px;
+        }
+
+        .resumen-fila strong {
+            display: inline-block;
+            width: 140px;
+        }
+
+        .campo {
+            margin-top: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            resize: vertical;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        .nota {
+            font-size: 13px;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .botones {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 11px 22px;
+            border-radius: 5px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-volver {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-confirmar {
+            background-color: #1976d2;
+            color: white;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>Agendar Cita Médica</h1>
+
+
+    <!-- ===================================== -->
+    <!-- MODO RECEPCIÓN -->
+    <!-- ===================================== -->
+
+    <div
+            class="modo-recepcion"
+            th:if="${origen == 'recepcion' && pacienteWalkIn != null}"
+    >
+
+        Cita para:
+
+        <span
+                th:text="${pacienteWalkIn.nombre + ' ' + pacienteWalkIn.apellido}"
+        >
+            Paciente
+        </span>
+
+        — Agendamiento desde Recepción
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- PROGRESO -->
+    <!-- ===================================== -->
+
+    <div class="progreso">
+
+        <div class="paso">
+            1. Sucursal
+        </div>
+
+        <div class="paso">
+            2. Especialidad
+        </div>
+
+        <div class="paso">
+            3. Médico
+        </div>
+
+        <div class="paso">
+            4. Fecha/Hora
+        </div>
+
+        <div class="paso activo">
+            5. Confirmar
+        </div>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- RESUMEN -->
+    <!-- ===================================== -->
+
+    <div class="resumen">
+
+        <h3>
+            Resumen de la cita
+        </h3>
+
+
+        <!-- PACIENTE WALK-IN -->
+
+        <div
+                class="resumen-fila"
+                th:if="${origen == 'recepcion' && pacienteWalkIn != null}"
+        >
+
+            <strong>
+                Paciente:
+            </strong>
+
+            <span
+                    th:text="${pacienteWalkIn.nombre + ' ' + pacienteWalkIn.apellido}"
+            >
+                Paciente
+            </span>
+
+        </div>
+
+
+        <div class="resumen-fila">
+
+            <strong>
+                Sucursal:
+            </strong>
+
+            <span
+                    th:text="${sucursal.nombre}"
+            >
+            </span>
+
+        </div>
+
+
+        <div class="resumen-fila">
+
+            <strong>
+                Especialidad:
+            </strong>
+
+            <span
+                    th:text="${especialidad.nombre}"
+            >
+            </span>
+
+        </div>
+
+
+        <div class="resumen-fila">
+
+            <strong>
+                Médico:
+            </strong>
+
+            <span
+                    th:text="${medico.nombre + ' ' + medico.apellido}"
+            >
+            </span>
+
+        </div>
+
+
+        <div class="resumen-fila">
+
+            <strong>
+                Fecha:
+            </strong>
+
+            <span
+                    th:text="${horario.fecha}"
+            >
+            </span>
+
+        </div>
+
+
+        <div class="resumen-fila">
+
+            <strong>
+                Hora:
+            </strong>
+
+            <span
+                    th:text="${horario.horaInicio + ' - ' + horario.horaFin}"
+            >
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- MOTIVO -->
+    <!-- ===================================== -->
+
+    <form
+            method="post"
+            th:action="@{/citas/agendar/confirmar}"
+    >
+
+        <input
+                type="hidden"
+                name="sucursalId"
+                th:value="${sucursalId}"
+        >
+
+        <input
+                type="hidden"
+                name="especialidadId"
+                th:value="${especialidadId}"
+        >
+
+        <input
+                type="hidden"
+                name="medicoId"
+                th:value="${medicoId}"
+        >
+
+        <input
+                type="hidden"
+                name="horarioId"
+                th:value="${horarioId}"
+        >
+
+
+        <!-- ===================================== -->
+        <!-- DATOS WALK-IN -->
+        <!-- ===================================== -->
+
+        <input
+                type="hidden"
+                name="pacienteId"
+                th:value="${pacienteId}"
+                th:if="${pacienteId != null}"
+        >
+
+        <input
+                type="hidden"
+                name="origen"
+                th:value="${origen}"
+                th:if="${origen != null}"
+        >
+
+
+        <div class="campo">
+
+            <label for="motivoConsulta">
+                Motivo de la consulta
+            </label>
+
+            <textarea
+                    id="motivoConsulta"
+                    name="motivoConsulta"
+                    minlength="10"
+                    maxlength="2000"
+                    required
+                    placeholder="Describa brevemente el motivo de la consulta..."
+            ></textarea>
+
+            <div class="nota">
+                Mínimo 10 caracteres y máximo 2000.
+            </div>
+
+        </div>
+
+
+        <div class="botones">
+
+
+            <!-- WALK-IN -->
+
+            <a
+                    th:if="${origen == 'recepcion'}"
+                    th:href="@{/citas/agendar/horario(
+                        sucursalId=${sucursalId},
+                        especialidadId=${especialidadId},
+                        medicoId=${medicoId},
+                        pacienteId=${pacienteId},
+                        origen='recepcion'
+                    )}"
+                    class="btn btn-volver"
+            >
+                Volver
+            </a>
+
+
+            <!-- PACIENTE NORMAL -->
+
+            <a
+                    th:unless="${origen == 'recepcion'}"
+                    th:href="@{/citas/agendar/horario(
+                        sucursalId=${sucursalId},
+                        especialidadId=${especialidadId},
+                        medicoId=${medicoId}
+                    )}"
+                    class="btn btn-volver"
+            >
+                Volver
+            </a>
+
+
+            <button
+                    type="submit"
+                    class="btn btn-confirmar"
+            >
+                Confirmar Cita
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+
+</html>

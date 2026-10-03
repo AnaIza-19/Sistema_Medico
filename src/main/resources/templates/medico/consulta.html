@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Consulta Médica</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .header {
+            background: #1f4e79;
+            color: white;
+            padding: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 92%;
+            max-width: 1100px;
+            margin: 25px auto;
+        }
+
+        .panel {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
+        }
+
+        .panel h2 {
+            color: #1f4e79;
+            margin-top: 0;
+        }
+
+        .datos {
+            display: grid;
+            grid-template-columns:
+                    repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .dato {
+            background: #f7f9fb;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .dato strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #1f4e79;
+        }
+
+        .signos {
+            display: grid;
+            grid-template-columns:
+                    repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+        }
+
+        .signo {
+            background: #eef5fb;
+            padding: 12px;
+            border-radius: 7px;
+            text-align: center;
+            border: 1px solid #c9dbea;
+        }
+
+        .signo strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .alerta {
+            background: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffecb5;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .emergencia {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .sin-signos {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .campo {
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        .campo label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .obligatorio {
+            color: #dc3545;
+        }
+
+        .mensaje {
+            background: #d1e7dd;
+            color: #0f5132;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #842029;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .botones {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button,
+        .boton {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .btn-guardar {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+        }
+
+
+        /* ========================================= */
+        /* SUGERENCIAS CIE-10 */
+        /* ========================================= */
+
+        .sugerencias-cie {
+            display: none;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 6px;
+            margin-top: 4px;
+            max-height: 220px;
+            overflow-y: auto;
+            position: absolute;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 1000;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .sugerencia-cie {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sugerencia-cie:last-child {
+            border-bottom: none;
+        }
+
+        .sugerencia-cie:hover {
+            background: #eef5fb;
+        }
+
+        .codigo-cie {
+            font-weight: bold;
+            color: #1f4e79;
+        }
+
+        .descripcion-cie {
+            margin-left: 8px;
+            color: #444;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ===================================================== -->
+<!-- ENCABEZADO -->
+<!-- ===================================================== -->
+
+<div class="header">
+
+    <h1>Consulta Médica</h1>
+
+</div>
+
+
+<div class="contenedor">
+
+
+    <!-- ================================================= -->
+    <!-- MENSAJES -->
+    <!-- ================================================= -->
+
+    <div class="mensaje"
+         th:if="${mensaje}"
+         th:text="${mensaje}">
+    </div>
+
+
+    <div class="error"
+         th:if="${error}"
+         th:text="${error}">
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- INFORMACION DE LA CITA -->
+    <!-- ================================================= -->
+
+    <div class="panel">
+
+        <h2>Información del paciente</h2>
+
+        <div class="datos">
+
+
+            <div class="dato">
+
+                <strong>Número de cita</strong>
+
+                #<span th:text="${cita.id}">
+                    0
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>Paciente</strong>
+
+                <span th:text="${cita.paciente.nombreCompleto}">
+                    Paciente
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>Médico</strong>
+
+                <span th:text="${medico.nombreCompleto}">
+                    Médico
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>Especialidad</strong>
+
+                <span th:text="${cita.especialidad != null
+                        ? cita.especialidad.nombre
+                        : 'Sin especialidad'}">
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>Estado de la cita</strong>
+
+                <span th:text="${cita.estado}">
+                </span>
+
+            </div>
+
+
+            <div class="dato">
+
+                <strong>Prioridad</strong>
+
+                <span th:text="${cita.prioridad != null
+                        ? cita.prioridad
+                        : 'NORMAL'}">
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="emergencia"
+             th:if="${cita.prioridad != null
+                and #strings.equalsIgnoreCase(
+                    cita.prioridad,
+                    'EMERGENCIA'
+                )}">
+
+            Paciente con prioridad de EMERGENCIA.
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- SIGNOS VITALES -->
+    <!-- ================================================= -->
+
+    <div class="panel">
+
+        <h2>Signos Vitales</h2>
+
+
+        <div class="sin-signos"
+             th:if="${signosVitales == null}">
+
+            No se encontraron signos vitales
+            registrados para esta cita.
+
+        </div>
+
+
+        <div th:if="${signosVitales != null}">
+
+
+            <div class="signos">
+
+
+                <div class="signo">
+
+                    <strong>Presión sistólica</strong>
+
+                    <span th:text="${signosVitales.presionSistolica}">
+                    </span>
+
+                    mmHg
+
+                </div>
+
+
+                <div class="signo">
+
+                    <strong>Presión diastólica</strong>
+
+                    <span th:text="${signosVitales.presionDiastolica}">
+                    </span>
+
+                    mmHg
+
+                </div>
+
+
+                <div class="signo">
+
+                    <strong>Temperatura</strong>
+
+                    <span th:text="${signosVitales.temperatura}">
+                    </span>
+
+                    °C
+
+                </div>
+
+
+                <div class="signo">
+
+                    <strong>Peso</strong>
+
+                    <span th:text="${signosVitales.peso}">
+                    </span>
+
+                    kg
+
+                </div>
+
+
+                <div class="signo">
+
+                    <strong>Talla</strong>
+
+                    <span th:text="${signosVitales.talla}">
+                    </span>
+
+                    cm
+
+                </div>
+
+
+                <div class="signo">
+
+                    <strong>Frecuencia cardíaca</strong>
+
+                    <span th:text="${signosVitales.frecuenciaCardiaca}">
+                    </span>
+
+                    lpm
+
+                </div>
+
+
+            </div>
+
+
+            <div class="alerta"
+                 th:if="${signosVitales.tieneAlertaClinica}">
+
+                <strong>Alerta clínica:</strong>
+
+                <span th:text="${signosVitales.detalleAlerta}">
+                </span>
+
+            </div>
+
+
+            <div class="emergencia"
+                 th:if="${signosVitales.esEmergencia}">
+
+                Este paciente fue registrado como emergencia.
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- FORMULARIO DE CONSULTA -->
+    <!-- ================================================= -->
+
+    <div class="panel">
+
+        <h2>Registro de Consulta Médica</h2>
+
+
+        <form id="formConsulta"
+              th:action="@{/medico/consulta/{id}/guardar
+                (id=${cita.id})}"
+              method="post">
+
+
+            <!-- MOTIVO DE VISITA -->
+
+            <div class="campo">
+
+                <label for="motivoVisita">
+
+                    Motivo de Visita
+
+                    <span class="obligatorio">
+                        *
+                    </span>
+
+                </label>
+
+
+                <textarea id="motivoVisita"
+                          name="motivoVisita"
+                          required
+                          th:text="${consulta.motivoVisita}">
+                </textarea>
+
+            </div>
+
+
+
+            <!-- HALLAZGOS CLINICOS -->
+
+            <div class="campo">
+
+                <label for="hallazgosClinicos">
+
+                    Hallazgos Clínicos
+
+                </label>
+
+
+                <textarea id="hallazgosClinicos"
+                          name="hallazgosClinicos"
+                          th:text="${consulta.hallazgosClinicos}">
+                </textarea>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- CODIGO CIE-10 -->
+            <!-- ================================================= -->
+
+            <div class="campo">
+
+                <label for="codigoCie10">
+
+                    Código CIE-10
+
+                </label>
+
+
+                <input type="text"
+                       id="codigoCie10"
+                       name="codigoCie10"
+                       maxlength="20"
+                       autocomplete="off"
+                       placeholder="Escriba código o diagnóstico..."
+                       th:value="${consulta.codigoCie10}">
+
+
+                <div id="sugerenciasCie10"
+                     class="sugerencias-cie">
+                </div>
+
+
+                <small>
+                    Escriba un código o descripción para buscar
+                    en el catálogo CIE-10.
+                </small>
+
+            </div>
+
+
+
+            <!-- DIAGNOSTICO -->
+
+            <div class="campo">
+
+                <label for="diagnostico">
+
+                    Diagnóstico
+
+                    <span class="obligatorio">
+                        *
+                    </span>
+
+                    <small>
+                        obligatorio para finalizar
+                    </small>
+
+                </label>
+
+
+                <textarea id="diagnostico"
+                          name="diagnostico"
+                          th:text="${consulta.diagnostico}">
+                </textarea>
+
+            </div>
+
+
+
+            <!-- PLAN DE TRATAMIENTO -->
+
+            <div class="campo">
+
+                <label for="planTratamiento">
+
+                    Plan de Tratamiento
+
+                </label>
+
+
+                <textarea id="planTratamiento"
+                          name="planTratamiento"
+                          th:text="${consulta.planTratamiento}">
+                </textarea>
+
+            </div>
+
+
+
+            <!-- NOTAS ADICIONALES -->
+
+            <div class="campo">
+
+                <label for="notasAdicionales">
+
+                    Notas Adicionales
+
+                </label>
+
+
+                <textarea id="notasAdicionales"
+                          name="notasAdicionales"
+                          th:text="${consulta.notasAdicionales}">
+                </textarea>
+
+            </div>
+
+
+
+            <!-- ESTADO -->
+
+            <div class="campo">
+
+                <label for="estado">
+
+                    Estado de la Consulta
+
+                </label>
+
+
+                <select id="estado"
+                        name="estado"
+                        required>
+
+
+                    <option value="EN_CURSO"
+                            th:selected="${consulta.estado == null
+                                    or consulta.estado == 'EN_CURSO'}">
+
+                        En curso
+
+                    </option>
+
+
+                    <option value="FINALIZADA"
+                            th:selected="${consulta.estado == 'FINALIZADA'}">
+
+                        Finalizada
+
+                    </option>
+
+
+                </select>
+
+            </div>
+
+
+
+            <!-- BOTONES -->
+
+            <div class="botones">
+
+
+                <button type="submit"
+                        class="btn-guardar">
+
+                    Guardar Consulta
+
+                </button>
+
+
+                <a th:href="@{/medico}"
+                   class="boton btn-volver">
+
+                    Volver al Panel
+
+                </a>
+
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- ===================================================== -->
+<!-- AUTOCOMPLETADO CIE-10 -->
+<!-- ===================================================== -->
+
+<script>
+
+    const campoCie10 =
+        document.getElementById(
+            "codigoCie10"
+        );
+
+
+    const sugerenciasCie10 =
+        document.getElementById(
+            "sugerenciasCie10"
+        );
+
+
+    let temporizadorCie10;
+
+
+    campoCie10.addEventListener(
+        "input",
+        function () {
+
+            clearTimeout(
+                temporizadorCie10
+            );
+
+
+            const buscar =
+                campoCie10.value.trim();
+
+
+            if (buscar.length < 1) {
+
+                sugerenciasCie10.innerHTML =
+                    "";
+
+                sugerenciasCie10.style.display =
+                    "none";
+
+                return;
+            }
+
+
+            temporizadorCie10 =
+                setTimeout(
+                    function () {
+
+                        buscarCodigosCie10(
+                            buscar
+                        );
+
+                    },
+                    250
+                );
+        }
+    );
+
+
+    async function buscarCodigosCie10(
+        buscar
+    ) {
+
+        try {
+
+            const respuesta =
+                await fetch(
+                    "/medico/api/cie10?buscar="
+                    +
+                    encodeURIComponent(
+                        buscar
+                    )
+                );
+
+
+            if (!respuesta.ok) {
+
+                throw new Error(
+                    "No fue posible consultar CIE-10."
+                );
+            }
+
+
+            const resultados =
+                await respuesta.json();
+
+
+            mostrarSugerenciasCie10(
+                resultados
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                error
+            );
+
+
+            sugerenciasCie10.innerHTML =
+                "";
+
+            sugerenciasCie10.style.display =
+                "none";
+        }
+    }
+
+
+    function mostrarSugerenciasCie10(
+        resultados
+    ) {
+
+        sugerenciasCie10.innerHTML =
+            "";
+
+
+        if (resultados.length === 0) {
+
+            const sinResultados =
+                document.createElement(
+                    "div"
+                );
+
+
+            sinResultados.className =
+                "sugerencia-cie";
+
+
+            sinResultados.textContent =
+                "No se encontraron códigos CIE-10.";
+
+
+            sugerenciasCie10.appendChild(
+                sinResultados
+            );
+
+
+            sugerenciasCie10.style.display =
+                "block";
+
+            return;
+        }
+
+
+        resultados.forEach(
+            function (cie) {
+
+                const opcion =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                opcion.className =
+                    "sugerencia-cie";
+
+
+                const codigo =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                codigo.className =
+                    "codigo-cie";
+
+
+                codigo.textContent =
+                    cie.codigo;
+
+
+                const descripcion =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                descripcion.className =
+                    "descripcion-cie";
+
+
+                descripcion.textContent =
+                    "- " + cie.descripcion;
+
+
+                opcion.appendChild(
+                    codigo
+                );
+
+
+                opcion.appendChild(
+                    descripcion
+                );
+
+
+                opcion.addEventListener(
+                    "click",
+                    function () {
+
+                        campoCie10.value =
+                            cie.codigo;
+
+
+                        sugerenciasCie10.innerHTML =
+                            "";
+
+
+                        sugerenciasCie10.style.display =
+                            "none";
+                    }
+                );
+
+
+                sugerenciasCie10.appendChild(
+                    opcion
+                );
+            }
+        );
+
+
+        sugerenciasCie10.style.display =
+            "block";
+    }
+
+
+    document.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                !campoCie10.contains(
+                    event.target
+                )
+                &&
+                !sugerenciasCie10.contains(
+                    event.target
+                )
+            ) {
+
+                sugerenciasCie10.style.display =
+                    "none";
+            }
+        }
+    );
+
+</script>
+
+
+
+<!-- ===================================================== -->
+<!-- CONFIRMACION AL FINALIZAR CONSULTA -->
+<!-- ===================================================== -->
+
+<script>
+
+    const formulario =
+        document.getElementById(
+            "formConsulta"
+        );
+
+
+    const estado =
+        document.getElementById(
+            "estado"
+        );
+
+
+    formulario.addEventListener(
+        "submit",
+        function (event) {
+
+            if (
+                estado.value === "FINALIZADA"
+            ) {
+
+                const confirmar =
+                    confirm(
+                        "¿Está seguro de finalizar esta consulta médica?"
+                    );
+
+
+                if (!confirmar) {
+
+                    event.preventDefault();
+                }
+            }
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

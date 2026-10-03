@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Acceso de Recepción
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            background: #f4f7fb;
+        }
+
+        .login-card {
+
+            width: 100%;
+            max-width: 470px;
+
+            background: white;
+
+            padding: 40px;
+
+            border-radius: 14px;
+
+            box-shadow:
+                    0 5px 20px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+
+            text-align: center;
+
+            margin-top: 0;
+
+            margin-bottom: 8px;
+
+            color: #1261a0;
+        }
+
+        .subtitulo {
+
+            text-align: center;
+
+            color: #666;
+
+            margin-bottom: 30px;
+        }
+
+        label {
+
+            display: block;
+
+            margin-top: 15px;
+            margin-bottom: 7px;
+
+            font-weight: bold;
+        }
+
+        input {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #cccccc;
+
+            border-radius: 7px;
+
+            font-size: 16px;
+        }
+
+        button {
+
+            width: 100%;
+
+            margin-top: 25px;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            background: #1261a0;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+
+            opacity: 0.92;
+        }
+
+        .error {
+
+            margin-top: 20px;
+
+            padding: 13px;
+
+            background: #f8d7da;
+
+            color: #842029;
+
+            border: 1px solid #f5c2c7;
+
+            border-radius: 7px;
+
+            text-align: center;
+
+            font-weight: bold;
+        }
+
+        .regresar {
+
+            margin-top: 20px;
+
+            text-align: center;
+        }
+
+        .regresar a {
+
+            color: #1261a0;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="login-card">
+
+
+    <h1>
+        Recepción
+    </h1>
+
+
+    <div class="subtitulo">
+
+        Sistema Médico Hospitalario
+
+    </div>
+
+
+    <form
+            th:action="@{/personal/login}"
+            method="post"
+    >
+
+
+        <label for="usuario">
+            Usuario
+        </label>
+
+
+        <input
+                id="usuario"
+                type="text"
+                name="usuario"
+                required
+                autocomplete="username"
+        >
+
+
+        <label for="contrasena">
+            Contraseña
+        </label>
+
+
+        <input
+                id="contrasena"
+                type="password"
+                name="contrasena"
+                required
+                autocomplete="current-password"
+        >
+
+
+        <button type="submit">
+            Iniciar Sesión
+        </button>
+
+
+    </form>
+
+
+    <div
+            class="error"
+            th:if="${error}"
+            th:text="${error}"
+    >
+        Error
+    </div>
+
+
+    <div class="regresar">
+
+        <a th:href="@{/}">
+            Regresar al portal
+        </a>
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

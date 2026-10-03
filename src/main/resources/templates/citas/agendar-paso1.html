@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Agendar Cita - Paso 1</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .progreso {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .paso {
+            width: 18%;
+            text-align: center;
+            padding: 10px 5px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .paso.activo {
+            background-color: #1976d2;
+            color: white;
+            font-weight: bold;
+        }
+
+        .campo {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .botones {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 11px 22px;
+            border-radius: 5px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-volver {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-continuar {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .paciente-walkin {
+            background-color: #e7f3ff;
+            border: 1px solid #b6d4fe;
+            padding: 15px;
+            border-radius: 7px;
+            margin-bottom: 25px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="contenedor">
+
+    <h1>
+        Agendar Cita Médica
+    </h1>
+
+
+    <!-- ===================================== -->
+    <!-- PACIENTE WALK-IN -->
+    <!-- ===================================== -->
+
+    <div
+            class="paciente-walkin"
+            th:if="${origen == 'recepcion' && pacienteWalkIn != null}"
+    >
+
+        <strong>
+            Paciente atendido en recepción:
+        </strong>
+
+        <span
+                th:text="${pacienteWalkIn.nombre + ' ' + pacienteWalkIn.apellido}"
+        >
+            Paciente
+        </span>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- INDICADOR DE PROGRESO -->
+    <!-- ===================================== -->
+
+    <div class="progreso">
+
+        <div class="paso activo">
+            1. Sucursal
+        </div>
+
+        <div class="paso">
+            2. Especialidad
+        </div>
+
+        <div class="paso">
+            3. Médico
+        </div>
+
+        <div class="paso">
+            4. Fecha/Hora
+        </div>
+
+        <div class="paso">
+            5. Confirmar
+        </div>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- PASO 1 -->
+    <!-- ===================================== -->
+
+    <form
+            method="get"
+            th:action="@{/citas/agendar/especialidad}"
+    >
+
+
+        <!-- ===================================== -->
+        <!-- DATOS DEL WALK-IN -->
+        <!-- ===================================== -->
+
+        <input
+                type="hidden"
+                name="pacienteId"
+                th:value="${pacienteId}"
+                th:if="${pacienteId != null}"
+        >
+
+
+        <input
+                type="hidden"
+                name="origen"
+                th:value="${origen}"
+                th:if="${origen != null}"
+        >
+
+
+        <div class="campo">
+
+            <label for="sucursalId">
+                Seleccione una sucursal:
+            </label>
+
+
+            <select
+                    id="sucursalId"
+                    name="sucursalId"
+                    required
+            >
+
+                <option value="">
+                    -- Seleccione una sucursal --
+                </option>
+
+
+                <option
+                        th:each="sucursal : ${sucursales}"
+                        th:value="${sucursal.id}"
+                        th:text="${sucursal.nombre}"
+                >
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="botones">
+
+
+            <!-- ===================================== -->
+            <!-- BOTÓN VOLVER -->
+            <!-- ===================================== -->
+
+            <a
+                    th:if="${origen == 'recepcion'}"
+                    th:href="@{/recepcion}"
+                    class="btn btn-volver"
+            >
+
+                Volver a Recepción
+
+            </a>
+
+
+            <a
+                    th:unless="${origen == 'recepcion'}"
+                    th:href="@{/}"
+                    class="btn btn-volver"
+            >
+
+                Volver al portal
+
+            </a>
+
+
+            <button
+                    type="submit"
+                    class="btn btn-continuar"
+            >
+
+                Continuar
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+</body>
+
+</html>

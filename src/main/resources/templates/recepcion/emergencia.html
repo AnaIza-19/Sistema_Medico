@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Registro de Emergencia
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #333;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #b02a37;
+        }
+
+        .emergencia {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 7px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+        .acciones {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button,
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 7px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+            padding: 15px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .exito {
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+            padding: 15px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <div
+            class="exito"
+            th:if="${mensajeExito}"
+            th:text="${mensajeExito}"
+    >
+        Emergencia registrada.
+    </div>
+
+
+    <div
+            class="error"
+            th:if="${mensajeError}"
+            th:text="${mensajeError}"
+    >
+        Error
+    </div>
+
+
+    <div class="card">
+
+        <span class="emergencia">
+            EMERGENCIA
+        </span>
+
+
+        <h1>
+            Registro de Paciente por Emergencia
+        </h1>
+
+
+        <p>
+            Ingrese los datos básicos del paciente para registrar
+            su llegada y enviarlo directamente a toma de signos vitales.
+        </p>
+
+
+        <form
+                th:action="@{/recepcion/emergencia}"
+                method="post"
+        >
+
+            <label for="dpi">
+                DPI
+            </label>
+
+
+            <input
+                    type="text"
+                    id="dpi"
+                    name="dpi"
+                    maxlength="13"
+                    minlength="13"
+                    pattern="[0-9]{13}"
+                    placeholder="13 dígitos"
+                    required
+            >
+
+
+            <label for="nombre">
+                Nombre
+            </label>
+
+
+            <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    maxlength="100"
+                    required
+            >
+
+
+            <label for="apellido">
+                Apellido
+            </label>
+
+
+            <input
+                    type="text"
+                    id="apellido"
+                    name="apellido"
+                    maxlength="100"
+                    required
+            >
+
+
+            <div class="acciones">
+
+                <button type="submit">
+                    Registrar Emergencia
+                </button>
+
+
+                <a
+                        th:href="@{/recepcion}"
+                        class="btn"
+                >
+                    Volver a Recepción
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

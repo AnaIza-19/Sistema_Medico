@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Agendar Cita - Paso 4</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 900px;
+            margin: 40px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .progreso {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+
+        .paso {
+            flex: 1;
+            text-align: center;
+            padding: 12px 5px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .paso.activo {
+            background-color: #1976d2;
+            color: white;
+            font-weight: bold;
+        }
+
+        .mensaje-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .modo-recepcion {
+            background-color: #e7f3ff;
+            color: #0c5460;
+            border: 1px solid #b6d4fe;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .titulo-seccion {
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .fechas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .fecha-btn {
+            padding: 12px 18px;
+            border: 2px solid #1976d2;
+            background-color: white;
+            color: #1976d2;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .fecha-btn:hover {
+            background-color: #eaf3fc;
+        }
+
+        .fecha-btn.activa {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .horarios {
+            display: none;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .horarios.activos {
+            display: grid;
+        }
+
+        .horario-card {
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            padding: 15px;
+            background-color: #fafafa;
+            transition: 0.2s;
+        }
+
+        .horario-card:hover {
+            border-color: #1976d2;
+            background-color: #f3f8fd;
+        }
+
+        .horario-card label {
+            cursor: pointer;
+            display: block;
+        }
+
+        .horario-card input {
+            margin-right: 10px;
+        }
+
+        .hora {
+            font-weight: bold;
+        }
+
+        .fecha-seleccionada {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #eef5fc;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .fecha-seleccionada.visible {
+            display: block;
+        }
+
+        .botones {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 11px 22px;
+            border-radius: 5px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-volver {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-continuar {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-continuar:disabled {
+            background-color: #9e9e9e;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 700px) {
+
+            .progreso {
+                gap: 5px;
+            }
+
+            .paso {
+                font-size: 11px;
+                padding: 9px 3px;
+            }
+
+            .horarios {
+                grid-template-columns: 1fr;
+            }
+
+            .fecha-btn {
+                width: 100%;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="contenedor">
+
+    <h1>
+        Agendar Cita Médica
+    </h1>
+
+
+    <!-- ===================================== -->
+    <!-- MODO RECEPCIÓN / WALK-IN -->
+    <!-- ===================================== -->
+
+    <div
+            class="modo-recepcion"
+            th:if="${origen == 'recepcion'}"
+    >
+        Agendamiento desde Recepción
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- INDICADOR DE PROGRESO -->
+    <!-- ===================================== -->
+
+    <div class="progreso">
+
+        <div class="paso">
+            1. Sucursal
+        </div>
+
+        <div class="paso">
+            2. Especialidad
+        </div>
+
+        <div class="paso">
+            3. Médico
+        </div>
+
+        <div class="paso activo">
+            4. Fecha/Hora
+        </div>
+
+        <div class="paso">
+            5. Confirmar
+        </div>
+
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- FA02 - SIN HORARIOS -->
+    <!-- ===================================== -->
+
+    <div
+            class="mensaje-error"
+            th:if="${mensajeError}"
+            th:text="${mensajeError}"
+    >
+    </div>
+
+
+    <!-- ===================================== -->
+    <!-- SI EXISTEN HORARIOS -->
+    <!-- ===================================== -->
+
+    <form
+            method="get"
+            th:action="@{/citas/agendar/confirmar}"
+            th:if="${!horarios.isEmpty()}"
+    >
+
+        <!-- SUCURSAL -->
+
+        <input
+                type="hidden"
+                name="sucursalId"
+                th:value="${sucursalId}"
+        >
+
+
+        <!-- ESPECIALIDAD -->
+
+        <input
+                type="hidden"
+                name="especialidadId"
+                th:value="${especialidadId}"
+        >
+
+
+        <!-- MÉDICO -->
+
+        <input
+                type="hidden"
+                name="medicoId"
+                th:value="${medicoId}"
+        >
+
+
+        <!-- PACIENTE WALK-IN -->
+
+        <input
+                type="hidden"
+                name="pacienteId"
+                th:value="${pacienteId}"
+                th:if="${pacienteId != null}"
+        >
+
+
+        <!-- ORIGEN -->
+
+        <input
+                type="hidden"
+                name="origen"
+                th:value="${origen}"
+                th:if="${origen != null}"
+        >
+
+
+        <!-- ===================================== -->
+        <!-- CALENDARIO DE FECHAS -->
+        <!-- ===================================== -->
+
+        <h3 class="titulo-seccion">
+            Seleccione una fecha disponible:
+        </h3>
+
+
+        <div
+                class="fechas"
+                id="contenedorFechas"
+        >
+        </div>
+
+
+        <div
+                class="fecha-seleccionada"
+                id="fechaSeleccionada"
+        >
+
+            Fecha seleccionada:
+            <strong id="textoFechaSeleccionada"></strong>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- HORARIOS -->
+        <!-- ===================================== -->
+
+        <h3
+                class="titulo-seccion"
+                id="tituloHorarios"
+                style="display:none;"
+        >
+            Seleccione una hora disponible:
+        </h3>
+
+
+        <div id="contenedorHorarios">
+
+            <div
+                    class="horario-card"
+                    th:each="horario : ${horarios}"
+                    th:attr="data-fecha=${horario.fecha}"
+            >
+
+                <label>
+
+                    <input
+                            type="radio"
+                            name="horarioId"
+                            th:value="${horario.id}"
+                    >
+
+                    <span
+                            class="hora"
+                            th:text="${horario.horaInicio + ' - ' + horario.horaFin}"
+                    >
+                    </span>
+
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- BOTONES -->
+        <!-- ===================================== -->
+
+        <div class="botones">
+
+
+            <!-- WALK-IN -->
+
+            <a
+                    th:if="${origen == 'recepcion'}"
+                    th:href="@{/citas/agendar/medico(
+                        sucursalId=${sucursalId},
+                        especialidadId=${especialidadId},
+                        pacienteId=${pacienteId},
+                        origen='recepcion'
+                    )}"
+                    class="btn btn-volver"
+            >
+                Volver
+            </a>
+
+
+            <!-- PACIENTE NORMAL -->
+
+            <a
+                    th:unless="${origen == 'recepcion'}"
+                    th:href="@{/citas/agendar/medico(
+                        sucursalId=${sucursalId},
+                        especialidadId=${especialidadId}
+                    )}"
+                    class="btn btn-volver"
+            >
+                Volver
+            </a>
+
+
+            <button
+                    type="submit"
+                    id="btnContinuar"
+                    class="btn btn-continuar"
+                    disabled
+            >
+                Continuar
+            </button>
+
+        </div>
+
+    </form>
+
+
+    <!-- ===================================== -->
+    <!-- SI NO EXISTEN HORARIOS -->
+    <!-- ===================================== -->
+
+    <div
+            class="botones"
+            th:if="${horarios.isEmpty()}"
+    >
+
+
+        <!-- WALK-IN -->
+
+        <a
+                th:if="${origen == 'recepcion'}"
+                th:href="@{/citas/agendar/medico(
+                    sucursalId=${sucursalId},
+                    especialidadId=${especialidadId},
+                    pacienteId=${pacienteId},
+                    origen='recepcion'
+                )}"
+                class="btn btn-volver"
+        >
+            Volver a seleccionar médico
+        </a>
+
+
+        <!-- PACIENTE NORMAL -->
+
+        <a
+                th:unless="${origen == 'recepcion'}"
+                th:href="@{/citas/agendar/medico(
+                    sucursalId=${sucursalId},
+                    especialidadId=${especialidadId}
+                )}"
+                class="btn btn-volver"
+        >
+            Volver a seleccionar médico
+        </a>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const tarjetasHorario =
+                document.querySelectorAll(
+                    ".horario-card"
+                );
+
+            const contenedorFechas =
+                document.getElementById(
+                    "contenedorFechas"
+                );
+
+            const fechaSeleccionada =
+                document.getElementById(
+                    "fechaSeleccionada"
+                );
+
+            const textoFechaSeleccionada =
+                document.getElementById(
+                    "textoFechaSeleccionada"
+                );
+
+            const tituloHorarios =
+                document.getElementById(
+                    "tituloHorarios"
+                );
+
+            const btnContinuar =
+                document.getElementById(
+                    "btnContinuar"
+                );
+
+
+            if (
+                !contenedorFechas
+                ||
+                tarjetasHorario.length === 0
+            ) {
+                return;
+            }
+
+
+            // =====================================
+            // OBTENER FECHAS SIN REPETIR
+            // =====================================
+
+            const fechas =
+                new Set();
+
+
+            tarjetasHorario.forEach(
+                function (tarjeta) {
+
+                    fechas.add(
+                        tarjeta.dataset.fecha
+                    );
+
+                    tarjeta.style.display =
+                        "none";
+                }
+            );
+
+
+            // =====================================
+            // FORMATEAR FECHA
+            // =====================================
+
+            function formatearFecha(
+                fechaTexto
+            ) {
+
+                const partes =
+                    fechaTexto.split("-");
+
+                if (partes.length !== 3) {
+                    return fechaTexto;
+                }
+
+                return partes[2]
+                    + "/"
+                    + partes[1]
+                    + "/"
+                    + partes[0];
+            }
+
+
+            // =====================================
+            // CREAR BOTONES DE FECHA
+            // =====================================
+
+            fechas.forEach(
+                function (fecha) {
+
+                    const boton =
+                        document.createElement(
+                            "button"
+                        );
+
+                    boton.type =
+                        "button";
+
+                    boton.className =
+                        "fecha-btn";
+
+                    boton.dataset.fecha =
+                        fecha;
+
+                    boton.textContent =
+                        formatearFecha(
+                            fecha
+                        );
+
+
+                    boton.addEventListener(
+                        "click",
+                        function () {
+
+                            document
+                                .querySelectorAll(
+                                    ".fecha-btn"
+                                )
+                                .forEach(
+                                    function (otroBoton) {
+
+                                        otroBoton
+                                            .classList
+                                            .remove(
+                                                "activa"
+                                            );
+                                    }
+                                );
+
+
+                            boton.classList.add(
+                                "activa"
+                            );
+
+
+                            textoFechaSeleccionada.textContent =
+                                formatearFecha(
+                                    fecha
+                                );
+
+                            fechaSeleccionada
+                                .classList
+                                .add(
+                                    "visible"
+                                );
+
+
+                            tituloHorarios.style.display =
+                                "block";
+
+
+                            document
+                                .querySelectorAll(
+                                    'input[name="horarioId"]'
+                                )
+                                .forEach(
+                                    function (radio) {
+
+                                        radio.checked =
+                                            false;
+                                    }
+                                );
+
+
+                            btnContinuar.disabled =
+                                true;
+
+
+                            tarjetasHorario.forEach(
+                                function (tarjeta) {
+
+                                    if (
+                                        tarjeta.dataset.fecha
+                                        ===
+                                        fecha
+                                    ) {
+
+                                        tarjeta.style.display =
+                                            "block";
+
+                                    } else {
+
+                                        tarjeta.style.display =
+                                            "none";
+                                    }
+                                }
+                            );
+                        }
+                    );
+
+
+                    contenedorFechas.appendChild(
+                        boton
+                    );
+                }
+            );
+
+
+            // =====================================
+            // HABILITAR CONTINUAR
+            // =====================================
+
+            document
+                .querySelectorAll(
+                    'input[name="horarioId"]'
+                )
+                .forEach(
+                    function (radio) {
+
+                        radio.addEventListener(
+                            "change",
+                            function () {
+
+                                btnContinuar.disabled =
+                                    false;
+                            }
+                        );
+                    }
+                );
+
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

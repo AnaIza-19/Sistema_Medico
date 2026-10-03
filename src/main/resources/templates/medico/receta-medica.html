@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Receta Médica</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+        }
+
+        .header {
+            background: #1f4e79;
+            color: white;
+            padding: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .contenedor {
+            width: 92%;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+        .tarjeta {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+        }
+
+        .info {
+            background: #eef5fb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .info p {
+            margin: 6px 0;
+        }
+
+        h2 {
+            color: #1f4e79;
+        }
+
+        .medicamento-fila {
+            border: 1px solid #d9d9d9;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns:
+                    repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .botones-fila {
+            margin-top: 12px;
+        }
+
+        .acciones {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button,
+        .boton {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-agregar {
+            background: #1f4e79;
+            color: white;
+        }
+
+        .btn-eliminar {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-guardar {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- ======================================= -->
+<!-- ENCABEZADO -->
+<!-- ======================================= -->
+
+<div class="header">
+
+    <h1>Generar Receta Médica</h1>
+
+</div>
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <!-- ======================================= -->
+        <!-- MENSAJE DE ERROR -->
+        <!-- ======================================= -->
+
+        <div class="error"
+             th:if="${error}"
+             th:text="${error}">
+        </div>
+
+
+        <!-- ======================================= -->
+        <!-- INFORMACION DEL PACIENTE -->
+        <!-- ======================================= -->
+
+        <div class="info">
+
+            <p>
+                <strong>Cita:</strong>
+
+                #<span th:text="${cita.id}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Paciente:</strong>
+
+                <span th:text="${cita.paciente.nombreCompleto}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Médico:</strong>
+
+                <span th:text="${medico.nombreCompleto}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Especialidad:</strong>
+
+                <span th:text="${cita.especialidad != null
+                        ? cita.especialidad.nombre
+                        : 'Sin especialidad'}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Estado:</strong>
+
+                <span th:text="${cita.estado}">
+                </span>
+            </p>
+
+        </div>
+
+
+
+        <!-- ======================================= -->
+        <!-- FORMULARIO -->
+        <!-- ======================================= -->
+
+        <form th:action="@{/medico/receta/{id}
+              (id=${cita.id})}"
+              method="post">
+
+
+            <h2>Medicamentos</h2>
+
+            <p>
+                Agregue uno o varios medicamentos
+                indicados para el paciente.
+            </p>
+
+
+            <!-- =================================== -->
+            <!-- CONTENEDOR DE MEDICAMENTOS -->
+            <!-- =================================== -->
+
+            <div id="contenedorMedicamentos">
+
+
+                <!-- PRIMER MEDICAMENTO -->
+
+                <div class="medicamento-fila">
+
+
+                    <div class="grid">
+
+
+                        <!-- MEDICAMENTO -->
+
+                        <div>
+
+                            <label>
+                                Medicamento
+                            </label>
+
+                            <select name="medicamentoIds"
+                                    required>
+
+                                <option value="">
+                                    Seleccione un medicamento
+                                </option>
+
+                                <option th:each="medicamento : ${medicamentos}"
+                                        th:value="${medicamento.id}"
+                                        th:text="${medicamento.nombre}">
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- DOSIS -->
+
+                        <div>
+
+                            <label>
+                                Dosis
+                            </label>
+
+                            <input type="text"
+                                   name="dosis"
+                                   maxlength="100"
+                                   placeholder="Ej. 500 mg"
+                                   required>
+
+                        </div>
+
+
+                        <!-- FRECUENCIA -->
+
+                        <div>
+
+                            <label>
+                                Frecuencia
+                            </label>
+
+                            <input type="text"
+                                   name="frecuencias"
+                                   maxlength="100"
+                                   placeholder="Ej. Cada 8 horas"
+                                   required>
+
+                        </div>
+
+
+                        <!-- DURACION -->
+
+                        <div>
+
+                            <label>
+                                Duración
+                            </label>
+
+                            <input type="text"
+                                   name="duraciones"
+                                   maxlength="100"
+                                   placeholder="Ej. 5 días"
+                                   required>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- INDICACIONES -->
+
+                    <div style="margin-top: 15px;">
+
+                        <label>
+                            Indicaciones
+                        </label>
+
+                        <textarea
+                                name="indicaciones"
+                                placeholder="Ej. Tomar después de los alimentos.">
+                        </textarea>
+
+                    </div>
+
+
+                    <!-- ELIMINAR -->
+
+                    <div class="botones-fila">
+
+                        <button type="button"
+                                class="btn-eliminar"
+                                onclick="eliminarMedicamento(this)">
+
+                            Eliminar
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================== -->
+            <!-- AGREGAR OTRO MEDICAMENTO -->
+            <!-- =================================== -->
+
+            <button type="button"
+                    class="btn-agregar"
+                    onclick="agregarMedicamento()">
+
+                + Agregar otro medicamento
+
+            </button>
+
+
+
+            <!-- =================================== -->
+            <!-- ACCIONES -->
+            <!-- =================================== -->
+
+            <div class="acciones">
+
+
+                <button type="submit"
+                        class="btn-guardar">
+
+                    Guardar Receta
+
+                </button>
+
+
+                <a th:href="@{/medico}"
+                   class="boton btn-volver">
+
+                    Volver al Panel
+
+                </a>
+
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<!-- ======================================= -->
+<!-- JAVASCRIPT -->
+<!-- ======================================= -->
+
+<script>
+
+    // =====================================================
+    // AGREGAR MEDICAMENTO
+    // =====================================================
+
+    function agregarMedicamento() {
+
+        const contenedor =
+            document.getElementById(
+                "contenedorMedicamentos"
+            );
+
+
+        const primeraFila =
+            contenedor.querySelector(
+                ".medicamento-fila"
+            );
+
+
+        const nuevaFila =
+            primeraFila.cloneNode(true);
+
+
+        // Limpiar SELECT
+
+        const select =
+            nuevaFila.querySelector(
+                'select[name="medicamentoIds"]'
+            );
+
+        select.value = "";
+
+
+        // Limpiar DOSIS
+
+        nuevaFila.querySelector(
+            'input[name="dosis"]'
+        ).value = "";
+
+
+        // Limpiar FRECUENCIA
+
+        nuevaFila.querySelector(
+            'input[name="frecuencias"]'
+        ).value = "";
+
+
+        // Limpiar DURACION
+
+        nuevaFila.querySelector(
+            'input[name="duraciones"]'
+        ).value = "";
+
+
+        // Limpiar INDICACIONES
+
+        nuevaFila.querySelector(
+            'textarea[name="indicaciones"]'
+        ).value = "";
+
+
+        contenedor.appendChild(
+            nuevaFila
+        );
+    }
+
+
+    // =====================================================
+    // ELIMINAR MEDICAMENTO
+    // =====================================================
+
+    function eliminarMedicamento(
+        boton
+    ) {
+
+        const contenedor =
+            document.getElementById(
+                "contenedorMedicamentos"
+            );
+
+
+        const filas =
+            contenedor.querySelectorAll(
+                ".medicamento-fila"
+            );
+
+
+        // Siempre debe quedar por lo menos una fila
+
+        if (filas.length === 1) {
+
+            alert(
+                "Debe existir al menos un medicamento."
+            );
+
+            return;
+        }
+
+
+        boton
+            .closest(
+                ".medicamento-fila"
+            )
+            .remove();
+    }
+
+</script>
+
+
+</body>
+
+</html>

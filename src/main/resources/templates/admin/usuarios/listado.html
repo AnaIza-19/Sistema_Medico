@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Listado de Usuarios</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f6f8;
+        }
+
+
+        /* ===================================== */
+        /* ESTRUCTURA GENERAL */
+        /* ===================================== */
+
+        .pagina {
+            display: flex;
+            min-height: 100vh;
+        }
+
+
+        /* ===================================== */
+        /* MENÚ LATERAL */
+        /* ===================================== */
+
+        .menu-lateral {
+            width: 240px;
+            background-color: #263238;
+            color: white;
+            padding: 25px 15px;
+            flex-shrink: 0;
+        }
+
+        .menu-lateral h2 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 35px;
+            font-size: 21px;
+        }
+
+        .titulo-menu {
+            font-size: 13px;
+            color: #b0bec5;
+            text-transform: uppercase;
+            margin: 20px 10px 10px;
+        }
+
+        .menu-lateral a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+        }
+
+        .menu-lateral a:hover {
+            background-color: #37474f;
+        }
+
+        .menu-lateral .activo-menu {
+            background-color: #1976d2;
+        }
+
+        .cerrar-sesion {
+            margin-top: 40px;
+            background-color: #c62828;
+            text-align: center;
+        }
+
+        .cerrar-sesion:hover {
+            background-color: #b71c1c !important;
+        }
+
+
+        /* ===================================== */
+        /* CONTENIDO */
+        /* ===================================== */
+
+        .contenido {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contenedor {
+            width: 95%;
+            margin: 30px auto;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+
+        /* ===================================== */
+        /* MENSAJES */
+        /* ===================================== */
+
+        .mensaje-exito {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .mensaje-error-general {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+
+        /* ===================================== */
+        /* BARRA SUPERIOR */
+        /* ===================================== */
+
+        .barra-superior {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .busqueda {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        select,
+        input,
+        button {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        select,
+        input {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-buscar {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-crear {
+            background-color: #2e7d32;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+
+
+        /* ===================================== */
+        /* TABLA */
+        /* ===================================== */
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #eeeeee;
+        }
+
+        .activo {
+            color: green;
+            font-weight: bold;
+        }
+
+        .inactivo {
+            color: red;
+            font-weight: bold;
+        }
+
+
+        /* ===================================== */
+        /* MENÚ DE ACCIONES ⋮ */
+        /* ===================================== */
+
+        .acciones {
+            position: relative;
+            text-align: center;
+        }
+
+        .btn-menu-acciones {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 2px 10px;
+            cursor: pointer;
+        }
+
+        .menu-acciones {
+            display: none;
+            position: absolute;
+            right: 15px;
+            top: 40px;
+            min-width: 130px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .menu-acciones.mostrar {
+            display: block;
+        }
+
+        .menu-acciones a,
+        .menu-acciones button {
+            display: block;
+            width: 100%;
+            padding: 11px 15px;
+            text-align: left;
+            text-decoration: none;
+            background: white;
+            border: none;
+            border-radius: 0;
+            font-size: 14px;
+        }
+
+        .menu-acciones a:hover,
+        .menu-acciones button:hover {
+            background-color: #f5f5f5;
+        }
+
+        .editar {
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        .btn-eliminar {
+            color: #ef6c00;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+
+        /* ===================================== */
+        /* SIN DATOS */
+        /* ===================================== */
+
+        .sin-datos {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+        }
+
+
+        /* ===================================== */
+        /* PAGINACIÓN */
+        /* ===================================== */
+
+        .paginacion {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .paginas a {
+            margin: 0 5px;
+            text-decoration: none;
+        }
+
+        .pagina-actual {
+            font-weight: bold;
+        }
+
+
+        /* ===================================== */
+        /* MODAL ELIMINACIÓN */
+        /* ===================================== */
+
+        .modal-eliminar {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-eliminar-contenido {
+            background-color: white;
+            width: 90%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        }
+
+        .icono-advertencia {
+            font-size: 45px;
+            margin-bottom: 10px;
+        }
+
+        .botones-eliminar {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-cancelar-eliminar {
+            background: transparent;
+            color: #1976d2;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-confirmar-eliminar {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+
+        /* ===================================== */
+        /* RESPONSIVE */
+        /* ===================================== */
+
+        @media (max-width: 800px) {
+
+            .pagina {
+                display: block;
+            }
+
+            .menu-lateral {
+                width: 100%;
+            }
+
+            .contenedor {
+                width: 95%;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="pagina">
+
+
+    <!-- ================================================= -->
+    <!-- MENÚ LATERAL -->
+    <!-- ================================================= -->
+
+    <aside class="menu-lateral">
+
+        <h2>
+            Panel Administrativo
+        </h2>
+
+
+        <div class="titulo-menu">
+            Usuarios
+        </div>
+
+
+        <a
+                href="/admin/usuarios"
+                class="activo-menu">
+
+            📋 Listar Usuarios
+
+        </a>
+
+
+        <a href="/admin/usuarios/crear">
+
+            ➕ Crear Usuario
+
+        </a>
+
+
+        <a
+                href="/admin/cerrar-sesion"
+                class="cerrar-sesion">
+
+            Cerrar Sesión
+
+        </a>
+
+    </aside>
+
+
+
+    <!-- ================================================= -->
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- ================================================= -->
+
+    <main class="contenido">
+
+
+        <div class="contenedor">
+
+
+            <h1>
+                Listado de Usuarios
+            </h1>
+
+
+            <!-- ===================================== -->
+            <!-- MENSAJE DE ÉXITO -->
+            <!-- ===================================== -->
+
+            <div
+                    class="mensaje-exito"
+                    th:if="${exito}"
+                    th:text="${exito}">
+            </div>
+
+
+            <!-- ===================================== -->
+            <!-- MENSAJE ERROR -->
+            <!-- ===================================== -->
+
+            <div
+                    class="mensaje-error-general"
+                    th:if="${errorGeneral}"
+                    th:text="${errorGeneral}">
+            </div>
+
+
+
+            <!-- ===================================== -->
+            <!-- BÚSQUEDA -->
+            <!-- ===================================== -->
+
+            <div class="barra-superior">
+
+
+                <form
+                        class="busqueda"
+                        method="get"
+                        th:action="@{/admin/usuarios}">
+
+
+                    <select name="campo">
+
+
+                        <option
+                                value="id"
+                                th:selected="${campo == 'id'}">
+                            ID
+                        </option>
+
+
+                        <option
+                                value="nombre"
+                                th:selected="${campo == 'nombre'}">
+                            Nombre
+                        </option>
+
+
+                        <option
+                                value="correo"
+                                th:selected="${campo == 'correo'}">
+                            Correo Electrónico
+                        </option>
+
+
+                        <option
+                                value="rol"
+                                th:selected="${campo == 'rol'}">
+                            Rol
+                        </option>
+
+
+                        <option
+                                value="usuario"
+                                th:selected="${campo == 'usuario'}">
+                            Nombre de Usuario
+                        </option>
+
+
+                        <option
+                                value="dpi"
+                                th:selected="${campo == 'dpi'}">
+                            DPI
+                        </option>
+
+
+                    </select>
+
+
+                    <input
+                            type="text"
+                            name="buscar"
+                            placeholder="Buscar..."
+                            th:value="${buscar}">
+
+
+                    <input
+                            type="hidden"
+                            name="tamanio"
+                            th:value="${tamanio}">
+
+
+                    <button
+                            type="submit"
+                            class="btn-buscar">
+
+                        🔍 Buscar
+
+                    </button>
+
+
+                </form>
+
+
+                <a
+                        href="/admin/usuarios/crear"
+                        class="btn-crear">
+
+                    Crear Usuario
+
+                </a>
+
+
+            </div>
+
+
+
+            <!-- ===================================== -->
+            <!-- TABLA -->
+            <!-- ===================================== -->
+
+            <div class="tabla-contenedor">
+
+                <table>
+
+
+                    <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Nombre</th>
+
+                        <th>Correo Electrónico</th>
+
+                        <th>Rol</th>
+
+                        <th>Nombre de Usuario</th>
+
+                        <th>Estado</th>
+
+                        <th>Acciones</th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                    <tr th:each="usuario : ${usuarios.content}">
+
+
+                        <td th:text="${usuario.id}">
+                            1
+                        </td>
+
+
+                        <td th:text="${usuario.nombreCompleto}">
+                            Nombre
+                        </td>
+
+
+                        <td th:text="${usuario.correo != null ? usuario.correo : '-'}">
+                            correo@email.com
+                        </td>
+
+
+                        <td th:text="${usuario.rol != null ? usuario.rol.nombre : '-'}">
+                            Rol
+                        </td>
+
+
+                        <td th:text="${usuario.nombreUsuario}">
+                            usuario
+                        </td>
+
+
+                        <td>
+
+
+                            <span
+                                    th:if="${usuario.activo}"
+                                    class="activo">
+
+                                Activo
+
+                            </span>
+
+
+                            <span
+                                    th:unless="${usuario.activo}"
+                                    class="inactivo">
+
+                                Inactivo
+
+                            </span>
+
+
+                        </td>
+
+
+
+                        <!-- ================================= -->
+                        <!-- ACCIONES ⋮ -->
+                        <!-- ================================= -->
+
+                        <td class="acciones">
+
+
+                            <button
+                                    type="button"
+                                    class="btn-menu-acciones"
+                                    onclick="mostrarMenuAcciones(this)">
+
+                                ⋮
+
+                            </button>
+
+
+                            <div class="menu-acciones">
+
+
+                                <a
+                                        th:href="@{/admin/usuarios/editar/{id}(id=${usuario.id})}"
+                                        class="editar">
+
+                                    Editar
+
+                                </a>
+
+
+                                <button
+                                        type="button"
+                                        class="btn-eliminar"
+                                        th:attr="
+                                            data-id=${usuario.id},
+                                            data-usuario=${usuario.nombreUsuario}
+                                        "
+                                        onclick="abrirModalEliminar(this)">
+
+                                    Eliminar
+
+                                </button>
+
+
+                            </div>
+
+
+                        </td>
+
+
+                    </tr>
+
+
+
+                    <!-- ================================= -->
+                    <!-- SIN RESULTADOS -->
+                    <!-- ================================= -->
+
+                    <tr th:if="${usuarios.totalElements == 0}">
+
+                        <td
+                                colspan="7"
+                                class="sin-datos">
+
+                            No se encontraron datos usuarios.
+
+                        </td>
+
+                    </tr>
+
+
+                    </tbody>
+
+
+                </table>
+
+            </div>
+
+
+
+            <!-- ===================================== -->
+            <!-- PAGINACIÓN -->
+            <!-- ===================================== -->
+
+            <div class="paginacion">
+
+
+                <div>
+
+
+                    <form
+                            method="get"
+                            th:action="@{/admin/usuarios}">
+
+
+                        <input
+                                type="hidden"
+                                name="campo"
+                                th:value="${campo}">
+
+
+                        <input
+                                type="hidden"
+                                name="buscar"
+                                th:value="${buscar}">
+
+
+                        <input
+                                type="hidden"
+                                name="pagina"
+                                value="0">
+
+
+                        <label>
+                            Elementos por página:
+                        </label>
+
+
+                        <select
+                                name="tamanio"
+                                onchange="this.form.submit()">
+
+
+                            <option
+                                    value="10"
+                                    th:selected="${tamanio == 10}">
+                                10
+                            </option>
+
+
+                            <option
+                                    value="25"
+                                    th:selected="${tamanio == 25}">
+                                25
+                            </option>
+
+
+                            <option
+                                    value="50"
+                                    th:selected="${tamanio == 50}">
+                                50
+                            </option>
+
+
+                        </select>
+
+
+                    </form>
+
+
+                </div>
+
+
+
+                <!-- CONTEO -->
+
+                <div>
+
+                    <span>
+                        Registros:
+                    </span>
+
+                    <strong
+                            th:text="${usuarios.totalElements}">
+                        0
+                    </strong>
+
+                </div>
+
+
+
+                <!-- PAGINACIÓN -->
+
+                <div class="paginas">
+
+
+                    <a
+                            th:if="${usuarios.hasPrevious()}"
+                            th:href="@{/admin/usuarios(
+                                campo=${campo},
+                                buscar=${buscar},
+                                pagina=${paginaActual - 1},
+                                tamanio=${tamanio}
+                            )}">
+
+                        Anterior
+
+                    </a>
+
+
+                    <span class="pagina-actual">
+
+                        Página
+
+                        <span th:text="${usuarios.number + 1}">
+                            1
+                        </span>
+
+                        de
+
+                        <span th:text="${usuarios.totalPages == 0 ? 1 : usuarios.totalPages}">
+                            1
+                        </span>
+
+                    </span>
+
+
+                    <a
+                            th:if="${usuarios.hasNext()}"
+                            th:href="@{/admin/usuarios(
+                                campo=${campo},
+                                buscar=${buscar},
+                                pagina=${paginaActual + 1},
+                                tamanio=${tamanio}
+                            )}">
+
+                        Siguiente
+
+                    </a>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- ================================================= -->
+<!-- MODAL CONFIRMAR ELIMINACIÓN -->
+<!-- ================================================= -->
+
+<div
+        id="modalEliminar"
+        class="modal-eliminar">
+
+
+    <div class="modal-eliminar-contenido">
+
+
+        <div class="icono-advertencia">
+            ⚠️
+        </div>
+
+
+        <h2>
+            Confirmar eliminación
+        </h2>
+
+
+        <p id="textoEliminar">
+
+            ¿Está seguro que desea eliminar este usuario?
+            Esta acción no se puede deshacer.
+
+        </p>
+
+
+        <form
+                id="formEliminar"
+                method="post">
+
+
+            <div class="botones-eliminar">
+
+
+                <button
+                        type="button"
+                        class="btn-cancelar-eliminar"
+                        onclick="cerrarModalEliminar()">
+
+                    Cancelar
+
+                </button>
+
+
+                <button
+                        type="submit"
+                        class="btn-confirmar-eliminar">
+
+                    Eliminar
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+    // =====================================================
+    // MENÚ DE ACCIONES ⋮
+    // =====================================================
+
+    function mostrarMenuAcciones(boton) {
+
+        const menu =
+            boton.nextElementSibling;
+
+
+        document
+            .querySelectorAll(".menu-acciones")
+            .forEach(function (otroMenu) {
+
+                if (otroMenu !== menu) {
+                    otroMenu.classList.remove("mostrar");
+                }
+
+            });
+
+
+        menu.classList.toggle("mostrar");
+    }
+
+
+    // Cerrar menú al hacer clic fuera
+
+    document.addEventListener(
+        "click",
+        function (evento) {
+
+            if (
+                !evento.target.closest(".acciones")
+            ) {
+
+                document
+                    .querySelectorAll(".menu-acciones")
+                    .forEach(function (menu) {
+
+                        menu.classList.remove("mostrar");
+
+                    });
+
+            }
+
+        }
+    );
+    // MODAL ELIMINAR
+    function abrirModalEliminar(boton) {
+
+        const id =
+            boton.getAttribute(
+                "data-id"
+            );
+
+
+        const nombreUsuario =
+            boton.getAttribute(
+                "data-usuario"
+            );
+
+
+        document.getElementById(
+            "textoEliminar"
+        ).textContent =
+
+            '¿Está seguro que desea eliminar el usuario "' +
+            nombreUsuario +
+            '"? Esta acción no se puede deshacer.';
+
+
+        document.getElementById(
+            "formEliminar"
+        ).action =
+
+            "/admin/usuarios/eliminar/" + id;
+
+
+        document.getElementById(
+            "modalEliminar"
+        ).style.display = "flex";
+
+
+        document
+            .querySelectorAll(".menu-acciones")
+            .forEach(function (menu) {
+
+                menu.classList.remove("mostrar");
+
+            });
+    }
+
+    function cerrarModalEliminar() {
+
+        document.getElementById(
+            "modalEliminar"
+        ).style.display = "none";
+    }
+    // Cerrar modal al tocar afuera
+
+    document.getElementById(
+        "modalEliminar"
+    ).addEventListener(
+        "click",
+        function (evento) {
+
+            if (evento.target === this) {
+                cerrarModalEliminar();
+            }
+
+        }
+    );
+</script>
+</body>
+</html>

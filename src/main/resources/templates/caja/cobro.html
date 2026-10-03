@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Registrar Cobro
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #333;
+        }
+
+        .header {
+            background: #1261a0;
+            color: white;
+            padding: 20px;
+        }
+
+        .header-contenido {
+            max-width: 900px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        h1,
+        h2 {
+            color: #1261a0;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .dato {
+            margin-bottom: 12px;
+        }
+
+        .dato strong {
+            display: inline-block;
+            min-width: 180px;
+        }
+
+        .monto {
+            margin-top: 25px;
+            padding: 20px;
+            text-align: center;
+            background: #e7f3ff;
+            border-radius: 10px;
+            border: 1px solid #b6d4fe;
+        }
+
+        .monto-total {
+            display: block;
+            margin-top: 8px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1261a0;
+        }
+
+        label {
+            display: block;
+            margin-top: 25px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: #1261a0;
+        }
+
+        .acciones {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 7px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .btn-principal {
+            background: #1261a0;
+            color: white;
+        }
+
+        .btn-principal:hover {
+            background: #0d4f83;
+        }
+
+        .btn-secundario {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secundario:hover {
+            background: #5a6268;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+    <div class="header-contenido">
+
+        <strong>
+            Caja - Cobro de Consulta
+        </strong>
+
+
+        <span>
+            Cajero:
+
+            <strong
+                    th:text="${cajero.nombre + ' ' + cajero.apellido}"
+            >
+                Cajero
+            </strong>
+        </span>
+
+    </div>
+
+</header>
+
+
+<div class="container">
+
+
+    <div class="card">
+
+
+        <h1>
+            Registrar Cobro
+        </h1>
+
+
+        <h2>
+            Detalle de la Cita
+        </h2>
+
+
+        <div class="dato">
+
+            <strong>
+                No. de cita:
+            </strong>
+
+            <span th:text="${cita.id}">
+                0
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <strong>
+                Paciente:
+            </strong>
+
+            <span
+                    th:text="${cita.paciente.nombre + ' ' + cita.paciente.apellido}"
+            >
+                Paciente
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <strong>
+                Especialidad:
+            </strong>
+
+            <span th:text="${cita.especialidad.nombre}">
+                Especialidad
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <strong>
+                Médico:
+            </strong>
+
+            <span
+                    th:text="${cita.medico.nombre + ' ' + cita.medico.apellido}"
+            >
+                Médico
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <strong>
+                Fecha:
+            </strong>
+
+            <span
+                    th:text="${#temporals.format(cita.horario.fecha, 'dd/MM/yyyy')}"
+            >
+                Fecha
+            </span>
+
+        </div>
+
+
+        <div class="dato">
+
+            <strong>
+                Hora:
+            </strong>
+
+            <span
+                    th:text="${#temporals.format(cita.horario.horaInicio, 'HH:mm')
+                    + ' - '
+                    + #temporals.format(cita.horario.horaFin, 'HH:mm')}"
+            >
+                Hora
+            </span>
+
+        </div>
+
+
+        <div class="monto">
+
+            Monto total a cobrar
+
+            <span
+                    class="monto-total"
+                    th:text="'Q' + ${#numbers.formatDecimal(monto, 1, 2)}"
+            >
+                Q0.00
+            </span>
+
+        </div>
+
+
+        <!-- ============================================== -->
+        <!-- FORMULARIO DE COBRO -->
+        <!-- ============================================== -->
+        <!-- ============================================== -->
+        <!-- MENSAJE DE ERROR -->
+        <!-- ============================================== -->
+
+        <div
+                th:if="${mensajeError != null}"
+                style="
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+            border-radius: 7px;
+        "
+                th:text="${mensajeError}"
+        >
+            Mensaje de error
+        </div>
+
+
+        <!-- ============================================== -->
+        <!-- MENSAJE DE ÉXITO -->
+        <!-- ============================================== -->
+
+        <div
+                th:if="${mensajeExito != null}"
+                style="
+            margin-top: 20px;
+            padding: 15px;
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+            border-radius: 7px;
+        "
+                th:text="${mensajeExito}"
+        >
+            Mensaje de éxito
+        </div>
+        <form
+                th:action="@{/caja/procesar}"
+                method="post"
+        >
+
+            <input
+                    type="hidden"
+                    name="citaId"
+                    th:value="${cita.id}"
+            >
+
+
+            <label for="metodoPago">
+                Método de pago
+            </label>
+
+
+            <select
+                    id="metodoPago"
+                    name="metodoPago"
+                    required
+                    onchange="mostrarCamposPago()"
+            >
+
+                <option value="">
+                    Seleccione un método
+                </option>
+
+                <option value="EFECTIVO">
+                    Efectivo
+                </option>
+
+                <option value="VISA">
+                    Visa
+                </option>
+
+                <option value="MASTERCARD">
+                    Mastercard
+                </option>
+
+                <option value="DEBITO">
+                    Débito
+                </option>
+
+            </select>
+
+
+            <!-- ========================================== -->
+            <!-- EFECTIVO -->
+            <!-- ========================================== -->
+
+            <div
+                    id="camposEfectivo"
+                    style="display: none;"
+            >
+
+                <label for="montoRecibido">
+                    Monto Recibido
+                </label>
+
+
+                <input
+                        type="number"
+                        id="montoRecibido"
+                        name="montoRecibido"
+                        min="0"
+                        step="0.01"
+                        placeholder="Ejemplo: 200.00"
+                >
+
+            </div>
+
+
+            <!-- ========================================== -->
+            <!-- TARJETA -->
+            <!-- ========================================== -->
+
+            <div
+                    id="camposTarjeta"
+                    style="display: none;"
+            >
+
+                <label for="ultimosCuatro">
+                    Últimos 4 dígitos de la tarjeta
+                </label>
+
+
+                <input
+                        type="text"
+                        id="ultimosCuatro"
+                        name="ultimosCuatro"
+                        maxlength="4"
+                        inputmode="numeric"
+                        pattern="[0-9]{4}"
+                        placeholder="Ejemplo: 4242"
+                >
+
+            </div>
+
+
+            <!-- ========================================== -->
+            <!-- BOTONES -->
+            <!-- ========================================== -->
+
+            <div class="acciones">
+
+                <button
+                        type="submit"
+                        class="btn btn-principal"
+                >
+                    Registrar Pago
+                </button>
+
+
+                <a
+                        th:href="@{/caja/buscar(tipo='CITA', valor=${cita.id})}"
+                        class="btn btn-secundario"
+                >
+                    Regresar
+                </a>
+
+            </div>
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ===================================================== -->
+
+<script>
+
+    function mostrarCamposPago() {
+
+        const metodo =
+            document.getElementById(
+                "metodoPago"
+            ).value;
+
+
+        const efectivo =
+            document.getElementById(
+                "camposEfectivo"
+            );
+
+
+        const tarjeta =
+            document.getElementById(
+                "camposTarjeta"
+            );
+
+
+        const montoRecibido =
+            document.getElementById(
+                "montoRecibido"
+            );
+
+
+        const ultimosCuatro =
+            document.getElementById(
+                "ultimosCuatro"
+            );
+
+
+        // ==============================================
+        // OCULTAR CAMPOS
+        // ==============================================
+
+        efectivo.style.display =
+            "none";
+
+        tarjeta.style.display =
+            "none";
+
+
+        // ==============================================
+        // QUITAR VALIDACIONES
+        // ==============================================
+
+        montoRecibido.required =
+            false;
+
+        ultimosCuatro.required =
+            false;
+
+
+        // ==============================================
+        // LIMPIAR CAMPOS QUE NO SE UTILIZAN
+        // ==============================================
+
+        if (metodo !== "EFECTIVO") {
+
+            montoRecibido.value =
+                "";
+        }
+
+
+        if (
+            metodo !== "VISA"
+            &&
+            metodo !== "MASTERCARD"
+            &&
+            metodo !== "DEBITO"
+        ) {
+
+            ultimosCuatro.value =
+                "";
+        }
+
+
+        // ==============================================
+        // EFECTIVO
+        // ==============================================
+
+        if (metodo === "EFECTIVO") {
+
+            efectivo.style.display =
+                "block";
+
+            montoRecibido.required =
+                true;
+        }
+
+
+        // ==============================================
+        // VISA / MASTERCARD / DÉBITO
+        // ==============================================
+
+        if (
+            metodo === "VISA"
+            ||
+            metodo === "MASTERCARD"
+            ||
+            metodo === "DEBITO"
+        ) {
+
+            tarjeta.style.display =
+                "block";
+
+            ultimosCuatro.required =
+                true;
+        }
+    }
+
+</script>
+
+
+</body>
+
+</html>

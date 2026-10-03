@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Mis Citas</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #333;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 18px 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            margin: 0;
+            color: #1261a0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .titulo {
+            margin-bottom: 25px;
+        }
+
+        .titulo h1 {
+            color: #1261a0;
+            margin-bottom: 5px;
+        }
+
+        .titulo p {
+            color: #666;
+        }
+
+        .sin-citas {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .tabla-contenedor {
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1261a0;
+            color: white;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .estado {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .PAGADA {
+            background: #dff5e5;
+            color: #247a3d;
+        }
+
+        .PENDIENTE_PAGO {
+            background: #fff1cc;
+            color: #966500;
+        }
+
+        .EXPIRADA {
+            background: #eeeeee;
+            color: #666666;
+        }
+
+        .CANCELADA {
+            background: #ffe0e0;
+            color: #a12626;
+        }
+
+        .CONFIRMADA {
+            background: #dfefff;
+            color: #145f9b;
+        }
+
+        .acciones {
+            margin-top: 25px;
+
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+
+            padding: 12px 22px;
+
+            border-radius: 7px;
+
+            text-decoration: none;
+
+            font-weight: bold;
+
+            border: none;
+
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #1261a0;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1261a0;
+            border: 1px solid #1261a0;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+
+            .header {
+                padding: 15px 20px;
+            }
+
+            th,
+            td {
+                padding: 10px;
+                font-size: 13px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h2>
+        Sistema Médico Hospitalario
+    </h2>
+
+    <span th:if="${paciente != null}">
+        Paciente:
+        <strong th:text="${paciente.nombre + ' ' + paciente.apellido}">
+            Paciente
+        </strong>
+    </span>
+
+</div>
+
+
+<div class="container">
+
+
+    <div class="titulo">
+
+        <h1>
+            Mis Citas
+        </h1>
+
+        <p>
+            Consulte las citas médicas asociadas a su cuenta.
+        </p>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- SIN CITAS -->
+    <!-- ================================================= -->
+
+    <div
+            class="sin-citas"
+            th:if="${#lists.isEmpty(citas)}"
+    >
+
+        <h3>
+            No tiene citas registradas.
+        </h3>
+
+        <p>
+            Puede agendar una nueva cita desde el portal del paciente.
+        </p>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- TABLA DE CITAS -->
+    <!-- ================================================= -->
+
+    <div
+            class="tabla-contenedor"
+            th:if="${!#lists.isEmpty(citas)}"
+    >
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>
+                    No.
+                </th>
+
+                <th>
+                    Médico
+                </th>
+
+                <th>
+                    Especialidad
+                </th>
+
+                <th>
+                    Sucursal
+                </th>
+
+                <th>
+                    Fecha
+                </th>
+
+                <th>
+                    Hora
+                </th>
+
+                <th>
+                    Estado
+                </th>
+
+            </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            <tr th:each="cita : ${citas}">
+
+                <td
+                        th:text="${cita.id}"
+                >
+                    1
+                </td>
+
+
+                <td
+                        th:text="${cita.medico.nombre + ' ' + cita.medico.apellido}"
+                >
+                    Médico
+                </td>
+
+
+                <td
+                        th:text="${cita.especialidad.nombre}"
+                >
+                    Especialidad
+                </td>
+
+
+                <td
+                        th:text="${cita.sucursal.nombre}"
+                >
+                    Sucursal
+                </td>
+
+
+                <td
+                        th:text="${#temporals.format(cita.horario.fecha, 'dd/MM/yyyy')}"
+                >
+                    20/08/2026
+                </td>
+
+
+                <td
+                        th:text="${#temporals.format(cita.horario.horaInicio, 'HH:mm')}"
+                >
+                    08:00
+                </td>
+
+
+                <td>
+
+                    <span
+                            class="estado"
+                            th:classappend="${cita.estado}"
+                            th:text="${cita.estado}"
+                    >
+                        PAGADA
+                    </span>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- BOTONES -->
+    <!-- ================================================= -->
+
+    <div class="acciones">
+
+        <a
+                th:href="@{/dashboard}"
+                class="btn btn-secondary"
+        >
+            Volver al Portal
+        </a>
+
+
+        <a
+                th:href="@{/citas/agendar}"
+                class="btn btn-primary"
+        >
+            Agendar Nueva Cita
+        </a>
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

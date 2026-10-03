@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Panel Médico</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+        }
+
+        .header {
+            background: #1f4e79;
+            color: white;
+            padding: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header-info {
+            margin-top: 8px;
+        }
+
+        .contenedor {
+            width: 92%;
+            margin: 25px auto;
+        }
+
+        .mensaje {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        .seccion {
+            background: white;
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
+        }
+
+        .seccion h2 {
+            margin-top: 0;
+            color: #1f4e79;
+        }
+
+        .tarjetas {
+            display: grid;
+            grid-template-columns:
+                    repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .tarjeta {
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            padding: 16px;
+            background: #fafafa;
+        }
+
+        .tarjeta.emergencia {
+            border: 2px solid #dc3545;
+            background: #fff3f3;
+        }
+
+        .tarjeta p {
+            margin: 7px 0;
+        }
+
+        .etiqueta-emergencia {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 5px 9px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .botones {
+            margin-top: 15px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button,
+        .boton {
+            border: none;
+            padding: 9px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .btn-principal {
+            background: #1f4e79;
+            color: white;
+        }
+
+        .btn-secundario {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-peligro {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-cierre {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .vacio {
+            color: #777;
+            font-style: italic;
+        }
+
+        .cerrar-sesion {
+            float: right;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ======================================= -->
+<!-- ENCABEZADO -->
+<!-- ======================================= -->
+
+<div class="header">
+
+    <a class="cerrar-sesion"
+       th:href="@{/personal/cerrar-sesion}">
+        Cerrar sesión
+    </a>
+
+    <h1>Panel Médico</h1>
+
+    <div class="header-info">
+
+        Bienvenido(a),
+
+        <strong th:text="${medico.nombreCompleto}">
+            Médico
+        </strong>
+
+    </div>
+
+</div>
+
+
+<div class="contenedor">
+
+
+    <!-- ======================================= -->
+    <!-- MENSAJES -->
+    <!-- ======================================= -->
+
+    <div class="mensaje"
+         th:if="${mensaje}"
+         th:text="${mensaje}">
+    </div>
+
+
+    <div class="error"
+         th:if="${error}"
+         th:text="${error}">
+    </div>
+
+
+
+    <!-- ======================================= -->
+    <!-- EN ESPERA DE CONSULTA -->
+    <!-- ======================================= -->
+
+    <section class="seccion">
+
+        <h2>En Espera de Consulta</h2>
+
+
+        <p class="vacio"
+           th:if="${#lists.isEmpty(citasEnEspera)}">
+
+            No hay pacientes en espera de consulta.
+
+        </p>
+
+
+        <div class="tarjetas"
+             th:if="${!#lists.isEmpty(citasEnEspera)}">
+
+
+            <div class="tarjeta"
+                 th:each="cita : ${citasEnEspera}"
+                 th:classappend="${cita.prioridad != null
+                         and #strings.equalsIgnoreCase(
+                                cita.prioridad,
+                                'EMERGENCIA'
+                         )}
+                         ? ' emergencia'
+                         : ''">
+
+
+                <!-- EMERGENCIA -->
+
+                <div class="etiqueta-emergencia"
+                     th:if="${cita.prioridad != null
+                         and #strings.equalsIgnoreCase(
+                                cita.prioridad,
+                                'EMERGENCIA'
+                         )}">
+
+                    EMERGENCIA
+
+                </div>
+
+
+                <!-- NUMERO DE CITA -->
+
+                <p>
+                    <strong>Cita:</strong>
+
+                    #<span th:text="${cita.id}">
+                    </span>
+                </p>
+
+
+                <!-- PACIENTE -->
+
+                <p>
+                    <strong>Paciente:</strong>
+
+                    <span th:text="${cita.paciente.nombreCompleto}">
+                    </span>
+                </p>
+
+
+                <!-- ESPECIALIDAD -->
+
+                <p>
+                    <strong>Especialidad:</strong>
+
+                    <span th:text="${cita.especialidad != null
+                            ? cita.especialidad.nombre
+                            : 'Sin especialidad'}">
+                    </span>
+                </p>
+
+
+                <!-- ESTADO -->
+
+                <p>
+                    <strong>Estado:</strong>
+
+                    <span th:text="${cita.estado}">
+                    </span>
+                </p>
+
+
+                <!-- PRIORIDAD -->
+
+                <p>
+                    <strong>Prioridad:</strong>
+
+                    <span th:text="${cita.prioridad != null
+                            ? cita.prioridad
+                            : 'NORMAL'}">
+                    </span>
+                </p>
+
+
+                <div class="botones">
+
+
+                    <!-- ================================= -->
+                    <!-- INICIAR CONSULTA -->
+                    <!-- ================================= -->
+
+                    <form th:action="@{/medico/iniciar/{id}
+                            (id=${cita.id})}"
+                          method="post">
+
+                        <button type="submit"
+                                class="btn-principal">
+
+                            Iniciar Consulta
+
+                        </button>
+
+                    </form>
+
+
+
+                    <!-- ================================= -->
+                    <!-- FA06 - NO ASISTIO -->
+                    <!-- ================================= -->
+
+                    <form th:action="@{/medico/no-asistio/{id}
+                            (id=${cita.id})}"
+                          method="post">
+
+                        <button type="submit"
+                                class="btn-peligro">
+
+                            No Asistió
+
+                        </button>
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ======================================= -->
+    <!-- EN CONSULTA MEDICA -->
+    <!-- ======================================= -->
+
+    <section class="seccion">
+
+        <h2>En Consulta Médica</h2>
+
+
+        <p class="vacio"
+           th:if="${#lists.isEmpty(citasEnConsulta)}">
+
+            No hay pacientes en consulta médica.
+
+        </p>
+
+
+        <div class="tarjetas"
+             th:if="${!#lists.isEmpty(citasEnConsulta)}">
+
+
+            <div class="tarjeta"
+                 th:each="cita : ${citasEnConsulta}">
+
+
+                <!-- NUMERO DE CITA -->
+
+                <p>
+                    <strong>Cita:</strong>
+
+                    #<span th:text="${cita.id}">
+                    </span>
+                </p>
+
+
+                <!-- PACIENTE -->
+
+                <p>
+                    <strong>Paciente:</strong>
+
+                    <span th:text="${cita.paciente.nombreCompleto}">
+                    </span>
+                </p>
+
+
+                <!-- ESPECIALIDAD -->
+
+                <p>
+                    <strong>Especialidad:</strong>
+
+                    <span th:text="${cita.especialidad != null
+                            ? cita.especialidad.nombre
+                            : 'Sin especialidad'}">
+                    </span>
+                </p>
+
+
+                <!-- ESTADO -->
+
+                <p>
+                    <strong>Estado:</strong>
+
+                    <span th:text="${cita.estado}">
+                    </span>
+                </p>
+
+
+                <div class="botones">
+
+
+                    <!-- VER / COMPLETAR CONSULTA -->
+
+                    <a class="boton btn-secundario"
+                       th:href="@{/medico/consulta/{id}
+                       (id=${cita.id})}">
+
+                        Ver / Completar Consulta
+
+                    </a>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ======================================= -->
+    <!-- EVALUADOS -->
+    <!-- ======================================= -->
+
+    <section class="seccion">
+
+        <h2>Evaluados — Pendiente de cierre</h2>
+
+
+        <p class="vacio"
+           th:if="${#lists.isEmpty(citasEvaluadas)}">
+
+            No hay pacientes pendientes de cierre.
+
+        </p>
+
+
+        <div class="tarjetas"
+             th:if="${!#lists.isEmpty(citasEvaluadas)}">
+
+
+            <div class="tarjeta"
+                 th:each="cita : ${citasEvaluadas}">
+
+
+                <!-- NUMERO DE CITA -->
+
+                <p>
+                    <strong>Cita:</strong>
+
+                    #<span th:text="${cita.id}">
+                    </span>
+                </p>
+
+
+                <!-- PACIENTE -->
+
+                <p>
+                    <strong>Paciente:</strong>
+
+                    <span th:text="${cita.paciente.nombreCompleto}">
+                    </span>
+                </p>
+
+
+                <!-- ESPECIALIDAD -->
+
+                <p>
+                    <strong>Especialidad:</strong>
+
+                    <span th:text="${cita.especialidad != null
+                            ? cita.especialidad.nombre
+                            : 'Sin especialidad'}">
+                    </span>
+                </p>
+
+
+                <!-- ESTADO -->
+
+                <p>
+                    <strong>Estado:</strong>
+
+                    <span th:text="${cita.estado}">
+                    </span>
+                </p>
+
+
+                <div class="botones">
+
+
+                    <!-- ================================= -->
+                    <!-- CU-09 -->
+                    <!-- ================================= -->
+
+                    <a class="boton btn-principal"
+                       th:href="@{/medico/laboratorio/{id}
+   (id=${cita.id})}">
+
+                        Orden de Laboratorio
+
+                    </a>
+
+
+
+                    <!-- ================================= -->
+                    <!-- CU-10 -->
+                    <!-- ================================= -->
+
+                    <a class="boton btn-secundario"
+                       th:href="@{/medico/receta/{id}
+   (id=${cita.id})}">
+
+                        Receta Médica
+
+                    </a>
+
+
+
+                    <!-- ================================= -->
+                    <!-- CU-11 -->
+                    <!-- ================================= -->
+
+                    <button type="button"
+                            class="btn-principal">
+
+                        Agendar Seguimiento
+
+                    </button>
+
+
+
+                    <!-- ================================= -->
+                    <!-- FINALIZAR ATENCION -->
+                    <!-- ================================= -->
+
+                    <form th:action="@{/medico/finalizar-atencion/{id}
+                            (id=${cita.id})}"
+                          method="post">
+
+                        <button type="submit"
+                                class="btn-cierre">
+
+                            Finalizar Atención
+
+                        </button>
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+
+<!-- ===================================================== -->
+<!-- TTS PARA LLAMAR AL PACIENTE -->
+<!-- ===================================================== -->
+
+<script th:if="${anuncioTts}"
+        th:inline="javascript">
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const texto =
+                /*[[${anuncioTts}]]*/ "";
+
+
+            if (
+                texto
+                &&
+                "speechSynthesis" in window
+            ) {
+
+                const mensaje =
+                    new SpeechSynthesisUtterance(
+                        texto
+                    );
+
+
+                // =========================================
+                // CONFIGURACION DE LA VOZ
+                // =========================================
+
+                mensaje.lang =
+                    "es-GT";
+
+                mensaje.rate =
+                    0.9;
+
+                mensaje.pitch =
+                    1;
+
+                mensaje.volume =
+                    1;
+
+
+                // =========================================
+                // REPRODUCIR MENSAJE
+                // =========================================
+
+                function reproducirMensaje() {
+
+                    const voces =
+                        window.speechSynthesis
+                            .getVoices();
+
+
+                    // Buscar primero una voz de Guatemala
+
+                    let vozEspanol =
+                        voces.find(
+                            voz =>
+                                voz.lang
+                                    .toLowerCase()
+                                    .startsWith("es-gt")
+                        );
+
+
+                    // Si no existe voz es-GT,
+                    // buscar cualquier voz en español
+
+                    if (!vozEspanol) {
+
+                        vozEspanol =
+                            voces.find(
+                                voz =>
+                                    voz.lang
+                                        .toLowerCase()
+                                        .startsWith("es")
+                            );
+                    }
+
+
+                    if (vozEspanol) {
+
+                        mensaje.voice =
+                            vozEspanol;
+                    }
+
+
+                    /*
+                     * Cancelamos cualquier mensaje anterior
+                     * antes de reproducir el nuevo.
+                     */
+
+                    window.speechSynthesis
+                        .cancel();
+
+
+                    window.speechSynthesis
+                        .speak(
+                            mensaje
+                        );
+                }
+
+
+                // =========================================
+                // ESPERAR QUE EL NAVEGADOR CARGUE LAS VOCES
+                // =========================================
+
+                if (
+                    window.speechSynthesis
+                        .getVoices()
+                        .length > 0
+                ) {
+
+                    reproducirMensaje();
+
+                } else {
+
+                    window.speechSynthesis
+                        .onvoiceschanged =
+                        reproducirMensaje;
+                }
+            }
+        }
+    );
+
+</script>
+
+
+
+<!-- ===================================================== -->
+<!-- ACTUALIZAR PANEL CADA 30 SEGUNDOS -->
+<!-- ===================================================== -->
+
+<script>
+
+    setTimeout(
+        function () {
+
+            window.location.reload();
+
+        },
+        30000
+    );
+
+</script>
+
+
+</body>
+
+</html>
