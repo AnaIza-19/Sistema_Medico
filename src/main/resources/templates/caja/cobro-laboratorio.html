@@ -473,12 +473,11 @@
             <!-- ============================================= -->
             <!-- TARJETA -->
             <!-- ============================================= -->
-
+S
             <div
                     id="camposTarjeta"
                     class="seccion-pago"
                     style="display:none;">
-
 
                 <div class="campo">
 
@@ -486,29 +485,24 @@
                         Últimos 4 dígitos de la tarjeta
                     </label>
 
-
                     <input
                             type="text"
                             id="ultimosCuatro"
                             name="ultimosCuatro"
-
                             maxlength="4"
-
                             inputmode="numeric"
-
                             placeholder="Ejemplo: 4242"
-
-                            pattern="[0-9]{4}">
+                            pattern="[0-9]{4}"
+                            oninvalid="this.setCustomValidity('Ingrese los últimos 4 dígitos de la tarjeta.')"
+                            oninput="this.setCustomValidity('')">
 
                 </div>
-
 
                 <p>
                     Ingrese únicamente los últimos 4 dígitos.
                 </p>
 
             </div>
-
 
 
             <!-- ============================================= -->
