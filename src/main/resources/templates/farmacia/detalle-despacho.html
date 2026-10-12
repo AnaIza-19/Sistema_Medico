@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Detalle del Despacho</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .header {
+            background-color: #1565c0;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+        }
+
+        .usuario {
+            background-color: white;
+            padding: 15px 35px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .usuario span {
+            margin-right: 25px;
+        }
+
+        .contenedor {
+            max-width: 1450px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .tarjeta {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        }
+
+        h2 {
+            color: #1565c0;
+            margin-top: 0;
+        }
+
+        .datos-receta {
+            background-color: #e3f2fd;
+            padding: 18px;
+            border-radius: 7px;
+            margin-bottom: 25px;
+        }
+
+        .datos-receta p {
+            margin: 7px 0;
+        }
+
+        .error {
+            background-color: #ffebee;
+            color: #b71c1c;
+            border-left: 5px solid #c62828;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #1565c0;
+            color: white;
+            text-align: left;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+        }
+
+        input:disabled,
+        select:disabled {
+            background-color: #eeeeee;
+        }
+
+        .disponible {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .stock-bajo {
+            color: #ef6c00;
+            font-weight: bold;
+        }
+
+        .sin-inventario {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .sustitucion {
+            min-width: 260px;
+        }
+
+        .sustitucion-opciones {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .sustitucion-opciones label {
+            display: block;
+            margin: 8px 0 5px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .subtotal {
+            font-weight: bold;
+        }
+
+        .resumen {
+            margin-top: 30px;
+            background-color: #e8f5e9;
+            border-left: 5px solid #2e7d32;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: right;
+        }
+
+        .resumen h2 {
+            margin: 0;
+            color: #2e7d32;
+        }
+
+        .total {
+            font-size: 27px;
+            font-weight: bold;
+            color: #1b5e20;
+        }
+
+        .informacion {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff8e1;
+            border-left: 4px solid #ffa000;
+            border-radius: 5px;
+        }
+
+        .botones {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 6px;
+            text-decoration: none;
+            border: none;
+            font-size: 15px;
+        }
+
+        .btn-volver {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-confirmar {
+            background-color: #2e7d32;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-confirmar:disabled {
+            background-color: #bdbdbd;
+            cursor: not-allowed;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>Detalle del Despacho</h1>
+
+    <p>CU-11 Despacho de Medicamentos</p>
+
+</div>
+
+
+<div class="usuario">
+
+    <span>
+        <strong>Personal:</strong>
+
+        <span th:text="${personalFarmacia.nombre + ' ' + personalFarmacia.apellido}">
+        </span>
+    </span>
+
+
+    <span>
+        <strong>Sucursal:</strong>
+
+        <span th:text="${personalFarmacia.sucursal.nombre}">
+        </span>
+    </span>
+
+</div>
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <div
+                class="error"
+                th:if="${error != null}"
+                th:text="${error}">
+        </div>
+
+
+        <h2>Información de la Receta</h2>
+
+
+        <div class="datos-receta">
+
+            <p>
+                <strong>ID Receta:</strong>
+                <span th:text="${receta.id}"></span>
+            </p>
+
+
+            <p>
+                <strong>ID Consulta:</strong>
+
+                <span th:text="${consultaId != null
+                                ? consultaId
+                                : 'Sin consulta'}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Fecha de emisión:</strong>
+
+                <span th:text="${#temporals.format(
+                                receta.fechaCreacion,
+                                'dd/MM/yyyy HH:mm'
+                )}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Vigencia:</strong>
+
+                <span
+                        style="color:green; font-weight:bold;"
+                        th:text="'Vigente - '
+                                + ${diasTranscurridos}
+                                + ' día(s)'">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Notas:</strong>
+
+                <span th:text="${receta.notas != null
+                                and !receta.notas.isBlank()
+                                ? receta.notas
+                                : 'Sin notas'}">
+                </span>
+            </p>
+
+        </div>
+
+
+        <h2>Medicamentos Recetados</h2>
+
+
+        <form
+                id="formDespacho"
+                th:action="@{/farmacia/despacho/{id}/confirmar(id=${receta.id})}"
+                method="post"
+        >
+
+
+            <!-- CSRF -->
+            <input
+                    type="hidden"
+                    th:if="${_csrf != null}"
+                    th:name="${_csrf.parameterName}"
+                    th:value="${_csrf.token}"
+            >
+
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>Medicamento</th>
+
+                    <th>Dosis</th>
+
+                    <th>Inventario</th>
+
+                    <th>Cantidad</th>
+
+                    <th>Precio</th>
+
+                    <th>Sustitución</th>
+
+                    <th>Subtotal</th>
+
+                </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                <tr
+                        th:each="item : ${medicamentos}"
+
+                        class="medicamento-row"
+
+                        th:attr="
+                            data-precio-original=${item.detalle.medicamento.precio},
+                            data-stock-original=${item.stockActual != null ? item.stockActual : 0}
+                        "
+                >
+
+
+                    <td>
+
+                        <strong
+                                th:text="${item.detalle.medicamento.nombre}">
+                        </strong>
+
+                        <br>
+
+                        <small
+                                th:text="${item.detalle.medicamento.unidad != null
+                                        ? item.detalle.medicamento.unidad
+                                        : ''}">
+                        </small>
+
+                    </td>
+
+
+                    <td
+                            th:text="${item.detalle.dosis}">
+                    </td>
+
+
+                    <td>
+
+
+                        <span
+                                th:if="${!item.inventarioRegistrado}"
+                                class="sin-inventario"
+                                th:text="${item.mensajeInventario}">
+                        </span>
+
+
+                        <span
+                                th:if="${item.inventarioRegistrado
+                                        and item.stockBajo}"
+                                class="stock-bajo"
+                                th:text="${item.mensajeInventario}">
+                        </span>
+
+
+                        <span
+                                th:if="${item.inventarioRegistrado
+                                        and !item.stockBajo}"
+                                class="disponible"
+                                th:text="${item.mensajeInventario}">
+                        </span>
+
+
+                    </td>
+
+
+                    <td style="width:110px;">
+
+
+                        <input
+                                type="number"
+
+                                class="cantidad"
+
+                                min="1"
+
+                                th:value="${item.detalle.cantidad}"
+
+                                th:max="${item.stockActual != null
+                                        ? item.stockActual
+                                        : 0}"
+
+                                th:disabled="${!item.inventarioRegistrado
+                                        or item.stockActual <= 0}"
+
+                                th:name="'cantidad_' + ${item.detalle.id}"
+                        >
+
+
+                    </td>
+
+
+                    <td>
+
+                        <span
+                                class="precio-mostrado"
+
+                                th:text="'Q'
+                                        + ${#numbers.formatDecimal(
+                                                item.detalle.medicamento.precio,
+                                                1,
+                                                2
+                                        )}">
+                        </span>
+
+                    </td>
+
+
+                    <td class="sustitucion">
+
+
+                        <label>
+
+                            <input
+                                    type="checkbox"
+                                    class="check-sustituir"
+                            >
+
+                            Sustituir
+
+                        </label>
+
+
+                        <div class="sustitucion-opciones">
+
+
+                            <label>
+                                Medicamento alternativo
+                            </label>
+
+
+                            <select
+                                    class="medicamento-alternativo"
+
+                                    th:name="'alternativo_' + ${item.detalle.id}"
+
+                                    disabled
+                            >
+
+
+                                <option
+                                        value=""
+                                        data-precio="0"
+                                        data-stock="0"
+                                >
+                                    Seleccione
+                                </option>
+
+
+                                <option
+                                        th:each="alternativa : ${alternativas}"
+
+                                        th:if="${alternativa.medicamento.id
+                                                != item.detalle.medicamento.id}"
+
+                                        th:value="${alternativa.medicamento.id}"
+
+                                        th:attr="
+                                            data-precio=${alternativa.medicamento.precio},
+                                            data-stock=${alternativa.stockActual}
+                                        "
+
+                                        th:text="${alternativa.medicamento.nombre
+                                                + ' | Stock: '
+                                                + alternativa.stockActual
+                                                + ' | Q'
+                                                + alternativa.medicamento.precio}">
+                                </option>
+
+
+                            </select>
+
+
+                            <label>
+                                Razón de sustitución
+                            </label>
+
+
+                            <input
+                                    type="text"
+
+                                    class="razon-sustitucion"
+
+                                    th:name="'razon_' + ${item.detalle.id}"
+
+                                    placeholder="Ingrese la razón"
+
+                                    disabled
+                            >
+
+
+                        </div>
+
+
+                    </td>
+
+
+                    <td>
+
+                        <span class="subtotal">
+                            Q0.00
+                        </span>
+
+                    </td>
+
+
+                </tr>
+
+
+                </tbody>
+
+            </table>
+
+
+            <div class="resumen">
+
+                <h2>
+                    Total del Despacho
+                </h2>
+
+                <div
+                        id="totalDespacho"
+                        class="total"
+                >
+                    Q0.00
+                </div>
+
+            </div>
+
+
+            <div class="informacion">
+
+                Verifique el total con el paciente.
+
+                El cobro físico al paciente se realiza
+                <strong>fuera del sistema</strong>.
+
+            </div>
+
+
+            <div class="botones">
+
+
+                <a
+                        th:href="@{/farmacia/despacho(recetaId=${receta.id})}"
+                        class="btn btn-volver"
+                >
+                    Volver
+                </a>
+
+
+                <button
+                        id="btnConfirmar"
+                        type="submit"
+                        class="btn btn-confirmar"
+                        disabled
+                >
+                    Confirmar Despacho
+                </button>
+
+
+            </div>
+
+
+        </form>
+        <form
+                th:action="@{/farmacia/despacho/{id}/cancelar(id=${receta.id})}"
+                method="post"
+                style="margin-top: 15px;"
+                onsubmit="return confirm('¿Confirma que el paciente NO adquirirá los medicamentos?');"
+        >
+
+            <input
+                    type="hidden"
+                    th:if="${_csrf != null}"
+                    th:name="${_csrf.parameterName}"
+                    th:value="${_csrf.token}"
+            >
+
+            <button
+                    type="submit"
+                    class="btn"
+                    style="
+                background-color: #c62828;
+                color: white;
+                cursor: pointer;
+            "
+            >
+                Paciente no adquiere medicamentos
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const formulario =
+        document.getElementById(
+            "formDespacho"
+        );
+
+
+    const botonConfirmar =
+        document.getElementById(
+            "btnConfirmar"
+        );
+
+
+    // =====================================================
+    // VALIDAR FORMULARIO
+    // =====================================================
+
+    function validarFormulario() {
+
+        let valido = true;
+
+        let existeMedicamento =
+            false;
+
+
+        document
+            .querySelectorAll(
+                ".medicamento-row"
+            )
+            .forEach(function (fila) {
+
+
+                const cantidad =
+                    fila.querySelector(
+                        ".cantidad"
+                    );
+
+
+                const check =
+                    fila.querySelector(
+                        ".check-sustituir"
+                    );
+
+
+                const select =
+                    fila.querySelector(
+                        ".medicamento-alternativo"
+                    );
+
+
+                const razon =
+                    fila.querySelector(
+                        ".razon-sustitucion"
+                    );
+
+
+                if (!cantidad.disabled) {
+
+                    const valor =
+                        parseInt(
+                            cantidad.value
+                        ) || 0;
+
+
+                    const maximo =
+                        parseInt(
+                            cantidad.max
+                        ) || 0;
+
+
+                    if (
+                        valor < 1
+                        ||
+                        valor > maximo
+                    ) {
+
+                        valido =
+                            false;
+
+                    } else {
+
+                        existeMedicamento =
+                            true;
+                    }
+                }
+
+
+                if (check.checked) {
+
+                    if (
+                        select.value === ""
+                        ||
+                        razon.value.trim() === ""
+                    ) {
+
+                        valido =
+                            false;
+                    }
+                }
+
+            });
+
+
+        if (!existeMedicamento) {
+
+            valido =
+                false;
+        }
+
+
+        botonConfirmar.disabled =
+            !valido;
+    }
+
+
+    // =====================================================
+    // ACTUALIZAR TOTALES
+    // =====================================================
+
+    function actualizarTotales() {
+
+        let total = 0;
+
+
+        document
+            .querySelectorAll(
+                ".medicamento-row"
+            )
+            .forEach(function (fila) {
+
+
+                const cantidadInput =
+                    fila.querySelector(
+                        ".cantidad"
+                    );
+
+
+                const check =
+                    fila.querySelector(
+                        ".check-sustituir"
+                    );
+
+
+                const select =
+                    fila.querySelector(
+                        ".medicamento-alternativo"
+                    );
+
+
+                const precioMostrado =
+                    fila.querySelector(
+                        ".precio-mostrado"
+                    );
+
+
+                const subtotalTexto =
+                    fila.querySelector(
+                        ".subtotal"
+                    );
+
+
+                let precio =
+                    parseFloat(
+                        fila.dataset.precioOriginal
+                    ) || 0;
+
+
+                let stock =
+                    parseInt(
+                        fila.dataset.stockOriginal
+                    ) || 0;
+
+
+                // =========================================
+                // SUSTITUCIÓN
+                // =========================================
+
+                if (
+                    check.checked
+                    &&
+                    select.value !== ""
+                ) {
+
+                    const opcion =
+                        select.options[
+                            select.selectedIndex
+                            ];
+
+
+                    precio =
+                        parseFloat(
+                            opcion.dataset.precio
+                        ) || 0;
+
+
+                    stock =
+                        parseInt(
+                            opcion.dataset.stock
+                        ) || 0;
+
+
+                    cantidadInput.disabled =
+                        stock <= 0;
+
+
+                    cantidadInput.max =
+                        stock;
+
+                } else {
+
+
+                    const stockOriginal =
+                        parseInt(
+                            fila.dataset.stockOriginal
+                        ) || 0;
+
+
+                    cantidadInput.disabled =
+                        stockOriginal <= 0;
+
+
+                    cantidadInput.max =
+                        stockOriginal;
+                }
+
+
+                let cantidad =
+                    parseInt(
+                        cantidadInput.value
+                    ) || 0;
+
+
+                if (
+                    !cantidadInput.disabled
+                    &&
+                    cantidad > stock
+                ) {
+
+                    cantidad =
+                        stock;
+
+                    cantidadInput.value =
+                        stock;
+                }
+
+
+                if (
+                    !cantidadInput.disabled
+                    &&
+                    cantidad < 1
+                ) {
+
+                    cantidad =
+                        1;
+
+                    cantidadInput.value =
+                        1;
+                }
+
+
+                const subtotal =
+                    cantidadInput.disabled
+                        ? 0
+                        : cantidad * precio;
+
+
+                subtotalTexto.textContent =
+                    "Q"
+                    +
+                    subtotal.toFixed(2);
+
+
+                precioMostrado.textContent =
+                    "Q"
+                    +
+                    precio.toFixed(2);
+
+
+                total +=
+                    subtotal;
+
+            });
+
+
+        document.getElementById(
+            "totalDespacho"
+        ).textContent =
+            "Q"
+            +
+            total.toFixed(2);
+
+
+        validarFormulario();
+    }
+
+
+    // =====================================================
+    // EVENTOS
+    // =====================================================
+
+    document
+        .querySelectorAll(
+            ".medicamento-row"
+        )
+        .forEach(function (fila) {
+
+
+            const cantidad =
+                fila.querySelector(
+                    ".cantidad"
+                );
+
+
+            const check =
+                fila.querySelector(
+                    ".check-sustituir"
+                );
+
+
+            const opciones =
+                fila.querySelector(
+                    ".sustitucion-opciones"
+                );
+
+
+            const select =
+                fila.querySelector(
+                    ".medicamento-alternativo"
+                );
+
+
+            const razon =
+                fila.querySelector(
+                    ".razon-sustitucion"
+                );
+
+
+            cantidad.addEventListener(
+                "input",
+                actualizarTotales
+            );
+
+
+            check.addEventListener(
+                "change",
+                function () {
+
+
+                    if (check.checked) {
+
+                        opciones.style.display =
+                            "block";
+
+
+                        select.disabled =
+                            false;
+
+
+                        razon.disabled =
+                            false;
+
+
+                        select.required =
+                            true;
+
+
+                        razon.required =
+                            true;
+
+                    } else {
+
+                        opciones.style.display =
+                            "none";
+
+
+                        select.disabled =
+                            true;
+
+
+                        razon.disabled =
+                            true;
+
+
+                        select.required =
+                            false;
+
+
+                        razon.required =
+                            false;
+
+
+                        select.value =
+                            "";
+
+
+                        razon.value =
+                            "";
+                    }
+
+
+                    actualizarTotales();
+
+                }
+            );
+
+
+            select.addEventListener(
+                "change",
+                actualizarTotales
+            );
+
+
+            razon.addEventListener(
+                "input",
+                validarFormulario
+            );
+
+        });
+
+
+    // =====================================================
+    // CONFIRMACIÓN FINAL
+    // =====================================================
+
+    formulario.addEventListener(
+        "submit",
+        function (event) {
+
+
+            const confirmar =
+                window.confirm(
+                    "¿Confirma el despacho de los medicamentos seleccionados?"
+                );
+
+
+            if (!confirmar) {
+
+                event.preventDefault();
+            }
+
+        }
+    );
+
+
+    actualizarTotales();
+
+</script>
+
+
+</body>
+</html>
+

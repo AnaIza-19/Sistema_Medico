@@ -44,6 +44,7 @@
             justify-content: center;
             gap: 20px;
             margin-top: 30px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -62,6 +63,15 @@
 
         .btn-agendar:hover {
             background-color: #125ea8;
+        }
+
+        .btn-historial {
+            background-color: #2e7d32;
+            color: white;
+        }
+
+        .btn-historial:hover {
+            background-color: #1b5e20;
         }
 
         .btn-salir {
@@ -104,6 +114,10 @@
 
     <div class="acciones">
 
+        <!-- ====================================== -->
+        <!-- AGENDAR CITA -->
+        <!-- ====================================== -->
+
         <a
                 th:href="@{/citas/agendar}"
                 class="btn btn-agendar">
@@ -112,6 +126,23 @@
 
         </a>
 
+
+        <!-- ====================================== -->
+        <!-- CU-11 HISTORIAL DE MEDICAMENTOS -->
+        <!-- ====================================== -->
+
+        <a
+                th:href="@{/paciente/historial-medicamentos}"
+                class="btn btn-historial">
+
+            Historial de Medicamentos
+
+        </a>
+
+
+        <!-- ====================================== -->
+        <!-- CERRAR SESIÓN -->
+        <!-- ====================================== -->
 
         <a
                 th:href="@{/cerrar-sesion}"

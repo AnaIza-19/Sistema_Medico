@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Despacho Registrado</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .header {
+            background-color: #1565c0;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+        }
+
+        .contenedor {
+            max-width: 1200px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .tarjeta {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        }
+
+        .exito {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+            border-left: 5px solid #2e7d32;
+            padding: 18px;
+            margin-bottom: 25px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .datos {
+            background-color: #e3f2fd;
+            padding: 18px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+
+        .datos p {
+            margin: 7px 0;
+        }
+
+        h2 {
+            color: #1565c0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #1565c0;
+            color: white;
+            text-align: left;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .sustituido {
+            color: #ef6c00;
+            font-weight: bold;
+        }
+
+        .alerta {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff3e0;
+            border-left: 5px solid #ef6c00;
+            color: #e65100;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .total {
+            margin-top: 25px;
+            background-color: #e8f5e9;
+            padding: 20px;
+            text-align: right;
+            border-radius: 6px;
+            font-size: 25px;
+            font-weight: bold;
+            color: #1b5e20;
+        }
+
+        .nota {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff8e1;
+            border-left: 4px solid #ffa000;
+        }
+
+        .botones {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .btn-principal {
+            background-color: #1565c0;
+            color: white;
+        }
+
+        .btn-secundario {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>Despacho de Medicamentos</h1>
+
+    <p>CU-11</p>
+
+</div>
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <div
+                class="exito"
+                th:text="'Despacho registrado exitosamente. '
+                        + ${detalles.size()}
+                        + ' medicamento(s) despachado(s). Total: Q'
+                        + ${#numbers.formatDecimal(
+                                despacho.montoTotal,
+                                1,
+                                2
+                        )}
+                        + '.'">
+        </div>
+
+
+        <h2>Resumen del Despacho</h2>
+
+
+        <div class="datos">
+
+            <p>
+                <strong>No. Despacho:</strong>
+                <span th:text="${despacho.id}"></span>
+            </p>
+
+
+            <p>
+                <strong>ID Receta:</strong>
+                <span th:text="${despacho.receta.id}"></span>
+            </p>
+
+
+            <p>
+                <strong>Sucursal:</strong>
+                <span th:text="${despacho.sucursal.nombre}"></span>
+            </p>
+
+
+            <p>
+                <strong>Personal de Farmacia:</strong>
+
+                <span th:text="${personalFarmacia.nombre
+                                + ' '
+                                + personalFarmacia.apellido}">
+                </span>
+            </p>
+
+
+            <p>
+                <strong>Fecha:</strong>
+
+                <span th:text="${#temporals.format(
+                                despacho.fechaDespacho,
+                                'dd/MM/yyyy HH:mm'
+                )}">
+                </span>
+            </p>
+
+        </div>
+
+
+        <h2>Medicamentos Despachados</h2>
+
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>Original</th>
+
+                <th>Despachado</th>
+
+                <th>Cantidad</th>
+
+                <th>Precio Unitario</th>
+
+                <th>Subtotal</th>
+
+                <th>Sustitución</th>
+
+            </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+            <tr th:each="detalle : ${detalles}">
+
+
+                <td
+                        th:text="${detalle.medicamentoOriginal.nombre}">
+                </td>
+
+
+                <td
+                        th:text="${detalle.medicamentoDespachado.nombre}">
+                </td>
+
+
+                <td
+                        th:text="${detalle.cantidad}">
+                </td>
+
+
+                <td
+                        th:text="'Q'
+                                + ${#numbers.formatDecimal(
+                                        detalle.precioUnitario,
+                                        1,
+                                        2
+                                )}">
+                </td>
+
+
+                <td
+                        th:text="'Q'
+                                + ${#numbers.formatDecimal(
+                                        detalle.subtotal,
+                                        1,
+                                        2
+                                )}">
+                </td>
+
+
+                <td>
+
+
+                    <span
+                            th:if="${!detalle.sustituido}"
+                    >
+                        No
+                    </span>
+
+
+                    <div
+                            th:if="${detalle.sustituido}"
+                            class="sustituido"
+                    >
+
+                        <div>
+                            Sí
+                        </div>
+
+                        <div
+                                th:text="'Razón: '
+                                        + ${detalle.razonSustitucion}">
+                        </div>
+
+                        <br>
+
+                        <div
+                                th:text="'Medicamento '
+                                        + ${detalle.medicamentoOriginal.nombre}
+                                        + ' sustituido por '
+                                        + ${detalle.medicamentoDespachado.nombre}
+                                        + '. El médico tratante será notificado de la sustitución.'">
+                        </div>
+
+                    </div>
+
+
+                </td>
+
+
+            </tr>
+
+
+            </tbody>
+
+        </table>
+
+
+        <div
+                class="total"
+                th:text="'Total del Despacho: Q'
+                        + ${#numbers.formatDecimal(
+                                despacho.montoTotal,
+                                1,
+                                2
+                        )}">
+        </div>
+
+
+        <!-- ALERTAS DE STOCK -->
+
+        <div
+                th:each="alerta : ${alertas}"
+                class="alerta"
+                th:text="${alerta}">
+        </div>
+
+
+        <div class="nota">
+
+            El pago físico del paciente se realiza
+            <strong>fuera del sistema</strong>.
+
+            Este módulo únicamente registra el despacho de
+            medicamentos y actualiza el inventario.
+
+        </div>
+
+
+        <div class="botones">
+
+
+            <a
+                    th:href="@{/farmacia/despacho}"
+                    class="btn btn-principal"
+            >
+                Nuevo Despacho
+            </a>
+
+
+            <a
+                    th:href="@{/farmacia}"
+                    class="btn btn-secundario"
+            >
+                Volver al Panel
+            </a>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

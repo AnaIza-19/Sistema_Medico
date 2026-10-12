@@ -4,9 +4,15 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+
 @Entity
 @Table(name = "receta_medica")
 public class RecetaMedica {
+
+
+    // ==========================================
+    // ID
+    // ==========================================
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +44,7 @@ public class RecetaMedica {
 
 
     // ==========================================
-    // FECHA
+    // FECHA DE CREACIÓN
     // ==========================================
 
     @Column(
@@ -48,22 +54,67 @@ public class RecetaMedica {
     private LocalDateTime fechaCreacion;
 
 
+    // ==========================================
+    // RECETA ACTIVA
+    // CU-11
+    // ==========================================
+
+    @Column(
+            name = "activo",
+            nullable = false
+    )
+    private Boolean activo;
+
+
+    // ==========================================
+    // NOTAS
+    // CU-11
+    // ==========================================
+
+    @Column(
+            name = "notas",
+            columnDefinition = "TEXT"
+    )
+    private String notas;
+
+
+    // ==========================================
+    // CONSTRUCTOR VACÍO
+    // ==========================================
+
     public RecetaMedica() {
     }
 
+
+    // ==========================================
+    // VALORES POR DEFECTO
+    // ==========================================
 
     @PrePersist
     public void prePersist() {
 
         if (fechaCreacion == null) {
-            fechaCreacion = LocalDateTime.now();
+
+            fechaCreacion =
+                    LocalDateTime.now();
+        }
+
+
+        if (activo == null) {
+
+            activo = true;
         }
     }
 
 
+    // ==========================================
+    // GETTERS Y SETTERS
+    // ==========================================
+
     public Long getId() {
         return id;
     }
+
 
     public void setId(Long id) {
         this.id = id;
@@ -74,6 +125,7 @@ public class RecetaMedica {
         return cita;
     }
 
+
     public void setCita(Cita cita) {
         this.cita = cita;
     }
@@ -82,6 +134,7 @@ public class RecetaMedica {
     public Usuario getMedico() {
         return medico;
     }
+
 
     public void setMedico(Usuario medico) {
         this.medico = medico;
@@ -92,9 +145,32 @@ public class RecetaMedica {
         return fechaCreacion;
     }
 
+
     public void setFechaCreacion(
             LocalDateTime fechaCreacion
     ) {
-        this.fechaCreacion = fechaCreacion;
+
+        this.fechaCreacion =
+                fechaCreacion;
+    }
+
+
+    public Boolean getActivo() {
+        return activo;
+    }
+
+
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
+    }
+
+
+    public String getNotas() {
+        return notas;
+    }
+
+
+    public void setNotas(String notas) {
+        this.notas = notas;
     }
 }

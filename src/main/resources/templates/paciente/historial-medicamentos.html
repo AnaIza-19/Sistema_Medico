@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Historial de Medicamentos</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .header {
+            background-color: #1565c0;
+            color: white;
+            padding: 22px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+        }
+
+        .paciente {
+            background-color: white;
+            padding: 15px 35px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .contenedor {
+            max-width: 1200px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .titulo {
+            color: #1565c0;
+            margin-bottom: 25px;
+        }
+
+        .sin-datos {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        }
+
+        .despacho {
+            background-color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            overflow: hidden;
+        }
+
+        .encabezado-despacho {
+            background-color: #e3f2fd;
+            padding: 18px 22px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+
+        .encabezado-despacho span {
+            display: inline-block;
+        }
+
+        .contenido {
+            padding: 22px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #1565c0;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        .sustituido {
+            color: #ef6c00;
+            font-weight: bold;
+        }
+
+        .no-sustituido {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .total {
+            margin-top: 18px;
+            text-align: right;
+            font-size: 21px;
+            font-weight: bold;
+            color: #1b5e20;
+        }
+
+        .nota {
+            margin-top: 20px;
+            background-color: #fff8e1;
+            border-left: 4px solid #ffa000;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .botones {
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .btn-volver {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        @media(max-width: 800px) {
+
+            table {
+                font-size: 13px;
+            }
+
+            .encabezado-despacho {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>Historial de Medicamentos</h1>
+
+    <p>Medicamentos despachados en farmacia interna</p>
+
+</div>
+
+
+<div class="paciente">
+
+    <strong>Paciente:</strong>
+
+    <span th:text="${paciente.nombre + ' ' + paciente.apellido}">
+        Paciente
+    </span>
+
+</div>
+
+
+<div class="contenedor">
+
+    <h2 class="titulo">
+        Mis medicamentos despachados
+    </h2>
+
+
+    <!-- ============================================= -->
+    <!-- SIN HISTORIAL -->
+    <!-- ============================================= -->
+
+    <div
+            class="sin-datos"
+            th:if="${despachos == null or despachos.isEmpty()}"
+    >
+
+        <h3>
+            No hay medicamentos despachados
+        </h3>
+
+        <p>
+            Aún no existen despachos confirmados
+            registrados en su historial.
+        </p>
+
+    </div>
+
+
+    <!-- ============================================= -->
+    <!-- HISTORIAL -->
+    <!-- ============================================= -->
+
+    <div
+            th:each="despacho : ${despachos}"
+            class="despacho"
+    >
+
+
+        <!-- INFORMACIÓN DEL DESPACHO -->
+
+        <div class="encabezado-despacho">
+
+            <span>
+                <strong>No. Despacho:</strong>
+
+                <span th:text="${despacho.id}">
+                </span>
+            </span>
+
+
+            <span>
+                <strong>Receta:</strong>
+
+                <span th:text="${despacho.receta.id}">
+                </span>
+            </span>
+
+
+            <span>
+                <strong>Fecha:</strong>
+
+                <span th:text="${#temporals.format(
+                                despacho.fechaDespacho,
+                                'dd/MM/yyyy HH:mm'
+                )}">
+                </span>
+            </span>
+
+
+            <span>
+                <strong>Sucursal:</strong>
+
+                <span th:text="${despacho.sucursal.nombre}">
+                </span>
+            </span>
+
+        </div>
+
+
+        <div class="contenido">
+
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>Medicamento Recetado</th>
+
+                    <th>Medicamento Entregado</th>
+
+                    <th>Cantidad</th>
+
+                    <th>Precio Unitario</th>
+
+                    <th>Subtotal</th>
+
+                    <th>Sustitución</th>
+
+                </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                <tr
+                        th:each="detalle :
+                            ${detallesPorDespacho.get(despacho.id)}"
+                >
+
+
+                    <td
+                            th:text="${detalle.medicamentoOriginal.nombre}">
+                    </td>
+
+
+                    <td
+                            th:text="${detalle.medicamentoDespachado.nombre}">
+                    </td>
+
+
+                    <td
+                            th:text="${detalle.cantidad}">
+                    </td>
+
+
+                    <td
+                            th:text="'Q'
+                                    + ${#numbers.formatDecimal(
+                                            detalle.precioUnitario,
+                                            1,
+                                            2
+                                    )}">
+                    </td>
+
+
+                    <td
+                            th:text="'Q'
+                                    + ${#numbers.formatDecimal(
+                                            detalle.subtotal,
+                                            1,
+                                            2
+                                    )}">
+                    </td>
+
+
+                    <td>
+
+
+                        <span
+                                th:if="${!detalle.sustituido}"
+                                class="no-sustituido"
+                        >
+                            No
+                        </span>
+
+
+                        <div
+                                th:if="${detalle.sustituido}"
+                                class="sustituido"
+                        >
+
+                            <div>
+                                Sí
+                            </div>
+
+                            <div
+                                    th:text="'Razón: '
+                                            + ${detalle.razonSustitucion}">
+                            </div>
+
+                        </div>
+
+
+                    </td>
+
+
+                </tr>
+
+
+                </tbody>
+
+            </table>
+
+
+            <div
+                    class="total"
+                    th:text="'Total del Despacho: Q'
+                            + ${#numbers.formatDecimal(
+                                    despacho.montoTotal,
+                                    1,
+                                    2
+                            )}">
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <div class="nota">
+
+        Este historial muestra únicamente los medicamentos
+        que fueron efectivamente despachados por farmacia.
+
+        Los registros cancelados donde no se adquirieron
+        medicamentos no aparecen como medicamentos entregados.
+
+    </div>
+
+
+    <div class="botones">
+
+        <a
+                th:href="@{/dashboard}"
+                class="btn btn-volver"
+        >
+            Volver al Panel
+        </a>
+
+    </div>
+
+
+</div>
+
+
+</body>
+</html>

@@ -2,9 +2,15 @@ package com.example.sistemamedico.model;
 
 import jakarta.persistence.*;
 
+
 @Entity
 @Table(name = "receta_medica_detalle")
 public class RecetaMedicaDetalle {
+
+
+    // ==========================================
+    // ID
+    // ==========================================
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,7 +66,7 @@ public class RecetaMedicaDetalle {
 
 
     // ==========================================
-    // DURACION
+    // DURACIÓN
     // ==========================================
 
     @Column(
@@ -82,13 +88,47 @@ public class RecetaMedicaDetalle {
     private String indicaciones;
 
 
+    // ==========================================
+    // CANTIDAD RECETADA
+    // CU-11 DESPACHO DE MEDICAMENTOS
+    // ==========================================
+
+    @Column(
+            name = "cantidad",
+            nullable = false
+    )
+    private Integer cantidad;
+
+
+    // ==========================================
+    // CONSTRUCTOR VACÍO
+    // ==========================================
+
     public RecetaMedicaDetalle() {
     }
 
 
+    // ==========================================
+    // VALORES POR DEFECTO
+    // ==========================================
+
+    @PrePersist
+    public void prePersist() {
+
+        if (cantidad == null) {
+            cantidad = 1;
+        }
+    }
+
+
+    // ==========================================
+    // GETTERS Y SETTERS
+    // ==========================================
+
     public Long getId() {
         return id;
     }
+
 
     public void setId(Long id) {
         this.id = id;
@@ -98,6 +138,7 @@ public class RecetaMedicaDetalle {
     public RecetaMedica getReceta() {
         return receta;
     }
+
 
     public void setReceta(
             RecetaMedica receta
@@ -110,6 +151,7 @@ public class RecetaMedicaDetalle {
         return medicamento;
     }
 
+
     public void setMedicamento(
             Medicamento medicamento
     ) {
@@ -121,6 +163,7 @@ public class RecetaMedicaDetalle {
         return dosis;
     }
 
+
     public void setDosis(String dosis) {
         this.dosis = dosis;
     }
@@ -129,6 +172,7 @@ public class RecetaMedicaDetalle {
     public String getFrecuencia() {
         return frecuencia;
     }
+
 
     public void setFrecuencia(
             String frecuencia
@@ -141,6 +185,7 @@ public class RecetaMedicaDetalle {
         return duracion;
     }
 
+
     public void setDuracion(
             String duracion
     ) {
@@ -152,9 +197,22 @@ public class RecetaMedicaDetalle {
         return indicaciones;
     }
 
+
     public void setIndicaciones(
             String indicaciones
     ) {
         this.indicaciones = indicaciones;
+    }
+
+
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+
+    public void setCantidad(
+            Integer cantidad
+    ) {
+        this.cantidad = cantidad;
     }
 }

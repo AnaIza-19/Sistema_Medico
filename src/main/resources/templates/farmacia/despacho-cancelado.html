@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>No adquisición registrada</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .header {
+            background-color: #1565c0;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+        }
+
+        .contenedor {
+            max-width: 950px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .tarjeta {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+        }
+
+        .mensaje {
+            background-color: #fff3e0;
+            border-left: 5px solid #ef6c00;
+            color: #e65100;
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .datos {
+            margin-top: 25px;
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 6px;
+        }
+
+        .datos p {
+            margin: 8px 0;
+        }
+
+        .nota {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-left: 5px solid #2e7d32;
+        }
+
+        .botones {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .btn-principal {
+            background-color: #1565c0;
+            color: white;
+        }
+
+        .btn-secundario {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<div class="header">
+
+    <h1>Farmacia</h1>
+
+    <p>CU-11 Despacho de Medicamentos</p>
+
+</div>
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <div
+                class="mensaje"
+                th:text="${despacho.observaciones}">
+        </div>
+
+
+        <div class="datos">
+
+            <p>
+                <strong>Registro No.:</strong>
+                <span th:text="${despacho.id}"></span>
+            </p>
+
+            <p>
+                <strong>Receta:</strong>
+                <span th:text="${despacho.receta.id}"></span>
+            </p>
+
+            <p>
+                <strong>Estado:</strong>
+                <span th:text="${despacho.estado}"></span>
+            </p>
+
+            <p>
+                <strong>Sucursal:</strong>
+                <span th:text="${despacho.sucursal.nombre}"></span>
+            </p>
+
+            <p>
+                <strong>Fecha:</strong>
+
+                <span th:text="${#temporals.format(
+                                despacho.fechaDespacho,
+                                'dd/MM/yyyy HH:mm'
+                )}">
+                </span>
+            </p>
+
+            <p>
+                <strong>Monto:</strong>
+                Q0.00
+            </p>
+
+        </div>
+
+
+        <div class="nota">
+
+            No se descontó ningún medicamento del inventario.
+
+            La receta permanece activa mientras continúe dentro
+            de su período de vigencia.
+
+        </div>
+
+
+        <div class="botones">
+
+            <a
+                    th:href="@{/farmacia/despacho}"
+                    class="btn btn-principal"
+            >
+                Nuevo Despacho
+            </a>
+
+
+            <a
+                    th:href="@{/farmacia}"
+                    class="btn btn-secundario"
+            >
+                Volver al Panel
+            </a>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

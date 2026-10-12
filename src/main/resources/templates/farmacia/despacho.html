@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Nuevo Despacho - Farmacia</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .header {
+            background-color: #1565c0;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+        }
+
+        .usuario {
+            background-color: white;
+            padding: 15px 35px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .usuario span {
+            margin-right: 25px;
+        }
+
+        .contenedor {
+            max-width: 1200px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .tarjeta {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        }
+
+        h2 {
+            color: #1565c0;
+            margin-top: 0;
+        }
+
+        .descripcion {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .formulario {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input {
+            padding: 12px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .botones {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+        }
+
+        button,
+        .btn {
+            border: none;
+            padding: 12px 22px;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-buscar {
+            background-color: #1565c0;
+            color: white;
+        }
+
+        .btn-volver {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-despachar {
+            background-color: #2e7d32;
+            color: white;
+        }
+
+        .btn-vencida {
+            background-color: #c62828;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        .nota {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-left: 4px solid #1565c0;
+            border-radius: 5px;
+        }
+
+        .mensaje {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .error {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #ffebee;
+            border-left: 4px solid #c62828;
+            color: #b71c1c;
+        }
+
+        .resultados {
+            margin-top: 35px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #1565c0;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .vigente {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .vencida {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        @media(max-width:700px) {
+
+            .formulario {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 13px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<div class="header">
+
+    <h1>Nuevo Despacho</h1>
+
+    <p>CU-11 Despacho de Medicamentos</p>
+
+</div>
+
+
+<div class="usuario">
+
+    <span>
+
+        <strong>Personal:</strong>
+
+        <span th:text="${personalFarmacia.nombre + ' ' + personalFarmacia.apellido}">
+            Carlos Farmacia
+        </span>
+
+    </span>
+
+
+    <span>
+
+        <strong>Sucursal:</strong>
+
+        <span th:text="${personalFarmacia.sucursal != null
+                        ? personalFarmacia.sucursal.nombre
+                        : 'Sin sucursal'}">
+            Hospital Central
+        </span>
+
+    </span>
+
+</div>
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <h2>Buscar Receta</h2>
+
+
+        <p class="descripcion">
+
+            Ingrese el ID de la receta o el ID de la consulta
+            para localizar la prescripción médica.
+
+        </p>
+
+
+        <form
+                th:action="@{/farmacia/despacho}"
+                method="get"
+        >
+
+
+            <div class="formulario">
+
+
+                <div class="campo">
+
+                    <label for="recetaId">
+                        ID de Receta
+                    </label>
+
+                    <input
+                            type="number"
+                            id="recetaId"
+                            name="recetaId"
+                            min="1"
+                            th:value="${recetaId}"
+                            placeholder="Ejemplo: 1"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="consultaId">
+                        ID de Consulta
+                    </label>
+
+                    <input
+                            type="number"
+                            id="consultaId"
+                            name="consultaId"
+                            min="1"
+                            th:value="${consultaId}"
+                            placeholder="Ejemplo: 1"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="botones">
+
+                <button
+                        type="submit"
+                        class="btn btn-buscar"
+                >
+                    Buscar
+                </button>
+
+
+                <a
+                        th:href="@{/farmacia}"
+                        class="btn btn-volver"
+                >
+                    Volver
+                </a>
+
+            </div>
+
+        </form>
+
+
+        <div
+                class="nota"
+                th:if="${resultados == null
+                         and mensaje == null
+                         and error == null}"
+        >
+
+            Puede utilizar uno de los dos filtros:
+            <strong>ID de Receta</strong>
+            o
+            <strong>ID de Consulta</strong>.
+
+        </div>
+
+
+        <div
+                class="error"
+                th:if="${error != null}"
+                th:text="${error}"
+        >
+        </div>
+
+
+        <div
+                class="mensaje"
+                th:if="${mensaje != null}"
+                th:text="${mensaje}"
+        >
+        </div>
+
+
+        <!-- ========================================== -->
+        <!-- RESULTADOS -->
+        <!-- ========================================== -->
+
+        <div
+                class="resultados"
+                th:if="${resultados != null and !resultados.isEmpty()}"
+        >
+
+            <h2>Resultados</h2>
+
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>ID Receta</th>
+
+                    <th>ID Consulta</th>
+
+                    <th>Fecha de Emisión</th>
+
+                    <th>Vigencia</th>
+
+                    <th>Notas</th>
+
+                    <th>Acción</th>
+
+                </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                <tr th:each="resultado : ${resultados}">
+
+
+                    <td
+                            th:text="${resultado.receta.id}"
+                    >
+                    </td>
+
+
+                    <td
+                            th:text="${resultado.consultaId != null
+                                    ? resultado.consultaId
+                                    : 'Sin consulta'}"
+                    >
+                    </td>
+
+
+                    <td
+                            th:text="${#temporals.format(
+                                    resultado.receta.fechaCreacion,
+                                    'dd/MM/yyyy HH:mm'
+                            )}"
+                    >
+                    </td>
+
+
+                    <td>
+
+                        <span
+                                class="vigente"
+                                th:if="${resultado.vigente}"
+                                th:text="'Vigente - '
+                                        + ${resultado.diasTranscurridos}
+                                        + ' día(s)'"
+                        >
+                        </span>
+
+
+                        <span
+                                class="vencida"
+                                th:if="${!resultado.vigente}"
+                                th:text="'Vencida - '
+                                        + ${resultado.diasTranscurridos}
+                                        + ' día(s)'"
+                        >
+                        </span>
+
+                    </td>
+
+
+                    <td
+                            th:text="${resultado.receta.notas != null
+                                    and !resultado.receta.notas.isBlank()
+                                    ? resultado.receta.notas
+                                    : 'Sin notas'}"
+                    >
+                    </td>
+
+
+                    <td>
+
+
+                        <button
+                                th:if="${!resultado.vigente}"
+                                type="button"
+                                class="btn btn-vencida"
+                                disabled
+                        >
+                            Vencida
+                        </button>
+
+
+                        <a
+                                th:if="${resultado.vigente}"
+                                th:href="@{/farmacia/despacho/{id}(id=${resultado.receta.id})}"
+                                class="btn btn-despachar"
+                        >
+                            Despachar
+                        </a>
+
+
+                    </td>
+
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

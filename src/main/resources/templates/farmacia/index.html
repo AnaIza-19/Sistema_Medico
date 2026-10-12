@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Farmacia</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .encabezado {
+            background: #1f4e79;
+            color: white;
+            padding: 22px 35px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+            font-size: 34px;
+        }
+
+        .encabezado p {
+            margin: 6px 0 0;
+        }
+
+        .usuario {
+            text-align: right;
+        }
+
+        .usuario p {
+            margin: 3px 0;
+        }
+
+        .cerrar-sesion {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+        }
+
+        .tarjeta {
+            background: white;
+            padding: 30px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                    0 2px 10px
+                    rgba(0,0,0,0.10);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1f4e79;
+            font-size: 28px;
+        }
+
+        .descripcion {
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        .opciones {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .opcion {
+            flex: 1;
+            min-width: 260px;
+
+            background: #f8f9fa;
+            padding: 25px;
+
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .opcion h3 {
+            margin-top: 0;
+            color: #1f4e79;
+        }
+
+        .btn {
+            display: inline-block;
+
+            margin-top: 15px;
+
+            padding: 12px 20px;
+
+            background: #198754;
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 6px;
+
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #157347;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="encabezado">
+
+    <div>
+
+        <h1>
+            Farmacia
+        </h1>
+
+        <p>
+            CU-11 Despacho de Medicamentos
+        </p>
+
+    </div>
+
+
+    <div class="usuario">
+
+        <p>
+            <strong>Personal:</strong>
+
+            <span th:text="${personalFarmacia.nombreCompleto}">
+                Personal
+            </span>
+        </p>
+
+        <p>
+            Rol:
+            <strong>FARMACIA</strong>
+        </p>
+
+        <p th:if="${personalFarmacia.sucursal != null}">
+            Sucursal:
+
+            <strong th:text="${personalFarmacia.sucursal.nombre}">
+                Sucursal
+            </strong>
+        </p>
+
+        <a
+                class="cerrar-sesion"
+                th:href="@{/personal/cerrar-sesion}">
+
+            Cerrar sesión
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="contenedor">
+
+
+    <div class="tarjeta">
+
+        <h2>
+            Panel de Farmacia
+        </h2>
+
+
+        <p class="descripcion">
+
+            Gestión del despacho de medicamentos
+            prescritos por el médico.
+
+        </p>
+
+
+        <div class="opciones">
+
+
+            <div class="opcion">
+
+                <h3>
+                    Nuevo Despacho
+                </h3>
+
+                <p>
+                    Buscar una receta médica vigente
+                    y preparar los medicamentos
+                    para su despacho.
+                </p>
+
+
+                <a
+                        class="btn"
+                        th:href="@{/farmacia/despacho}">
+
+                    Nuevo Despacho
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+</html>

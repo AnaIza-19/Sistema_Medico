@@ -249,13 +249,8 @@ public class PersonalLoginController {
         // CU-09
         // =================================================
 
-        if (
-                "LABORATORIO".equalsIgnoreCase(
-                        rol
-                )
-        ) {
-
-            return "redirect:/laboratorio";
+        if ("FARMACIA".equalsIgnoreCase(rol)) {
+            return "redirect:/farmacia";
         }
 
 

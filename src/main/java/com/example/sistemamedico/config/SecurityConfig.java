@@ -5,18 +5,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+
 @Configuration
 public class SecurityConfig {
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
     ) throws Exception {
 
+
         http
+
+                // =================================================
+                // AUTORIZACIÓN DE RUTAS
+                // =================================================
+
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers(
+
 
                                 // =========================
                                 // PORTAL PÚBLICO - CU-00
@@ -35,9 +44,19 @@ public class SecurityConfig {
                                 "/login-paciente",
 
                                 "/dashboard",
+
                                 "/cerrar-sesion",
 
                                 "/registro",
+
+
+                                // =========================
+                                // PORTAL DEL PACIENTE
+                                // CU-11 HISTORIAL
+                                // =========================
+
+                                "/paciente",
+                                "/paciente/**",
 
 
                                 // =========================
@@ -49,7 +68,8 @@ public class SecurityConfig {
 
 
                                 // =========================
-                                // AGENDAMIENTO - CU-03/CU-04
+                                // AGENDAMIENTO
+                                // CU-03 / CU-04
                                 // =========================
 
                                 "/citas/**",
@@ -85,10 +105,30 @@ public class SecurityConfig {
 
                                 "/admin/**",
 
+
+                                // =========================
+                                // MÉDICO - CU-08
+                                // =========================
+
                                 "/medico",
                                 "/medico/**",
+
+
+                                // =========================
+                                // LABORATORIO - CU-09
+                                // =========================
+
                                 "/laboratorio",
                                 "/laboratorio/**",
+
+
+                                // =========================
+                                // FARMACIA - CU-11
+                                // =========================
+
+                                "/farmacia",
+                                "/farmacia/**",
+
 
                                 // =========================
                                 // ERROR
@@ -98,19 +138,40 @@ public class SecurityConfig {
 
                         ).permitAll()
 
-                        .anyRequest().authenticated()
+
+                        .anyRequest()
+                        .authenticated()
                 )
 
 
-                // Login controlado manualmente por el proyecto
-                .formLogin(form -> form.disable())
+                // =================================================
+                // LOGIN CONTROLADO MANUALMENTE
+                // =================================================
+
+                .formLogin(
+                        form ->
+                                form.disable()
+                )
 
 
-                .httpBasic(basic -> basic.disable())
+                // =================================================
+                // HTTP BASIC DESACTIVADO
+                // =================================================
 
+                .httpBasic(
+                        basic ->
+                                basic.disable()
+                )
+
+
+                // =================================================
+                // CSRF
+                // =================================================
 
                 .csrf(csrf -> csrf
+
                         .ignoringRequestMatchers(
+
 
                                 "/api/verificar-dpi",
 
@@ -147,6 +208,7 @@ public class SecurityConfig {
                                 // =========================
 
                                 "/enfermeria/**"
+
                         )
                 );
 
