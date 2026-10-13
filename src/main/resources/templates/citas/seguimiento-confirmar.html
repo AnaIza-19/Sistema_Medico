@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Confirmar Seguimiento
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        header {
+            background: #1565c0;
+            color: white;
+            padding: 25px 40px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header p {
+            margin: 6px 0 0;
+            font-size: 17px;
+        }
+
+        .contenedor {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .tarjeta {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+
+            box-shadow:
+                    0 3px 12px
+                    rgba(0, 0, 0, 0.10);
+        }
+
+        .banner {
+            background: #e8f5e9;
+            border: 1px solid #81c784;
+            border-left: 6px solid #2e7d32;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .banner h3 {
+            margin-top: 0;
+            color: #1b5e20;
+        }
+
+        .datos {
+            display: grid;
+
+            grid-template-columns:
+                    repeat(
+                            auto-fit,
+                            minmax(220px, 1fr)
+                    );
+
+            gap: 12px;
+        }
+
+        .dato {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        h2 {
+            color: #1565c0;
+        }
+
+        .campo {
+            margin-top: 22px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .ayuda {
+            margin-top: 6px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-confirmar {
+            background: #2e7d32;
+            color: white;
+        }
+
+        .btn-volver {
+            background: #ddd;
+            color: #222;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>
+        Confirmar Cita de Seguimiento
+    </h1>
+
+    <p>
+        CU-12 Agendamiento de Cita de Seguimiento
+    </p>
+
+</header>
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <!-- ============================================= -->
+        <!-- RESUMEN -->
+        <!-- ============================================= -->
+
+        <div class="banner">
+
+            <h3>
+                Resumen del Seguimiento
+            </h3>
+
+
+            <div class="datos">
+
+
+                <div class="dato">
+
+                    <strong>Paciente:</strong>
+
+                    <span th:text="${paciente.nombreCompleto}">
+                        Paciente
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>Médico:</strong>
+
+                    <span th:text="${medico.nombreCompleto}">
+                        Médico
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>Especialidad:</strong>
+
+                    <span th:text="${especialidad.nombre}">
+                        Especialidad
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>Sucursal:</strong>
+
+                    <span th:text="${sucursal.nombre}">
+                        Sucursal
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>Tipo:</strong>
+
+                    <span
+                            th:if="${tipoSeguimiento == 'MONITOREO_TRATAMIENTO'}">
+                        Monitoreo de Tratamiento
+                    </span>
+
+                    <span
+                            th:if="${tipoSeguimiento == 'REVISION_RESULTADOS_LABORATORIO'}">
+                        Revisión de Resultados de Laboratorio
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>Fecha:</strong>
+
+                    <span
+                            th:text="${#temporals.format(
+                                    horario.fecha,
+                                    'dd/MM/yyyy'
+                            )}">
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>Hora:</strong>
+
+                    <span
+                            th:text="${#temporals.format(
+                                    horario.horaInicio,
+                                    'HH:mm'
+                            )}">
+                    </span>
+
+                    a
+
+                    <span
+                            th:text="${#temporals.format(
+                                    horario.horaFin,
+                                    'HH:mm'
+                            )}">
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <h2>
+            Información del Seguimiento
+        </h2>
+
+
+        <form
+                th:action="@{/citas/seguimiento/confirmar}"
+                method="post"
+        >
+
+
+            <input
+                    type="hidden"
+                    name="parentConsultationId"
+                    th:value="${parentConsultationId}"
+            >
+
+
+            <input
+                    type="hidden"
+                    name="tipoSeguimiento"
+                    th:value="${tipoSeguimiento}"
+            >
+
+
+            <input
+                    type="hidden"
+                    name="horarioId"
+                    th:value="${horarioId}"
+            >
+
+
+            <!-- MOTIVO -->
+
+            <div class="campo">
+
+                <label for="motivoSeguimiento">
+                    Motivo / Observaciones
+                </label>
+
+
+                <textarea
+                        id="motivoSeguimiento"
+                        name="motivoSeguimiento"
+                        minlength="10"
+                        maxlength="2000"
+                        required
+                        placeholder="Ingrese el motivo de la cita de seguimiento..."></textarea>
+
+
+                <div class="ayuda">
+                    Debe contener entre 10 y 2000 caracteres.
+                </div>
+
+            </div>
+
+
+            <!-- PRIORIDAD -->
+
+            <div class="campo">
+
+                <label for="prioridad">
+                    Prioridad
+                </label>
+
+
+                <select
+                        id="prioridad"
+                        name="prioridad"
+                        required
+                >
+
+                    <option value="NORMAL">
+                        Normal
+                    </option>
+
+                    <option value="EMERGENCIA">
+                        Emergencia
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- BOTONES -->
+
+            <div class="acciones">
+
+
+                <button
+                        type="submit"
+                        class="btn btn-confirmar"
+                >
+                    Confirmar Cita
+                </button>
+
+
+                <a
+                        th:href="@{/citas/seguimiento/horario(
+                            followUp=true,
+                            parentConsultationId=${parentConsultationId},
+                            tipoSeguimiento=${tipoSeguimiento}
+                        )}"
+                        class="btn btn-volver"
+                >
+                    Volver
+                </a>
+
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

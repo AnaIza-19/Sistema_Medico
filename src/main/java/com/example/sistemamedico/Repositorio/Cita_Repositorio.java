@@ -113,4 +113,33 @@ public interface Cita_Repositorio
             @Param("ahora")
             LocalDateTime ahora
     );
+    // =====================================================
+// CU-12
+//
+// BUSCAR RECORDATORIOS DE CITAS DE SEGUIMIENTO
+// PENDIENTES DE ENVÍO
+//
+// Condiciones:
+//
+// - Debe ser una cita de seguimiento.
+// - Debe estar CONFIRMADA.
+// - Debe tener recordatorio programado.
+// - La fecha programada ya debe haber llegado.
+// - El recordatorio todavía no debe haberse enviado.
+// =====================================================
+
+    @Query("""
+        SELECT c
+        FROM Cita c
+        WHERE c.tipoSeguimiento IS NOT NULL
+          AND UPPER(c.estado) = 'CONFIRMADA'
+          AND c.recordatorioProgramadoPara IS NOT NULL
+          AND c.recordatorioProgramadoPara <= :ahora
+          AND c.recordatorioEnviado = false
+        ORDER BY c.recordatorioProgramadoPara ASC
+        """)
+    List<Cita> buscarRecordatoriosSeguimientoPendientes(
+            @Param("ahora")
+            LocalDateTime ahora
+    );
 }

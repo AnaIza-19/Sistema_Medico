@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Cita de Seguimiento
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+
+        header {
+            background: #1565c0;
+            color: white;
+            padding: 25px 40px;
+        }
+
+
+        header h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+
+        header p {
+            margin: 6px 0 0;
+            font-size: 17px;
+        }
+
+
+        .contenedor {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+
+        .tarjeta {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+
+            box-shadow:
+                    0 3px 12px
+                    rgba(0, 0, 0, 0.10);
+        }
+
+
+        .tarjeta h2 {
+            margin-top: 0;
+            color: #1565c0;
+        }
+
+
+        /* =========================================
+           BANNER VERDE CU-12
+           ========================================= */
+
+        .banner-seguimiento {
+            background: #e8f5e9;
+            border: 1px solid #81c784;
+            border-left: 6px solid #2e7d32;
+
+            padding: 22px;
+
+            border-radius: 8px;
+
+            margin-bottom: 30px;
+        }
+
+
+        .banner-seguimiento h3 {
+            margin-top: 0;
+            color: #1b5e20;
+        }
+
+
+        .datos {
+            display: grid;
+
+            grid-template-columns:
+                    repeat(
+                            auto-fit,
+                            minmax(250px, 1fr)
+                    );
+
+            gap: 15px;
+        }
+
+
+        .dato {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+
+        .dato strong {
+            color: #333;
+        }
+
+
+        label {
+            display: block;
+
+            font-weight: bold;
+
+            margin-bottom: 8px;
+        }
+
+
+        select {
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #bbb;
+
+            border-radius: 6px;
+
+            font-size: 16px;
+        }
+
+
+        .campo {
+            margin-top: 25px;
+        }
+
+
+        .acciones {
+            margin-top: 30px;
+
+            display: flex;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .btn {
+            display: inline-block;
+
+            padding: 12px 22px;
+
+            border-radius: 6px;
+
+            text-decoration: none;
+
+            border: none;
+
+            cursor: pointer;
+
+            font-size: 16px;
+        }
+
+
+        .btn-continuar {
+            background: #1565c0;
+            color: white;
+        }
+
+
+        .btn-continuar:hover {
+            background: #0d47a1;
+        }
+
+
+        .btn-volver {
+            background: #ddd;
+            color: #222;
+        }
+
+
+        .nota {
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>
+        Agendar Cita de Seguimiento
+    </h1>
+
+    <p>
+        CU-12 Agendamiento de Cita de Seguimiento
+    </p>
+
+</header>
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <!-- ============================================= -->
+        <!-- DATOS PRECARGADOS -->
+        <!-- ============================================= -->
+
+        <div class="banner-seguimiento">
+
+            <h3>
+                Datos precargados de la consulta
+            </h3>
+
+
+            <div class="datos">
+
+
+                <div class="dato">
+
+                    <strong>
+                        Paciente:
+                    </strong>
+
+                    <span
+                            th:text="${paciente.nombreCompleto}">
+                        Paciente
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>
+                        Médico:
+                    </strong>
+
+                    <span
+                            th:text="${medico.nombreCompleto}">
+                        Médico
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>
+                        Especialidad:
+                    </strong>
+
+                    <span
+                            th:text="${especialidad.nombre}">
+                        Especialidad
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>
+                        Sucursal:
+                    </strong>
+
+                    <span
+                            th:text="${sucursal.nombre}">
+                        Sucursal
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>
+                        Consulta padre:
+                    </strong>
+
+                    #<span
+                        th:text="${parentConsultationId}">
+                        1
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <h2>
+            Tipo de Seguimiento
+        </h2>
+
+
+        <p>
+            Seleccione el motivo por el cual
+            el paciente requiere una nueva cita.
+        </p>
+
+
+        <!-- ============================================= -->
+        <!-- SELECCIONAR TIPO -->
+        <!-- ============================================= -->
+
+        <form
+                th:action="@{/citas/seguimiento/horario}"
+                method="get"
+        >
+
+
+            <input
+                    type="hidden"
+                    name="followUp"
+                    value="true"
+            >
+
+
+            <input
+                    type="hidden"
+                    name="parentConsultationId"
+                    th:value="${parentConsultationId}"
+            >
+
+
+            <div class="campo">
+
+                <label for="tipoSeguimiento">
+                    Tipo de seguimiento
+                </label>
+
+
+                <select
+                        id="tipoSeguimiento"
+                        name="tipoSeguimiento"
+                        required
+                >
+
+                    <option value="">
+                        Seleccione una opción
+                    </option>
+
+
+                    <option value="MONITOREO_TRATAMIENTO">
+                        Monitoreo de Tratamiento
+                    </option>
+
+
+                    <option value="REVISION_RESULTADOS_LABORATORIO">
+                        Revisión de Resultados de Laboratorio
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <p class="nota">
+                Los datos del paciente, médico,
+                especialidad y sucursal provienen
+                automáticamente de la consulta original.
+            </p>
+
+
+            <div class="acciones">
+
+                <button
+                        type="submit"
+                        class="btn btn-continuar"
+                >
+                    Continuar
+                </button>
+
+
+                <a
+                        th:href="@{/medico}"
+                        class="btn btn-volver"
+                >
+                    Volver
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

@@ -547,12 +547,12 @@
                     <!-- CU-11 -->
                     <!-- ================================= -->
 
-                    <button type="button"
-                            class="btn-principal">
-
+                    <a
+                            class="boton btn-principal"
+                            th:href="@{/citas/seguimiento/iniciar(citaId=${cita.id})}"
+                    >
                         Agendar Seguimiento
-
-                    </button>
+                    </a>
 
 
 

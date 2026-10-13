@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "citas")
 public class Cita {
 
+
     // =====================================================
     // ID
     // =====================================================
@@ -153,6 +154,44 @@ public class Cita {
 
 
     // =====================================================
+    // TIPO DE SEGUIMIENTO
+    // CU-12
+    //
+    // MONITOREO_TRATAMIENTO
+    // REVISION_RESULTADOS_LABORATORIO
+    //
+    // NULL = cita normal
+    // =====================================================
+
+    @Column(
+            name = "tipo_seguimiento",
+            length = 50
+    )
+    private String tipoSeguimiento;
+
+    @Column(name = "recordatorio_programado_para")
+    private LocalDateTime recordatorioProgramadoPara;
+
+    @Column(name = "recordatorio_enviado", nullable = false)
+    private Boolean recordatorioEnviado = false;
+    // =====================================================
+    // CONSULTA PADRE
+    // CU-12
+    //
+    // Consulta médica desde la cual se generó
+    // la cita de seguimiento.
+    //
+    // NULL = cita normal
+    // =====================================================
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "consulta_padre_id"
+    )
+    private ConsultaMedica consultaPadre;
+
+
+    // =====================================================
     // FECHA DE CREACIÓN
     // =====================================================
 
@@ -169,6 +208,7 @@ public class Cita {
 
     @PrePersist
     public void prePersist() {
+
 
         // =================================================
         // FECHA DE CREACIÓN
@@ -421,6 +461,66 @@ public class Cita {
 
         this.origen =
                 origen;
+    }
+    public LocalDateTime getRecordatorioProgramadoPara() {
+        return recordatorioProgramadoPara;
+    }
+
+    public void setRecordatorioProgramadoPara(
+            LocalDateTime recordatorioProgramadoPara
+    ) {
+        this.recordatorioProgramadoPara =
+                recordatorioProgramadoPara;
+    }
+
+    public Boolean getRecordatorioEnviado() {
+        return recordatorioEnviado;
+    }
+
+    public void setRecordatorioEnviado(
+            Boolean recordatorioEnviado
+    ) {
+        this.recordatorioEnviado =
+                recordatorioEnviado;
+    }
+
+    // =====================================================
+    // TIPO DE SEGUIMIENTO
+    // CU-12
+    // =====================================================
+
+    public String getTipoSeguimiento() {
+
+        return tipoSeguimiento;
+    }
+
+
+    public void setTipoSeguimiento(
+            String tipoSeguimiento
+    ) {
+
+        this.tipoSeguimiento =
+                tipoSeguimiento;
+    }
+
+
+    // =====================================================
+    // CONSULTA PADRE
+    // CU-12
+    // =====================================================
+
+    public ConsultaMedica getConsultaPadre() {
+
+        return consultaPadre;
+    }
+
+
+    public void setConsultaPadre(
+            ConsultaMedica consultaPadre
+    ) {
+
+        this.consultaPadre =
+                consultaPadre;
     }
 
 

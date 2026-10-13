@@ -1,12 +1,14 @@
 package com.example.sistemamedico.service;
 
 import com.example.sistemamedico.Repositorio.Cita_Repositorio;
+import com.example.sistemamedico.Repositorio.ConsultaMedica_Repositorio;
 import com.example.sistemamedico.Repositorio.Especialidad_Repositorio;
 import com.example.sistemamedico.Repositorio.HorarioMedico_Repositorio;
 import com.example.sistemamedico.Repositorio.Sucursal_Repositorio;
 import com.example.sistemamedico.Repositorio.Usuario_Repositorio;
 
 import com.example.sistemamedico.model.Cita;
+import com.example.sistemamedico.model.ConsultaMedica;
 import com.example.sistemamedico.model.Especialidad;
 import com.example.sistemamedico.model.HorarioMedico;
 import com.example.sistemamedico.model.Sucursal;
@@ -38,6 +40,10 @@ public class AgendamientoCitaService {
 
     private final Cita_Repositorio citaRepository;
 
+    private final ConsultaMedica_Repositorio consultaMedicaRepository;
+
+    private final CorreoService correoService;
+
 
     // =====================================================
     // CONSTRUCTOR
@@ -46,14 +52,12 @@ public class AgendamientoCitaService {
     public AgendamientoCitaService(
 
             Sucursal_Repositorio sucursalRepository,
-
             Especialidad_Repositorio especialidadRepository,
-
             Usuario_Repositorio usuarioRepository,
-
             HorarioMedico_Repositorio horarioMedicoRepository,
-
-            Cita_Repositorio citaRepository
+            Cita_Repositorio citaRepository,
+            ConsultaMedica_Repositorio consultaMedicaRepository,
+            CorreoService correoService
     ) {
 
         this.sucursalRepository =
@@ -70,6 +74,12 @@ public class AgendamientoCitaService {
 
         this.citaRepository =
                 citaRepository;
+
+        this.consultaMedicaRepository =
+                consultaMedicaRepository;
+
+        this.correoService =
+                correoService;
     }
 
 
@@ -162,6 +172,63 @@ public class AgendamientoCitaService {
                 );
     }
 
+// =====================================================
+// CU-12
+// HORARIOS FUTUROS DISPONIBLES PARA SEGUIMIENTO
+//
+// Solo:
+// - mismo médico
+// - misma sucursal
+// - misma especialidad
+// - estado DISPONIBLE
+// - fecha y hora futuras
+// =====================================================
+
+    public List<HorarioMedico> obtenerHorariosSeguimientoDisponibles(
+
+            Long medicoId,
+
+            Long sucursalId,
+
+            Long especialidadId
+    ) {
+
+        LocalDateTime ahora =
+                LocalDateTime.now();
+
+
+        return obtenerHorariosDisponibles(
+                medicoId,
+                sucursalId,
+                especialidadId
+        )
+                .stream()
+
+                .filter(
+                        horario ->
+                                horario.getFecha() != null
+                                        &&
+                                        horario.getHoraInicio() != null
+                )
+
+                .filter(
+                        horario -> {
+
+                            LocalDateTime fechaHora =
+                                    LocalDateTime.of(
+                                            horario.getFecha(),
+                                            horario.getHoraInicio()
+                                    );
+
+
+                            return fechaHora.isAfter(
+                                    ahora
+                            );
+                        }
+                )
+
+                .toList();
+    }
 
     // =====================================================
     // BUSCAR SUCURSAL
@@ -222,6 +289,35 @@ public class AgendamientoCitaService {
                 );
     }
 
+
+    // =====================================================
+    // CU-12
+    // BUSCAR CONSULTA MÉDICA
+    // =====================================================
+
+    public Optional<ConsultaMedica> buscarConsultaMedica(
+            Long id
+    ) {
+
+        return consultaMedicaRepository
+                .findById(
+                        id
+                );
+    }
+// =====================================================
+// CU-12
+// BUSCAR CONSULTA MÉDICA POR CITA
+// =====================================================
+
+    public Optional<ConsultaMedica> buscarConsultaMedicaPorCita(
+            Long citaId
+    ) {
+
+        return consultaMedicaRepository
+                .findByCitaId(
+                        citaId
+                );
+    }
 
     // =====================================================
     // REGISTRAR CITA
@@ -643,6 +739,574 @@ public class AgendamientoCitaService {
         return citaRepository.save(
                 cita
         );
+    }
+
+
+    // =====================================================
+    // CU-12
+    // REGISTRAR CITA DE SEGUIMIENTO
+    //
+    // Los datos de paciente, médico, sucursal y especialidad
+    // se obtienen automáticamente desde la consulta padre.
+    // =====================================================
+
+    @Transactional
+    public Cita registrarCitaSeguimiento(
+
+            Long consultaPadreId,
+
+            Long horarioId,
+
+            String tipoSeguimiento,
+
+            String motivoSeguimiento,
+
+            String prioridad,
+
+            Long medicoAutenticadoId
+    ) {
+
+        // =================================================
+        // BUSCAR CONSULTA PADRE
+        // =================================================
+
+        ConsultaMedica consultaPadre =
+                consultaMedicaRepository
+                        .findById(
+                                consultaPadreId
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Consulta médica no encontrada."
+                                        )
+                        );
+
+
+        // =================================================
+        // VALIDAR ESTADO DE LA CONSULTA
+        // =================================================
+
+        String estadoConsulta =
+                consultaPadre.getEstado() == null
+                        ? ""
+                        : consultaPadre
+                        .getEstado()
+                        .trim()
+                        .toUpperCase();
+
+
+        if (
+                !"EN_CURSO".equals(
+                        estadoConsulta
+                )
+                        &&
+                        !"FINALIZADA".equals(
+                                estadoConsulta
+                        )
+        ) {
+
+            throw new IllegalStateException(
+                    "La consulta médica no está disponible para agendar seguimiento."
+            );
+        }
+
+
+        // =================================================
+        // OBTENER CITA PADRE
+        // =================================================
+
+        Cita citaPadre =
+                consultaPadre.getCita();
+
+
+        if (citaPadre == null) {
+
+            throw new IllegalStateException(
+                    "La consulta médica no tiene una cita asociada."
+            );
+        }
+
+
+        // =================================================
+        // OBTENER DATOS PRECARGADOS
+        // =================================================
+
+        Usuario paciente =
+                citaPadre.getPaciente();
+
+        Usuario medico =
+                citaPadre.getMedico();
+
+        Sucursal sucursal =
+                citaPadre.getSucursal();
+
+        Especialidad especialidad =
+                citaPadre.getEspecialidad();
+
+
+        if (
+                paciente == null
+                        ||
+                        medico == null
+                        ||
+                        sucursal == null
+                        ||
+                        especialidad == null
+        ) {
+
+            throw new IllegalStateException(
+                    "No fue posible obtener los datos necesarios de la consulta padre."
+            );
+        }
+
+
+        // =================================================
+        // VALIDAR MÉDICO AUTENTICADO
+        // =================================================
+
+        if (
+                medicoAutenticadoId == null
+                        ||
+                        medico.getId() == null
+                        ||
+                        !medico.getId()
+                                .equals(
+                                        medicoAutenticadoId
+                                )
+        ) {
+
+            throw new IllegalStateException(
+                    "La consulta no pertenece al médico autenticado."
+            );
+        }
+
+
+        // =================================================
+        // VALIDAR PACIENTE
+        // =================================================
+
+        if (
+                paciente.getRol() == null
+                        ||
+                        !"PACIENTE".equalsIgnoreCase(
+                                paciente
+                                        .getRol()
+                                        .getNombre()
+                        )
+        ) {
+
+            throw new IllegalStateException(
+                    "La consulta no tiene un paciente válido."
+            );
+        }
+
+
+        if (!Boolean.TRUE.equals(
+                paciente.getActivo()
+        )) {
+
+            throw new IllegalStateException(
+                    "El paciente se encuentra inactivo."
+            );
+        }
+
+
+        // =================================================
+        // VALIDAR MÉDICO
+        // =================================================
+
+        if (
+                medico.getRol() == null
+                        ||
+                        !"MEDICO".equalsIgnoreCase(
+                                medico
+                                        .getRol()
+                                        .getNombre()
+                        )
+        ) {
+
+            throw new IllegalStateException(
+                    "La consulta no tiene un médico válido."
+            );
+        }
+
+
+        if (!Boolean.TRUE.equals(
+                medico.getActivo()
+        )) {
+
+            throw new IllegalStateException(
+                    "El médico se encuentra inactivo."
+            );
+        }
+
+
+        // =================================================
+        // VALIDAR TIPO DE SEGUIMIENTO
+        // =================================================
+
+        String tipoLimpio =
+                tipoSeguimiento == null
+                        ? ""
+                        : tipoSeguimiento
+                        .trim()
+                        .toUpperCase();
+
+
+        if (
+                !"MONITOREO_TRATAMIENTO".equals(
+                        tipoLimpio
+                )
+                        &&
+                        !"REVISION_RESULTADOS_LABORATORIO".equals(
+                                tipoLimpio
+                        )
+        ) {
+
+            throw new IllegalArgumentException(
+                    "Debe seleccionar el tipo de seguimiento."
+            );
+        }
+
+
+        // =================================================
+        // VALIDAR MOTIVO / OBSERVACIONES
+        // =================================================
+
+        String motivo =
+                motivoSeguimiento == null
+                        ? ""
+                        : motivoSeguimiento.trim();
+
+
+        if (
+                motivo.length() < 10
+                        ||
+                        motivo.length() > 2000
+        ) {
+
+            throw new IllegalArgumentException(
+                    "Las observaciones son obligatorias. Deben contener entre 10 y 2000 caracteres."
+            );
+        }
+
+
+        // =================================================
+        // VALIDAR PRIORIDAD
+        // =================================================
+
+        String prioridadLimpia =
+                prioridad == null
+                        ? ""
+                        : prioridad
+                        .trim()
+                        .toUpperCase();
+
+
+        if (prioridadLimpia.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Debe seleccionar la prioridad del seguimiento."
+            );
+        }
+
+
+        if (prioridadLimpia.length() > 20) {
+
+            throw new IllegalArgumentException(
+                    "La prioridad seleccionada no es válida."
+            );
+        }
+
+
+        // =================================================
+        // BUSCAR HORARIO
+        // =================================================
+
+        HorarioMedico horario =
+                horarioMedicoRepository
+                        .findById(
+                                horarioId
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Horario no encontrado."
+                                        )
+                        );
+
+
+        // =================================================
+        // FA01
+        // VOLVER A VALIDAR DISPONIBILIDAD
+        // =================================================
+
+        if (
+                horario.getEstado() == null
+                        ||
+                        !"DISPONIBLE".equalsIgnoreCase(
+                                horario.getEstado()
+                        )
+        ) {
+
+            throw new IllegalStateException(
+                    "El horario seleccionado ya no está disponible. Por favor, elija otro horario."
+            );
+        }
+
+        // =================================================
+// CU-12
+// VALIDAR QUE LA FECHA Y HORA SEAN FUTURAS
+// =================================================
+
+        if (
+                horario.getFecha() == null
+                        ||
+                        horario.getHoraInicio() == null
+        ) {
+
+            throw new IllegalArgumentException(
+                    "Seleccione una fecha futura dentro de los horarios disponibles del médico."
+            );
+        }
+
+
+        LocalDateTime fechaHoraSeguimiento =
+                LocalDateTime.of(
+                        horario.getFecha(),
+                        horario.getHoraInicio()
+                );
+
+
+        if (
+                !fechaHoraSeguimiento.isAfter(
+                        LocalDateTime.now()
+                )
+        ) {
+
+            throw new IllegalArgumentException(
+                    "Seleccione una fecha futura dentro de los horarios disponibles del médico."
+            );
+        }
+
+        // =================================================
+        // EL HORARIO DEBE SER DEL MISMO MÉDICO
+        // =================================================
+
+        if (
+                horario.getMedico() == null
+                        ||
+                        horario.getMedico().getId() == null
+                        ||
+                        !horario.getMedico()
+                                .getId()
+                                .equals(
+                                        medico.getId()
+                                )
+        ) {
+
+            throw new IllegalStateException(
+                    "El horario seleccionado no corresponde al médico de la consulta."
+            );
+        }
+
+
+        // =================================================
+        // VALIDAR SUCURSAL
+        // =================================================
+
+        if (
+                horario.getSucursal() == null
+                        ||
+                        horario.getSucursal().getId() == null
+                        ||
+                        !horario.getSucursal()
+                                .getId()
+                                .equals(
+                                        sucursal.getId()
+                                )
+        ) {
+
+            throw new IllegalStateException(
+                    "El horario seleccionado no corresponde a la sucursal de la consulta."
+            );
+        }
+
+
+        // =================================================
+        // VALIDAR ESPECIALIDAD
+        // =================================================
+
+        if (
+                horario.getEspecialidad() == null
+                        ||
+                        horario.getEspecialidad().getId() == null
+                        ||
+                        !horario.getEspecialidad()
+                                .getId()
+                                .equals(
+                                        especialidad.getId()
+                                )
+        ) {
+
+            throw new IllegalStateException(
+                    "El horario seleccionado no corresponde a la especialidad de la consulta."
+            );
+        }
+
+
+        // =================================================
+        // CREAR CITA DE SEGUIMIENTO
+        // =================================================
+
+        Cita citaSeguimiento =
+                new Cita();
+
+
+        citaSeguimiento.setPaciente(
+                paciente
+        );
+
+
+        citaSeguimiento.setMedico(
+                medico
+        );
+
+
+        citaSeguimiento.setSucursal(
+                sucursal
+        );
+
+
+        citaSeguimiento.setEspecialidad(
+                especialidad
+        );
+
+
+        citaSeguimiento.setHorario(
+                horario
+        );
+
+
+        citaSeguimiento.setMotivoConsulta(
+                motivo
+        );
+
+
+        citaSeguimiento.setPrioridad(
+                prioridadLimpia
+        );
+
+
+        citaSeguimiento.setOrigen(
+                "INTERNO"
+        );
+
+
+        citaSeguimiento.setTipoSeguimiento(
+                tipoLimpio
+        );
+
+
+        citaSeguimiento.setConsultaPadre(
+                consultaPadre
+        );
+
+// =================================================
+// PROGRAMAR RECORDATORIO
+// UN DÍA ANTES DE LA CITA
+// =================================================
+
+        citaSeguimiento.setRecordatorioProgramadoPara(
+                fechaHoraSeguimiento.minusDays(1)
+        );
+
+        citaSeguimiento.setRecordatorioEnviado(
+                false
+        );
+        /*
+         * El CU-12 no incluye un paso de pago.
+         * La cita es agendada directamente por el médico.
+         */
+        citaSeguimiento.setEstado(
+                "CONFIRMADA"
+        );
+
+
+        // =================================================
+        // OCUPAR HORARIO
+        // =================================================
+
+        horario.setEstado(
+                "OCUPADO"
+        );
+
+
+        horario.setReservadoHasta(
+                null
+        );
+
+
+        // =================================================
+// GUARDAR HORARIO
+// =================================================
+
+        horarioMedicoRepository.save(
+                horario
+        );
+
+
+// =================================================
+// GUARDAR CITA DE SEGUIMIENTO
+// =================================================
+
+        Cita citaGuardada =
+                citaRepository.save(
+                        citaSeguimiento
+                );
+
+
+
+// =================================================
+// CU-12
+// ENVIAR CORREO DE CONFIRMACIÓN
+//
+// Si el correo falla, NO se cancela
+// el registro de la cita.
+// =================================================
+
+        try {
+
+            correoService
+                    .enviarConfirmacionSeguimiento(
+                            citaGuardada
+                    );
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Error al enviar notificación por correo "
+                            + "electrónico al paciente "
+                            + citaGuardada
+                            .getPaciente()
+                            .getNombreCompleto()
+                            + "."
+            );
+
+
+            System.err.println(
+                    "Detalle: "
+                            + e.getMessage()
+            );
+        }
+
+
+// =================================================
+// DEVOLVER CITA REGISTRADA
+// =================================================
+
+        return citaGuardada;
     }
 
 

@@ -73,6 +73,850 @@ public class AgendamientoCitaController {
                 );
     }
 
+    // =====================================================
+// CU-12
+// VERIFICAR SI EL USUARIO ES MÉDICO
+// =====================================================
+
+    private boolean esMedico(
+            Object usuarioSesion
+    ) {
+
+        if (!(usuarioSesion instanceof Usuario usuario)) {
+
+            return false;
+        }
+
+
+        return usuario.getRol() != null
+                &&
+                "MEDICO".equalsIgnoreCase(
+                        usuario.getRol().getNombre()
+                )
+                &&
+                Boolean.TRUE.equals(
+                        usuario.getActivo()
+                );
+    }
+
+    // =====================================================
+// CU-12
+// INICIAR AGENDAMIENTO DE SEGUIMIENTO
+//
+// Recibimos la cita desde el panel del médico,
+// localizamos su consulta médica y redirigimos
+// utilizando parentConsultationId.
+// =====================================================
+
+    @GetMapping("/seguimiento/iniciar")
+    public String iniciarSeguimiento(
+
+            @RequestParam Long citaId,
+
+            HttpSession session,
+
+            RedirectAttributes redirectAttributes
+    ) {
+
+        Object usuarioSesion =
+                session.getAttribute(
+                        "usuarioInterno"
+                );
+
+
+        if (!esMedico(usuarioSesion)) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        Usuario medico =
+                (Usuario) usuarioSesion;
+
+
+        var consulta =
+                agendamientoCitaService
+                        .buscarConsultaMedicaPorCita(
+                                citaId
+                        )
+                        .orElse(null);
+
+
+        if (consulta == null) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "No se encontró la consulta médica asociada a la cita."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        if (
+                consulta.getCita() == null
+                        ||
+                        consulta.getCita().getMedico() == null
+                        ||
+                        !consulta.getCita()
+                                .getMedico()
+                                .getId()
+                                .equals(
+                                        medico.getId()
+                                )
+        ) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "La consulta no pertenece al médico autenticado."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        return "redirect:/citas/seguimiento"
+                + "?followUp=true"
+                + "&parentConsultationId="
+                + consulta.getId();
+    }
+
+
+// =====================================================
+// CU-12
+// MOSTRAR DATOS PRECARGADOS DEL SEGUIMIENTO
+// =====================================================
+
+    @GetMapping("/seguimiento")
+    public String mostrarSeguimiento(
+
+            @RequestParam(
+                    defaultValue = "false"
+            )
+            boolean followUp,
+
+            @RequestParam Long parentConsultationId,
+
+            HttpSession session,
+
+            Model model,
+
+            RedirectAttributes redirectAttributes
+    ) {
+
+        Object usuarioSesion =
+                session.getAttribute(
+                        "usuarioInterno"
+                );
+
+
+        if (!esMedico(usuarioSesion)) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        Usuario medicoSesion =
+                (Usuario) usuarioSesion;
+
+
+        if (!followUp) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "El agendamiento no corresponde a una cita de seguimiento."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        var consulta =
+                agendamientoCitaService
+                        .buscarConsultaMedica(
+                                parentConsultationId
+                        )
+                        .orElse(null);
+
+
+        if (
+                consulta == null
+                        ||
+                        consulta.getCita() == null
+        ) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "No se encontró la consulta médica indicada."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        var citaPadre =
+                consulta.getCita();
+
+
+        if (
+                citaPadre.getMedico() == null
+                        ||
+                        !citaPadre.getMedico()
+                                .getId()
+                                .equals(
+                                        medicoSesion.getId()
+                                )
+        ) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "La consulta no pertenece al médico autenticado."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        // =================================================
+        // DATOS PRECARGADOS
+        // =================================================
+
+        model.addAttribute(
+                "followUp",
+                true
+        );
+
+
+        model.addAttribute(
+                "parentConsultationId",
+                consulta.getId()
+        );
+
+
+        model.addAttribute(
+                "consultaPadre",
+                consulta
+        );
+
+
+        model.addAttribute(
+                "citaPadre",
+                citaPadre
+        );
+
+
+        model.addAttribute(
+                "paciente",
+                citaPadre.getPaciente()
+        );
+
+
+        model.addAttribute(
+                "medico",
+                citaPadre.getMedico()
+        );
+
+
+        model.addAttribute(
+                "especialidad",
+                citaPadre.getEspecialidad()
+        );
+
+
+        model.addAttribute(
+                "sucursal",
+                citaPadre.getSucursal()
+        );
+
+
+        return "citas/seguimiento";
+    }
+
+    // =====================================================
+// CU-12
+// MOSTRAR HORARIOS DISPONIBLES DE SEGUIMIENTO
+// =====================================================
+
+    @GetMapping("/seguimiento/horario")
+    public String mostrarHorariosSeguimiento(
+
+            @RequestParam(
+                    defaultValue = "false"
+            )
+            boolean followUp,
+
+            @RequestParam Long parentConsultationId,
+
+            @RequestParam String tipoSeguimiento,
+
+            HttpSession session,
+
+            Model model,
+
+            RedirectAttributes redirectAttributes
+    ) {
+
+        // =================================================
+        // VALIDAR MÉDICO
+        // =================================================
+
+        Object usuarioSesion =
+                session.getAttribute(
+                        "usuarioInterno"
+                );
+
+
+        if (!esMedico(usuarioSesion)) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        Usuario medicoSesion =
+                (Usuario) usuarioSesion;
+
+
+        // =================================================
+        // VALIDAR MODO SEGUIMIENTO
+        // =================================================
+
+        if (!followUp) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "El agendamiento no corresponde a una cita de seguimiento."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        // =================================================
+        // VALIDAR TIPO DE SEGUIMIENTO
+        // =================================================
+
+        String tipo =
+                tipoSeguimiento == null
+                        ? ""
+                        : tipoSeguimiento
+                        .trim()
+                        .toUpperCase();
+
+
+        if (
+                !"MONITOREO_TRATAMIENTO".equals(tipo)
+                        &&
+                        !"REVISION_RESULTADOS_LABORATORIO".equals(tipo)
+        ) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Debe seleccionar un tipo de seguimiento válido."
+            );
+
+            return "redirect:/citas/seguimiento"
+                    + "?followUp=true"
+                    + "&parentConsultationId="
+                    + parentConsultationId;
+        }
+
+
+        // =================================================
+        // BUSCAR CONSULTA PADRE
+        // =================================================
+
+        var consulta =
+                agendamientoCitaService
+                        .buscarConsultaMedica(
+                                parentConsultationId
+                        )
+                        .orElse(null);
+
+
+        if (
+                consulta == null
+                        ||
+                        consulta.getCita() == null
+        ) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "No se encontró la consulta médica indicada."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        var citaPadre =
+                consulta.getCita();
+
+
+        // =================================================
+        // VALIDAR QUE SEA DEL MÉDICO AUTENTICADO
+        // =================================================
+
+        if (
+                citaPadre.getMedico() == null
+                        ||
+                        !citaPadre.getMedico()
+                                .getId()
+                                .equals(
+                                        medicoSesion.getId()
+                                )
+        ) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "La consulta no pertenece al médico autenticado."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        // =================================================
+        // OBTENER SOLO HORARIOS FUTUROS
+        // DEL MISMO MÉDICO
+        // =================================================
+
+        var horarios =
+                agendamientoCitaService
+                        .obtenerHorariosSeguimientoDisponibles(
+
+                                citaPadre
+                                        .getMedico()
+                                        .getId(),
+
+                                citaPadre
+                                        .getSucursal()
+                                        .getId(),
+
+                                citaPadre
+                                        .getEspecialidad()
+                                        .getId()
+                        );
+
+
+        // =================================================
+        // DATOS PARA LA VISTA
+        // =================================================
+
+        model.addAttribute(
+                "followUp",
+                true
+        );
+
+
+        model.addAttribute(
+                "parentConsultationId",
+                consulta.getId()
+        );
+
+
+        model.addAttribute(
+                "tipoSeguimiento",
+                tipo
+        );
+
+
+        model.addAttribute(
+                "consultaPadre",
+                consulta
+        );
+
+
+        model.addAttribute(
+                "citaPadre",
+                citaPadre
+        );
+
+
+        model.addAttribute(
+                "paciente",
+                citaPadre.getPaciente()
+        );
+
+
+        model.addAttribute(
+                "medico",
+                citaPadre.getMedico()
+        );
+
+
+        model.addAttribute(
+                "especialidad",
+                citaPadre.getEspecialidad()
+        );
+
+
+        model.addAttribute(
+                "sucursal",
+                citaPadre.getSucursal()
+        );
+
+
+        model.addAttribute(
+                "horarios",
+                horarios
+        );
+
+
+        return "citas/seguimiento-horario";
+    }
+
+// =====================================================
+// CU-12
+// MOSTRAR CONFIRMACIÓN DE CITA DE SEGUIMIENTO
+// =====================================================
+
+    @GetMapping("/seguimiento/confirmar")
+    public String mostrarConfirmacionSeguimiento(
+
+            @RequestParam(
+                    defaultValue = "false"
+            )
+            boolean followUp,
+
+            @RequestParam Long parentConsultationId,
+
+            @RequestParam String tipoSeguimiento,
+
+            @RequestParam Long horarioId,
+
+            HttpSession session,
+
+            Model model,
+
+            RedirectAttributes redirectAttributes
+    ) {
+
+        // =================================================
+        // VALIDAR MÉDICO
+        // =================================================
+
+        Object usuarioSesion =
+                session.getAttribute(
+                        "usuarioInterno"
+                );
+
+
+        if (!esMedico(usuarioSesion)) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        Usuario medicoSesion =
+                (Usuario) usuarioSesion;
+
+
+        // =================================================
+        // VALIDAR FOLLOW UP
+        // =================================================
+
+        if (!followUp) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "El agendamiento no corresponde a una cita de seguimiento."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        // =================================================
+        // BUSCAR CONSULTA PADRE
+        // =================================================
+
+        var consulta =
+                agendamientoCitaService
+                        .buscarConsultaMedica(
+                                parentConsultationId
+                        )
+                        .orElse(null);
+
+
+        if (
+                consulta == null
+                        ||
+                        consulta.getCita() == null
+        ) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "No se encontró la consulta médica indicada."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        var citaPadre =
+                consulta.getCita();
+
+
+        // =================================================
+        // VALIDAR MÉDICO
+        // =================================================
+
+        if (
+                citaPadre.getMedico() == null
+                        ||
+                        !citaPadre.getMedico()
+                                .getId()
+                                .equals(
+                                        medicoSesion.getId()
+                                )
+        ) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "La consulta no pertenece al médico autenticado."
+            );
+
+            return "redirect:/medico";
+        }
+
+
+        // =================================================
+        // BUSCAR HORARIO
+        // =================================================
+
+        var horario =
+                agendamientoCitaService
+                        .buscarHorario(
+                                horarioId
+                        )
+                        .orElse(null);
+
+
+        if (horario == null) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "El horario seleccionado no existe."
+            );
+
+            return "redirect:/citas/seguimiento/horario"
+                    + "?followUp=true"
+                    + "&parentConsultationId="
+                    + parentConsultationId
+                    + "&tipoSeguimiento="
+                    + tipoSeguimiento;
+        }
+
+
+        // =================================================
+        // DATOS PARA LA VISTA
+        // =================================================
+
+        model.addAttribute(
+                "followUp",
+                true
+        );
+
+        model.addAttribute(
+                "parentConsultationId",
+                parentConsultationId
+        );
+
+        model.addAttribute(
+                "tipoSeguimiento",
+                tipoSeguimiento
+        );
+
+        model.addAttribute(
+                "horarioId",
+                horarioId
+        );
+
+        model.addAttribute(
+                "horario",
+                horario
+        );
+
+        model.addAttribute(
+                "paciente",
+                citaPadre.getPaciente()
+        );
+
+        model.addAttribute(
+                "medico",
+                citaPadre.getMedico()
+        );
+
+        model.addAttribute(
+                "especialidad",
+                citaPadre.getEspecialidad()
+        );
+
+        model.addAttribute(
+                "sucursal",
+                citaPadre.getSucursal()
+        );
+
+
+        return "citas/seguimiento-confirmar";
+    }
+
+    // =====================================================
+// CU-12
+// CONFIRMAR Y REGISTRAR CITA DE SEGUIMIENTO
+// =====================================================
+
+    @PostMapping("/seguimiento/confirmar")
+    public String confirmarCitaSeguimiento(
+
+            @RequestParam Long parentConsultationId,
+
+            @RequestParam String tipoSeguimiento,
+
+            @RequestParam Long horarioId,
+
+            @RequestParam String motivoSeguimiento,
+
+            @RequestParam String prioridad,
+
+            HttpSession session,
+
+            RedirectAttributes redirectAttributes
+    ) {
+
+        // =================================================
+        // VALIDAR MÉDICO AUTENTICADO
+        // =================================================
+
+        Object usuarioSesion =
+                session.getAttribute(
+                        "usuarioInterno"
+                );
+
+
+        if (!esMedico(usuarioSesion)) {
+
+            return "redirect:/personal/login";
+        }
+
+
+        Usuario medico =
+                (Usuario) usuarioSesion;
+
+
+        try {
+
+            var cita =
+                    agendamientoCitaService
+                            .registrarCitaSeguimiento(
+
+                                    parentConsultationId,
+
+                                    horarioId,
+
+                                    tipoSeguimiento,
+
+                                    motivoSeguimiento,
+
+                                    prioridad,
+
+                                    medico.getId()
+                            );
+
+
+            // =================================================
+            // NOMBRE DEL TIPO PARA MOSTRAR AL USUARIO
+            // =================================================
+
+            String tipoMostrar;
+
+
+            if (
+                    "MONITOREO_TRATAMIENTO"
+                            .equalsIgnoreCase(
+                                    tipoSeguimiento
+                            )
+            ) {
+
+                tipoMostrar =
+                        "Monitoreo de Tratamiento";
+
+            } else {
+
+                tipoMostrar =
+                        "Revisión de Resultados de Laboratorio";
+            }
+
+
+            // =================================================
+            // MENSAJE DE ÉXITO
+            // =================================================
+
+            redirectAttributes.addFlashAttribute(
+                    "mensaje",
+                    "Cita de seguimiento agendada exitosamente. "
+                            + "Tipo: "
+                            + tipoMostrar
+                            + ". Paciente: "
+                            + cita.getPaciente()
+                            .getNombreCompleto()
+                            + "."
+            );
+
+
+            return "redirect:/medico";
+
+
+        } catch (
+                IllegalArgumentException
+                |
+                IllegalStateException e
+        ) {
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    e.getMessage()
+            );
+
+
+            // =================================================
+            // FA01
+            // EL HORARIO YA NO ESTÁ DISPONIBLE
+            // =================================================
+
+            if (
+                    e.getMessage() != null
+                            &&
+                            e.getMessage()
+                                    .startsWith(
+                                            "El horario seleccionado ya no está disponible"
+                                    )
+            ) {
+
+                return "redirect:/citas/seguimiento/horario"
+                        + "?followUp=true"
+                        + "&parentConsultationId="
+                        + parentConsultationId
+                        + "&tipoSeguimiento="
+                        + tipoSeguimiento;
+            }
+
+
+            // =================================================
+            // OTROS ERRORES
+            // REGRESAR A CONFIRMACIÓN
+            // =================================================
+
+            return "redirect:/citas/seguimiento/confirmar"
+                    + "?followUp=true"
+                    + "&parentConsultationId="
+                    + parentConsultationId
+                    + "&tipoSeguimiento="
+                    + tipoSeguimiento
+                    + "&horarioId="
+                    + horarioId;
+        }
+    }
 
     // =====================================================
     // PASO 1 - SELECCIONAR SUCURSAL

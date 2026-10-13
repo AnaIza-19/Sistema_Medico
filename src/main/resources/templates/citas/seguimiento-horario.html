@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Horario de Seguimiento
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        header {
+            background: #1565c0;
+            color: white;
+            padding: 25px 40px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header p {
+            margin: 6px 0 0;
+            font-size: 17px;
+        }
+
+        .contenedor {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .tarjeta {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow:
+                    0 3px 12px
+                    rgba(0, 0, 0, 0.10);
+        }
+
+        .banner {
+            background: #e8f5e9;
+            border: 1px solid #81c784;
+            border-left: 6px solid #2e7d32;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .banner h3 {
+            margin-top: 0;
+            color: #1b5e20;
+        }
+
+        .datos {
+            display: grid;
+            grid-template-columns:
+                    repeat(
+                            auto-fit,
+                            minmax(220px, 1fr)
+                    );
+            gap: 12px;
+        }
+
+        .dato {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        h2 {
+            color: #1565c0;
+        }
+
+        .horarios {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .horario {
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 18px;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .horario:hover {
+            border-color: #1565c0;
+            background: #f5f9ff;
+        }
+
+        .horario input {
+            margin-right: 12px;
+        }
+
+        .sin-horarios {
+            padding: 18px;
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-continuar {
+            background: #1565c0;
+            color: white;
+        }
+
+        .btn-continuar:hover {
+            background: #0d47a1;
+        }
+
+        .btn-volver {
+            background: #ddd;
+            color: #222;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>
+        Seleccionar Horario
+    </h1>
+
+    <p>
+        CU-12 Cita de Seguimiento
+    </p>
+
+</header>
+
+
+<div class="contenedor">
+
+    <div class="tarjeta">
+
+
+        <!-- ============================================= -->
+        <!-- DATOS DE LA CITA DE SEGUIMIENTO -->
+        <!-- ============================================= -->
+
+        <div class="banner">
+
+            <h3>
+                Cita de Seguimiento
+            </h3>
+
+
+            <div class="datos">
+
+
+                <div class="dato">
+
+                    <strong>
+                        Paciente:
+                    </strong>
+
+                    <span
+                            th:text="${paciente.nombreCompleto}">
+                        Paciente
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>
+                        Médico:
+                    </strong>
+
+                    <span
+                            th:text="${medico.nombreCompleto}">
+                        Médico
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>
+                        Especialidad:
+                    </strong>
+
+                    <span
+                            th:text="${especialidad.nombre}">
+                        Especialidad
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>
+                        Sucursal:
+                    </strong>
+
+                    <span
+                            th:text="${sucursal.nombre}">
+                        Sucursal
+                    </span>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <strong>
+                        Tipo:
+                    </strong>
+
+
+                    <span
+                            th:if="${tipoSeguimiento == 'MONITOREO_TRATAMIENTO'}">
+                        Monitoreo de Tratamiento
+                    </span>
+
+
+                    <span
+                            th:if="${tipoSeguimiento == 'REVISION_RESULTADOS_LABORATORIO'}">
+                        Revisión de Resultados de Laboratorio
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================================= -->
+        <!-- HORARIOS -->
+        <!-- ============================================= -->
+
+        <h2>
+            Horarios Disponibles
+        </h2>
+
+
+        <p>
+            Seleccione una fecha y hora futura disponible
+            para el mismo médico.
+        </p>
+
+
+        <!-- ============================================= -->
+        <!-- SI NO EXISTEN HORARIOS -->
+        <!-- ============================================= -->
+
+        <div
+                class="sin-horarios"
+                th:if="${#lists.isEmpty(horarios)}"
+        >
+
+            No se encontraron horarios futuros disponibles
+            para este médico.
+
+        </div>
+
+
+        <!-- ============================================= -->
+        <!-- SI EXISTEN HORARIOS -->
+        <!-- ============================================= -->
+
+        <form
+                th:if="${!#lists.isEmpty(horarios)}"
+                th:action="@{/citas/seguimiento/confirmar}"
+                method="get"
+        >
+
+
+            <!-- FOLLOW UP -->
+
+            <input
+                    type="hidden"
+                    name="followUp"
+                    value="true"
+            >
+
+
+            <!-- CONSULTA PADRE -->
+
+            <input
+                    type="hidden"
+                    name="parentConsultationId"
+                    th:value="${parentConsultationId}"
+            >
+
+
+            <!-- TIPO DE SEGUIMIENTO -->
+
+            <input
+                    type="hidden"
+                    name="tipoSeguimiento"
+                    th:value="${tipoSeguimiento}"
+            >
+
+
+            <!-- LISTADO DE HORARIOS -->
+
+            <div class="horarios">
+
+
+                <label
+                        class="horario"
+                        th:each="horario : ${horarios}"
+                >
+
+
+                    <input
+                            type="radio"
+                            name="horarioId"
+                            th:value="${horario.id}"
+                            required
+                    >
+
+
+                    <strong
+                            th:text="${#temporals.format(
+                                    horario.fecha,
+                                    'dd/MM/yyyy'
+                            )}">
+                        15/10/2026
+                    </strong>
+
+
+                    &nbsp;—&nbsp;
+
+
+                    <span
+                            th:text="${#temporals.format(
+                                    horario.horaInicio,
+                                    'HH:mm'
+                            )}">
+                        08:00
+                    </span>
+
+
+                    a
+
+
+                    <span
+                            th:text="${#temporals.format(
+                                    horario.horaFin,
+                                    'HH:mm'
+                            )}">
+                        09:00
+                    </span>
+
+
+                </label>
+
+
+            </div>
+
+
+            <!-- ========================================= -->
+            <!-- BOTONES -->
+            <!-- ========================================= -->
+
+            <div class="acciones">
+
+
+                <button
+                        type="submit"
+                        class="btn btn-continuar"
+                >
+
+                    Continuar
+
+                </button>
+
+
+                <!-- ===================================== -->
+                <!-- FA02 - CANCELAR AGENDAMIENTO -->
+                <!-- ===================================== -->
+
+                <a
+                        th:href="@{/medico}"
+                        class="btn btn-volver"
+                >
+
+                    Volver
+
+                </a>
+
+
+            </div>
+
+        </form>
+
+
+        <!-- ============================================= -->
+        <!-- VOLVER CUANDO NO HAY HORARIOS -->
+        <!-- ============================================= -->
+
+        <div
+                class="acciones"
+                th:if="${#lists.isEmpty(horarios)}"
+        >
+
+
+            <a
+                    th:href="@{/medico}"
+                    class="btn btn-volver"
+            >
+
+                Volver
+
+            </a>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

@@ -19,11 +19,12 @@ public class ExpiracionCitasService {
     private final Cita_Repositorio citaRepository;
 
     private final HorarioMedico_Repositorio horarioMedicoRepository;
-
+    private final CorreoService correoService;
 
     public ExpiracionCitasService(
             Cita_Repositorio citaRepository,
-            HorarioMedico_Repositorio horarioMedicoRepository
+            HorarioMedico_Repositorio horarioMedicoRepository,
+            CorreoService correoService
     ) {
 
         this.citaRepository =
@@ -31,8 +32,10 @@ public class ExpiracionCitasService {
 
         this.horarioMedicoRepository =
                 horarioMedicoRepository;
-    }
 
+        this.correoService =
+                correoService;
+    }
 
     // =====================================================
     // CU-06 FA03
@@ -156,6 +159,129 @@ public class ExpiracionCitasService {
                             + cita.getId()
                             + " expirada automáticamente."
             );
+        }
+    }
+    // =====================================================
+// CU-12
+// ENVIAR RECORDATORIOS DE CITAS DE SEGUIMIENTO
+//
+// Se ejecuta cada 60 segundos.
+//
+// - Busca recordatorios cuya fecha ya llegó.
+// - Solo procesa citas CONFIRMADAS.
+// - Envía el correo.
+// - Marca recordatorio_enviado = true.
+// - Si falla el correo, queda en false para reintentar.
+// =====================================================
+
+    @Scheduled(
+            fixedRate = 60000
+    )
+    @Transactional
+    public void enviarRecordatoriosSeguimiento() {
+
+        LocalDateTime ahora =
+                LocalDateTime.now();
+
+
+        List<Cita> recordatoriosPendientes =
+                citaRepository
+                        .buscarRecordatoriosSeguimientoPendientes(
+                                ahora
+                        );
+
+
+        if (recordatoriosPendientes.isEmpty()) {
+
+            return;
+        }
+
+
+        for (Cita cita : recordatoriosPendientes) {
+
+            // =================================================
+            // VALIDACIÓN EXTRA
+            // NO ENVIAR SI LA CITA FUE CANCELADA
+            // =================================================
+
+            if (
+                    cita.getEstado() == null
+                            ||
+                            !"CONFIRMADA".equalsIgnoreCase(
+                                    cita.getEstado()
+                            )
+            ) {
+
+                continue;
+            }
+
+
+            // =================================================
+            // EVITAR ENVÍO DUPLICADO
+            // =================================================
+
+            if (
+                    Boolean.TRUE.equals(
+                            cita.getRecordatorioEnviado()
+                    )
+            ) {
+
+                continue;
+            }
+
+
+            try {
+
+                // =============================================
+                // ENVIAR CORREO
+                // =============================================
+
+                correoService
+                        .enviarRecordatorioSeguimiento(
+                                cita
+                        );
+
+
+                // =============================================
+                // MARCAR COMO ENVIADO
+                // =============================================
+
+                cita.setRecordatorioEnviado(
+                        true
+                );
+
+
+                citaRepository.save(
+                        cita
+                );
+
+
+                System.out.println(
+                        "CU-12 - Recordatorio enviado para la cita "
+                                + cita.getId()
+                                + "."
+                );
+
+            } catch (Exception e) {
+
+                // =============================================
+                // SI FALLA, NO SE MARCA COMO ENVIADO
+                // PARA QUE PUEDA REINTENTARSE
+                // =============================================
+
+                System.err.println(
+                        "CU-12 - Error al enviar recordatorio "
+                                + "de la cita "
+                                + cita.getId()
+                                + "."
+                );
+
+
+                System.err.println(
+                        "Detalle: "
+                                + e.getMessage()
+                );
+            }
         }
     }
 }
