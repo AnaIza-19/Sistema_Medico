@@ -2,6 +2,7 @@ package com.example.sistemamedico.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -131,6 +132,15 @@ public class SecurityConfig {
 
 
                                 // =========================
+                                // CU-13
+                                // ESPECIALIDADES POR SEDE
+                                // =========================
+
+                                "/branch-specialty",
+                                "/branch-specialty/**",
+
+
+                                // =========================
                                 // ERROR
                                 // =========================
 
@@ -207,7 +217,16 @@ public class SecurityConfig {
                                 // ENFERMERÍA - CU-07
                                 // =========================
 
-                                "/enfermeria/**"
+                                "/enfermeria/**",
+
+
+                                // =========================
+                                // CU-13
+                                // ESPECIALIDADES POR SEDE
+                                // =========================
+
+                                "/branch-specialty",
+                                "/branch-specialty/**"
 
                         )
                 );

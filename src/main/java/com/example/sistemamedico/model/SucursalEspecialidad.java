@@ -16,10 +16,19 @@ import jakarta.persistence.*;
 )
 public class SucursalEspecialidad {
 
+
+    // =====================================================
+    // ID
+    // =====================================================
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
+    // =====================================================
+    // SUCURSAL
+    // =====================================================
 
     @ManyToOne
     @JoinColumn(
@@ -29,6 +38,10 @@ public class SucursalEspecialidad {
     private Sucursal sucursal;
 
 
+    // =====================================================
+    // ESPECIALIDAD
+    // =====================================================
+
     @ManyToOne
     @JoinColumn(
             name = "especialidad_id",
@@ -37,19 +50,46 @@ public class SucursalEspecialidad {
     private Especialidad especialidad;
 
 
-    @Column(nullable = false)
-    private Boolean activo;
+    // =====================================================
+    // ESTADO
+    // =====================================================
 
+    @Column(nullable = false)
+    private Boolean activo = true;
+
+
+    // =====================================================
+    // PRE PERSIST
+    // =====================================================
+
+    @PrePersist
+    public void prePersist() {
+
+        if (activo == null) {
+            activo = true;
+        }
+    }
+
+
+    // =====================================================
+    // CONSTRUCTOR
+    // =====================================================
 
     public SucursalEspecialidad() {
     }
 
 
+    // =====================================================
+    // GETTERS Y SETTERS
+    // =====================================================
+
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(
+            Long id
+    ) {
         this.id = id;
     }
 

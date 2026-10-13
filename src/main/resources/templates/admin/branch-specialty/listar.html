@@ -1,0 +1,380 @@
+
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Especialidades por Sede - CU-13</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .contenedor {
+            max-width: 1150px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px #ddd;
+        }
+
+        h1 {
+            color: #17365d;
+        }
+
+        .acciones-superiores {
+            margin: 20px 0;
+        }
+
+        .boton {
+            display: inline-block;
+            background: #1976d2;
+            color: white;
+            padding: 11px 16px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .boton:hover {
+            background: #12599f;
+        }
+
+        .boton-rojo {
+            background: #dc3545;
+        }
+
+        .boton-rojo:hover {
+            background: #b02a37;
+        }
+
+        .boton-gris {
+            background: #6c757d;
+        }
+
+        .filtros {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #17365d;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f2f5f9;
+        }
+
+        .activo {
+            color: green;
+            font-weight: bold;
+        }
+
+        .inactivo {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .mensaje-exito {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .mensaje-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .paginacion {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .sin-registros {
+            padding: 20px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>CU-13: Especialidades por Sede</h1>
+
+    <p>
+        Bienvenido, administrador:
+        <strong th:text="${usuarioActual}">
+            Administrador
+        </strong>
+    </p>
+
+    <hr>
+
+    <h2>Configuración de Sedes y Especialidades</h2>
+
+    <p>
+        Administre las especialidades médicas
+        disponibles en cada sucursal del hospital.
+    </p>
+
+    <!-- BOTONES PRINCIPALES -->
+
+    <div class="acciones-superiores">
+
+        <a class="boton"
+           th:href="@{/branch-specialty/create}">
+            + Asignar Especialidad
+        </a>
+
+        <a class="boton boton-gris"
+           th:href="@{/admin/usuarios}">
+            Volver al Panel Administrativo
+        </a>
+
+    </div>
+
+    <!-- MENSAJES -->
+
+    <div class="mensaje-exito"
+         th:if="${mensajeExito}"
+         th:text="${mensajeExito}">
+    </div>
+
+    <div class="mensaje-error"
+         th:if="${mensajeError}"
+         th:text="${mensajeError}">
+    </div>
+
+    <!-- FILTROS -->
+
+    <form class="filtros"
+          method="get"
+          th:action="@{/branch-specialty}">
+
+        <label for="buscar">Buscar por ID:</label>
+
+        <input type="number"
+               id="buscar"
+               name="buscar"
+               min="1"
+               placeholder="Ingrese ID"
+               th:value="${buscar}">
+
+        <label for="tamanio">Mostrar:</label>
+
+        <select id="tamanio" name="tamanio">
+
+            <option value="10"
+                    th:selected="${tamanio == 10}">
+                10 registros
+            </option>
+
+            <option value="25"
+                    th:selected="${tamanio == 25}">
+                25 registros
+            </option>
+
+            <option value="50"
+                    th:selected="${tamanio == 50}">
+                50 registros
+            </option>
+
+        </select>
+
+        <input type="hidden"
+               name="pagina"
+               value="0">
+
+        <button class="boton" type="submit">
+            Buscar
+        </button>
+
+        <a class="boton boton-gris"
+           th:href="@{/branch-specialty}">
+            Limpiar
+        </a>
+
+    </form>
+
+    <!-- TABLA DE ASIGNACIONES -->
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Sede</th>
+                <th>Especialidad</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="asignacion : ${asignaciones.content}">
+
+                <td th:text="${asignacion.id}">
+                    1
+                </td>
+
+                <td th:text="${asignacion.sucursal.nombre}">
+                    Sede Central
+                </td>
+
+                <td th:text="${asignacion.especialidad.nombre}">
+                    Pediatría
+                </td>
+
+                <td>
+                    <span th:class="${asignacion.activo} ? 'activo' : 'inactivo'"
+                          th:text="${asignacion.activo} ? 'Activo' : 'Inactivo'">
+                        Activo
+                    </span>
+                </td>
+
+                <td>
+
+                    <form method="post"
+                          th:action="@{/branch-specialty/delete}"
+                          onsubmit="return confirm('¿Confirmar eliminación?');">
+
+                        <input type="hidden"
+                               name="id"
+                               th:value="${asignacion.id}">
+
+                        <button type="submit"
+                                class="boton boton-rojo">
+                            Eliminar
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            <tr th:if="${asignaciones.empty}">
+
+                <td colspan="5"
+                    class="sin-registros">
+
+                    No se encontraron asignaciones registradas.
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- INFORMACIÓN DE REGISTROS -->
+
+    <p th:if="${!asignaciones.empty}">
+
+        Total de registros:
+
+        <strong th:text="${asignaciones.totalElements}">
+            0
+        </strong>
+
+    </p>
+
+    <!-- PAGINACIÓN -->
+
+    <div class="paginacion"
+         th:if="${asignaciones.totalPages > 1}">
+
+        <a class="boton"
+           th:if="${asignaciones.hasPrevious()}"
+           th:href="@{/branch-specialty(
+                    pagina=${asignaciones.number - 1},
+                    tamanio=${asignaciones.size},
+                    buscar=${buscar}
+                 )}">
+            Anterior
+        </a>
+
+        <span>
+            Página
+            <strong th:text="${asignaciones.number + 1}">
+                1
+            </strong>
+            de
+            <strong th:text="${asignaciones.totalPages}">
+                1
+            </strong>
+        </span>
+
+        <a class="boton"
+           th:if="${asignaciones.hasNext()}"
+           th:href="@{/branch-specialty(
+                    pagina=${asignaciones.number + 1},
+                    tamanio=${asignaciones.size},
+                    buscar=${buscar}
+                 )}">
+            Siguiente
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
+
