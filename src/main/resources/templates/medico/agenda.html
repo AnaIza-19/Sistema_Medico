@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agenda Médica | CU-16</title>
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <style>
+        :root {--blue:#194b77;--bg:#f3f6fa;--violet:#8b5cf6;--border:#dce4ed;--text:#203246;--muted:#64748b}
+        *{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px Arial,sans-serif;color:var(--text)}
+        header{background:var(--blue);color:white;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+        header h1{font-size:25px;margin:0 0 5px}header a{color:white;text-decoration:none;border:1px solid #ffffff75;padding:9px 12px;border-radius:7px}
+        main{max-width:1500px;margin:auto;padding:24px} .toolbar,.card{background:white;border-radius:12px;box-shadow:0 2px 10px #1b375315}
+        .toolbar{padding:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+        button{border:0;border-radius:7px;padding:10px 13px;cursor:pointer;background:#e8eef5;color:var(--text);font-weight:600}
+        button:hover{filter:brightness(.95)}button.primary{background:var(--blue);color:white}button.purple{background:var(--violet);color:white}button.danger{background:#b91c1c;color:white}button.active{background:#dbeafe;color:#164c81}button:disabled{opacity:.55;cursor:wait}
+        .spacer{flex:1}.title-period{font-size:19px;font-weight:bold;min-width:170px;text-align:center}
+        .layout{display:grid;grid-template-columns:minmax(0,1fr) 325px;gap:16px}.card{padding:17px;min-width:0}
+        .weekdays,.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.weekdays>div{text-align:center;font-weight:bold;background:#ecf2f8;padding:13px 0;border:1px solid var(--border)}
+        .day-cell{border:1px solid var(--border);min-height:115px;padding:7px;min-width:0;cursor:pointer;background:white}.day-cell.outside{background:#f9fbfd;color:#a1acb9}.day-cell.today .date-number{background:var(--blue);color:white}.day-cell.selected{outline:2px solid #60a5fa;outline-offset:-2px}
+        .date-number{display:inline-grid;place-items:center;border-radius:50%;height:27px;width:27px;margin-bottom:5px;font-weight:bold}
+        .event-pill{display:block;border-radius:5px;padding:5px 6px;margin:3px 0;background:#8b5cf6;color:white;font-size:11px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
+        .timed-view{display:flex;flex-direction:column;gap:10px}.timed-day{border:1px solid var(--border);border-radius:7px;padding:11px;min-height:70px}.timed-day h3{margin:0 0 9px;font-size:14px}.timed-day .event-pill{font-size:13px;white-space:normal}
+        .task-header{display:flex;align-items:center;justify-content:space-between;gap:8px}.task-header h2{font-size:19px;margin:0 0 6px}.muted{font-size:13px;color:var(--muted)}
+        .filters{display:flex;gap:5px;margin:13px 0;flex-wrap:wrap}.filters button{padding:7px 9px;font-size:12px}
+        .task{border:1px solid var(--border);border-radius:8px;padding:10px;margin:9px 0}.task strong{display:block;overflow-wrap:anywhere}.task.done strong{text-decoration:line-through;color:#64748b}.task p{font-size:13px;margin:5px 0;overflow-wrap:anywhere}.task-actions{display:flex;gap:6px;margin-top:8px}.task-actions button{font-size:12px;padding:6px 8px}
+        .priority{display:inline-block;font-size:12px;border-radius:20px;padding:3px 8px;margin:6px 0}.priority-0{background:#e0f2fe;color:#0369a1}.priority-1{background:#fef3c7;color:#92400e}.priority-2{background:#fee2e2;color:#b91c1c}
+        .modal-overlay{position:fixed;inset:0;background:#0d1b2acc;display:none;align-items:center;justify-content:center;padding:15px;z-index:10}.modal-overlay.open{display:flex}
+        .modal{background:white;width:min(520px,100%);border-radius:12px;padding:22px;max-height:94vh;overflow:auto}.modal h2{margin:0 0 17px}
+        label{display:block;font-weight:600;margin:11px 0 6px}input:not([type=checkbox]),select,textarea{width:100%;border:1px solid #c7d2df;border-radius:7px;padding:10px;font:inherit}textarea{resize:vertical;min-height:78px}
+        .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.check-row{display:flex;align-items:center;gap:8px;margin-top:12px}.check-row label{margin:0}
+        .modal-footer{display:flex;justify-content:flex-end;gap:9px;margin-top:19px}.error{color:#b91c1c;font-size:13px;margin-top:10px;min-height:15px}
+        .alert{padding:11px 15px;border-radius:8px;margin-bottom:13px;background:#dbeafe;color:#164c81;display:none}.alert.error-alert{background:#fee2e2;color:#991b1b}
+        .empty{padding:14px;color:var(--muted);font-style:italic}.hidden{display:none!important}
+        @media(max-width:900px){.layout{grid-template-columns:1fr}.day-cell{min-height:92px}.toolbar .spacer{flex-basis:100%}}
+        @media(max-width:560px){main{padding:10px}header{padding:17px}.card{padding:9px}.day-cell{min-height:75px;padding:3px}.event-pill{font-size:10px;padding:3px}.date-number{width:23px;height:23px;font-size:12px}.title-period{min-width:0}.field-row{grid-template-columns:1fr}}
+        .cita-pill{font-weight:600}
+        .detail-line{margin:10px 0;line-height:1.45;overflow-wrap:anywhere}
+    </style>
+</head>
+<body>
+<header>
+    <div><h1>Agenda Médica — CU-16</h1><span>Bienvenido(a), <strong th:text="${medicoNombre}">Médico</strong></span></div>
+    <a href="/medico">← Volver al Panel Médico</a>
+</header>
+<main>
+    <div id="aviso" class="alert" role="status"></div>
+    <section class="toolbar" aria-label="Controles del calendario">
+        <button id="anterior" type="button" title="Anterior">‹</button>
+        <button id="hoy" type="button">Hoy</button>
+        <button id="siguiente" type="button" title="Siguiente">›</button>
+        <span id="periodo" class="title-period"></span>
+        <span class="spacer"></span>
+        <button type="button" data-view="mes" class="active">Mes</button>
+        <button type="button" data-view="semana">Semana</button>
+        <button type="button" data-view="dia">Día</button>
+        <button type="button" id="toggleTareas">Ocultar tareas</button>
+        <button type="button" id="nuevoEvento" class="purple">+ Nuevo Evento</button>
+    </section>
+    <div id="layout" class="layout">
+        <section class="card" aria-label="Calendario">
+            <div id="calendar"></div>
+        </section>
+        <aside id="panelTareas" class="card" aria-label="Panel de tareas">
+            <div class="task-header"><div><h2>Tareas <span id="conteoTareas">(0)</span></h2><span id="fechaSeleccionada" class="muted"></span></div><button id="nuevaTarea" class="primary" type="button">+ Nueva</button></div>
+            <div class="filters"><button data-filter="pendientes" class="active">Pendientes</button><button data-filter="completadas">Completadas</button><button data-filter="todas">Todas</button></div>
+            <div id="listaTareas"></div>
+        </aside>
+    </div>
+</main>
+
+<div class="modal-overlay" id="modalEvento" role="dialog" aria-modal="true" aria-labelledby="tituloModalEvento">
+    <div class="modal">
+        <h2 id="tituloModalEvento">Nuevo evento</h2>
+        <form id="formEvento">
+            <input type="hidden" id="eventoId">
+            <label for="eventoTitulo">Título *</label><input id="eventoTitulo" maxlength="150" required>
+            <label for="eventoDescripcion">Descripción</label><textarea id="eventoDescripcion" maxlength="500"></textarea>
+            <label for="tipoEvento">Tipo de evento *</label>
+            <select id="tipoEvento" required><option value="0">Reunión</option><option value="1">Descanso</option><option value="2">Capacitación</option><option value="3">Personal</option><option value="4">Otro</option></select>
+            <div class="check-row"><input type="checkbox" id="todoElDia"><label for="todoElDia">Todo el día</label></div>
+            <div class="field-row"><div><label for="fechaInicio">Fecha de inicio *</label><input id="fechaInicio" type="datetime-local" required></div><div><label for="fechaFin">Fecha de fin *</label><input id="fechaFin" type="datetime-local" required></div></div>
+            <p class="muted" id="ayudaFecha">La fecha de fin debe ser posterior a la de inicio.</p>
+            <div id="errorEvento" class="error" role="alert"></div>
+            <div class="modal-footer"><button id="eliminarEvento" type="button" class="danger hidden">Eliminar</button><span class="spacer"></span><button type="button" data-close="modalEvento">Cancelar</button><button type="submit" class="purple">Guardar</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalTarea" role="dialog" aria-modal="true" aria-labelledby="tituloModalTarea">
+    <div class="modal">
+        <h2 id="tituloModalTarea">Nueva tarea</h2>
+        <form id="formTarea">
+            <label for="tareaTitulo">Título *</label><input id="tareaTitulo" maxlength="150" required>
+            <label for="tareaDescripcion">Descripción</label><textarea id="tareaDescripcion" maxlength="1000"></textarea>
+            <label for="tareaPrioridad">Prioridad *</label><select id="tareaPrioridad"><option value="0">Baja</option><option value="1" selected>Normal</option><option value="2">Alta</option></select>
+            <label for="tareaFecha">Fecha límite *</label><input id="tareaFecha" type="datetime-local" required>
+            <div id="errorTarea" class="error" role="alert"></div>
+            <div class="modal-footer"><button type="button" data-close="modalTarea">Cancelar</button><button type="submit" class="primary">Guardar tarea</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalCita" role="dialog" aria-modal="true" aria-labelledby="tituloModalCita">
+    <div class="modal">
+        <h2 id="tituloModalCita">Detalle de cita médica</h2>
+        <div id="detalleCita"></div>
+        <p class="muted">La cita es de solo lectura en este módulo.</p>
+        <div class="modal-footer"><button type="button" data-close="modalCita" class="primary">Cerrar</button></div>
+    </div>
+</div>
+<script>
+    (() => {
+        'use strict';
+        const API='/medico/agenda/api';
+        const $=id=>document.getElementById(id);
+        const fmt=new Intl.DateTimeFormat('es-GT',{day:'numeric',month:'long',year:'numeric'});
+        const fmtShort=new Intl.DateTimeFormat('es-GT',{day:'numeric',month:'short'});
+        const monthFmt=new Intl.DateTimeFormat('es-GT',{month:'long',year:'numeric'});
+        let fechaVista=new Date(),fechaSeleccionada=new Date(),vista='mes',filtro='pendientes',eventos=[],citas=[],tareas=[];
+        function ymd(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+        function dtLocal(d){return `${ymd(d)}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
+        function parseDate(str){return new Date(str+'T12:00:00')}
+        function addDays(d,n){const c=new Date(d);c.setDate(c.getDate()+n);return c}
+        function startWeek(d){const c=new Date(d.getFullYear(),d.getMonth(),d.getDate());c.setDate(c.getDate()-((c.getDay()+6)%7));return c}
+        function escapeHTML(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+        function aviso(msg,error=false){const a=$('aviso');a.textContent=msg;a.className=error?'alert error-alert':'alert';a.style.display='block';window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>{if(a.textContent===msg)a.style.display='none'},6500)}
+        function headers(){const o={'Content-Type':'application/json'};const token=document.querySelector('meta[name="_csrf"]');const header=document.querySelector('meta[name="_csrf_header"]');if(token&&header)o[header.content]=token.content;return o}
+        async function request(url,opts={}){const res=await fetch(url,{credentials:'same-origin',...opts,headers:{...headers(),...(opts.headers||{})}});if(!res.ok){let msg='Error HTTP '+res.status;try{const data=await res.json();msg=data.error||msg}catch{}throw Error(msg)}if(res.status===204)return null;return res.json()}
+        function periodo(){if(vista==='mes'){const a=new Date(fechaVista.getFullYear(),fechaVista.getMonth(),1);return [a,new Date(a.getFullYear(),a.getMonth()+1,1)]}if(vista==='semana'){const a=startWeek(fechaVista);return[a,addDays(a,7)]}const a=new Date(fechaVista.getFullYear(),fechaVista.getMonth(),fechaVista.getDate());return[a,addDays(a,1)]}
+        function overlaps(e,start,end){return new Date(e.fechaInicio)<end&&new Date(e.fechaFin)>start}
+        function labelEvent(e){const type=['Reunión','Descanso','Capacitación','Personal','Otro'][e.tipoEvento]||'Evento';return (e.todoElDia?'Todo el día':'')+' · '+type+' · '+e.titulo}
+        function mostrarCita(c){
+            const detail=$('detalleCita');detail.replaceChildren();
+            const fields=[
+                ['Cita', '#'+c.id], ['Paciente', c.paciente], ['Estado', c.estado],
+                ['Motivo', c.motivoConsulta||'Sin motivo registrado'],
+                ['Inicio', new Date(c.fechaInicio).toLocaleString('es-GT',{dateStyle:'long',timeStyle:'short'})],
+                ['Fin', new Date(c.fechaFin).toLocaleString('es-GT',{dateStyle:'long',timeStyle:'short'})]
+            ];
+            fields.forEach(([name,value])=>{
+                const p=document.createElement('p');p.className='detail-line';
+                const label=document.createElement('strong');label.textContent=name+': ';
+                p.append(label,document.createTextNode(value));detail.append(p);
+            });
+            modal('modalCita',true);
+        }
+        function buildPill(e){const b=document.createElement('button');b.type='button';b.className='event-pill';b.style.background=e.esCita?e.color:'#8b5cf6';b.classList.toggle('cita-pill',!!e.esCita);b.title=e.esCita?`Cita #${e.id} · ${e.paciente} · ${e.estado}`:labelEvent(e);b.textContent=e.esCita?`Cita #${e.id} · ${e.paciente}`:e.titulo;b.addEventListener('click',ev=>{ev.stopPropagation();if(e.esCita)mostrarCita(e);else editarEvento(e)});return b}
+        function render(){const [a,b]=periodo();$('periodo').textContent=vista==='mes'?monthFmt.format(a):vista==='semana'?`${fmtShort.format(a)} – ${fmtShort.format(addDays(b,-1))}`:fmt.format(a);document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===vista));const out=$('calendar');out.replaceChildren();if(vista==='mes'){const days=document.createElement('div');days.className='weekdays';['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(t=>{const c=document.createElement('div');c.textContent=t;days.append(c)});out.append(days);const grid=document.createElement('div');grid.className='month-grid';const first=startWeek(a);const last=addDays(b,-1);const count=Math.ceil((Math.round((last-first)/86400000)+1)/7)*7;for(let i=0;i<count;i++){const d=addDays(first,i);const cell=document.createElement('div');cell.className='day-cell'+(d.getMonth()!==a.getMonth()?' outside':'')+(ymd(d)===ymd(new Date())?' today':'')+(ymd(d)===ymd(fechaSeleccionada)?' selected':'');const n=document.createElement('span');n.className='date-number';n.textContent=d.getDate();cell.append(n);cell.addEventListener('click',()=>seleccionarDia(d));const de=new Date(d.getFullYear(),d.getMonth(),d.getDate());const hasta=addDays(de,1);[...eventos,...citas].filter(e=>overlaps(e,de,hasta)).sort((x,y)=>x.fechaInicio.localeCompare(y.fechaInicio)).forEach(e=>cell.append(buildPill(e)));grid.append(cell)}out.append(grid)}else{const group=document.createElement('div');group.className='timed-view';const days=vista==='semana'?7:1;for(let i=0;i<days;i++){const d=addDays(a,i),box=document.createElement('div');box.className='timed-day';const heading=document.createElement('h3');const btn=document.createElement('button');btn.type='button';btn.textContent=fmt.format(d);btn.addEventListener('click',()=>seleccionarDia(d));heading.append(btn);box.append(heading);const todayEvents=[...eventos,...citas].filter(e=>overlaps(e,d,addDays(d,1))).sort((x,y)=>x.fechaInicio.localeCompare(y.fechaInicio));if(todayEvents.length===0){const p=document.createElement('p');p.className='muted';p.textContent='Sin eventos';box.append(p)}todayEvents.forEach(e=>{const pill=buildPill(e);pill.textContent=(e.todoElDia?'Todo el día':new Date(e.fechaInicio).toLocaleTimeString('es-GT',{hour:'2-digit',minute:'2-digit'}))+' — '+(e.esCita?`Cita #${e.id} · ${e.paciente}`:e.titulo);box.append(pill)});group.append(box)}out.append(group)}renderTareas()}
+        function seleccionarDia(d){fechaSeleccionada=new Date(d.getFullYear(),d.getMonth(),d.getDate());render()}
+        async function cargar(){try{const [a,b]=periodo();const desde=vista==='mes'?startWeek(a):a;
+            const hasta=vista==='mes'?addDays(startWeek(addDays(b,-1)),7):b;
+            const [eventosResp,citasResp,tareasResp]=await Promise.all([
+                request(`${API}/eventos/periodo?inicio=${encodeURIComponent(dtLocal(desde)+':00')}&fin=${encodeURIComponent(dtLocal(hasta)+':00')}`),
+                request(`${API}/citas?inicio=${ymd(desde)}&fin=${ymd(hasta)}`),
+                request(`${API}/tareas`)
+            ]);
+            eventos=eventosResp;citas=citasResp.map(c=>({...c,esCita:true}));tareas=tareasResp;render()}catch(e){aviso(e.message,true)}}
+        function renderTareas(){$('fechaSeleccionada').textContent=fmt.format(fechaSeleccionada);document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x.dataset.filter===filtro));const list=$('listaTareas');list.replaceChildren();const ofDay=tareas.filter(t=>ymd(new Date(t.fechaLimite))===ymd(fechaSeleccionada));$('conteoTareas').textContent=`(${ofDay.length})`;const shown=ofDay.filter(t=>filtro==='todas'||Boolean(t.isCompleted)===(filtro==='completadas'));if(!shown.length){const p=document.createElement('p');p.className='empty';p.textContent='No hay tareas para esta fecha y filtro.';list.append(p);return}for(const t of shown){const card=document.createElement('div');card.className='task'+(t.isCompleted?' done':'');const title=document.createElement('strong');title.textContent=t.titulo;card.append(title);const priority=document.createElement('span');priority.className='priority priority-'+t.prioridad;priority.textContent=['Prioridad baja','Prioridad normal','Prioridad alta'][t.prioridad];card.append(priority);if(t.descripcion){const p=document.createElement('p');p.textContent=t.descripcion;card.append(p)}const time=document.createElement('div');time.className='muted';time.textContent='Vence: '+new Date(t.fechaLimite).toLocaleString('es-GT',{dateStyle:'short',timeStyle:'short'});card.append(time);const buttons=document.createElement('div');buttons.className='task-actions';const change=document.createElement('button');change.textContent=t.isCompleted?'↩ Pendiente':'✓ Completar';change.addEventListener('click',async()=>{try{await request(`${API}/tareas/${t.id}/estado`,{method:'PATCH',body:JSON.stringify({isCompleted:!t.isCompleted})});await cargar()}catch(e){aviso(e.message,true)}});const del=document.createElement('button');del.textContent='Eliminar';del.className='danger';del.addEventListener('click',async()=>{if(!confirm('¿Está seguro de eliminar esta tarea?'))return;try{await request(`${API}/tareas/${t.id}`,{method:'DELETE'});aviso('Tarea eliminada correctamente.');await cargar()}catch(e){aviso(e.message,true)}});buttons.append(change,del);card.append(buttons);list.append(card)}}
+        function modal(id,show){$(id).classList.toggle('open',show)}
+        function cambiarTipoFecha(){const all=$('todoElDia').checked;const ini=$('fechaInicio'),fin=$('fechaFin');let vi=ini.value,vf=fin.value;if(all){ini.type='date';fin.type='date';ini.value=vi.slice(0,10);fin.value=vf.slice(0,10)}else{ini.type='datetime-local';fin.type='datetime-local';ini.value=vi?vi.slice(0,10)+'T09:00':'';fin.value=vf?vf.slice(0,10)+'T10:00':''}}
+        function nuevoEvento(){$('formEvento').reset();$('eventoId').value='';$('tituloModalEvento').textContent='Nuevo evento';$('eliminarEvento').classList.add('hidden');$('todoElDia').checked=false;$('fechaInicio').type='datetime-local';$('fechaFin').type='datetime-local';const d=new Date(fechaSeleccionada);d.setHours(9,0,0,0);$('fechaInicio').value=dtLocal(d);d.setHours(10);$('fechaFin').value=dtLocal(d);$('errorEvento').textContent='';modal('modalEvento',true)}
+        function editarEvento(e){$('eventoId').value=e.id;$('tituloModalEvento').textContent='Detalle / editar evento';$('eventoTitulo').value=e.titulo;$('eventoDescripcion').value=e.descripcion||'';$('tipoEvento').value=e.tipoEvento;$('todoElDia').checked=!!e.todoElDia;const start=new Date(e.fechaInicio),end=new Date(e.fechaFin);if(e.todoElDia){$('fechaInicio').type='date';$('fechaFin').type='date';$('fechaInicio').value=ymd(start);$('fechaFin').value=ymd(addDays(end,-1))}else{$('fechaInicio').type='datetime-local';$('fechaFin').type='datetime-local';$('fechaInicio').value=dtLocal(start);$('fechaFin').value=dtLocal(end)}$('eliminarEvento').classList.remove('hidden');$('errorEvento').textContent='';modal('modalEvento',true)}
+        $('formEvento').addEventListener('submit',async ev=>{ev.preventDefault();const all=$('todoElDia').checked;const fi=$('fechaInicio').value,ff=$('fechaFin').value;const inicio=all?fi+'T00:00:00':fi+':00',fin=all?ff+'T00:00:00':ff+':00';if(!fi||!ff||(!all&&fin<=inicio)||(all&&ff<fi)){$('errorEvento').textContent='La fecha de fin debe ser posterior a la fecha de inicio (o igual si es todo el día).';return}const data={titulo:$('eventoTitulo').value,descripcion:$('eventoDescripcion').value,tipoEvento:Number($('tipoEvento').value),todoElDia:all,fechaInicio:inicio,fechaFin:fin};const id=$('eventoId').value;const btn=ev.target.querySelector('button[type=submit]');btn.disabled=true;try{await request(id?`${API}/eventos/${id}`:`${API}/eventos`,{method:id?'PUT':'POST',body:JSON.stringify(data)});modal('modalEvento',false);aviso(id?'Evento actualizado exitosamente.':`Evento creado exitosamente. ${data.titulo} — ${fmt.format(parseDate(fi.slice(0,10)))} a ${fmt.format(parseDate(ff.slice(0,10)))}.`);await cargar()}catch(e){$('errorEvento').textContent=e.message}finally{btn.disabled=false}});
+        $('eliminarEvento').addEventListener('click',async()=>{const id=$('eventoId').value;if(!id||!confirm('¿Está seguro de eliminar este evento?'))return;try{await request(`${API}/eventos/${id}`,{method:'DELETE'});modal('modalEvento',false);aviso('Evento eliminado correctamente.');await cargar()}catch(e){$('errorEvento').textContent=e.message}});
+        $('nuevaTarea').addEventListener('click',()=>{$('formTarea').reset();$('errorTarea').textContent='';const d=new Date(fechaSeleccionada);d.setHours(17,0,0,0);$('tareaFecha').value=dtLocal(d);modal('modalTarea',true)});
+        $('formTarea').addEventListener('submit',async ev=>{ev.preventDefault();const data={titulo:$('tareaTitulo').value,descripcion:$('tareaDescripcion').value,prioridad:Number($('tareaPrioridad').value),fechaLimite:$('tareaFecha').value+':00'};const btn=ev.target.querySelector('button[type=submit]');btn.disabled=true;try{await request(`${API}/tareas`,{method:'POST',body:JSON.stringify(data)});modal('modalTarea',false);aviso('Tarea creada correctamente.');await cargar()}catch(e){$('errorTarea').textContent=e.message}finally{btn.disabled=false}});
+        $('nuevoEvento').addEventListener('click',nuevoEvento);$('todoElDia').addEventListener('change',cambiarTipoFecha);
+        document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>modal(b.dataset.close,false)));
+        document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{vista=b.dataset.view;cargar()}));
+        document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filtro=b.dataset.filter;renderTareas()}));
+        $('anterior').addEventListener('click',()=>{if(vista==='mes')fechaVista=new Date(fechaVista.getFullYear(),fechaVista.getMonth()-1,1);else fechaVista=addDays(fechaVista,vista==='semana'?-7:-1);cargar()});
+        $('siguiente').addEventListener('click',()=>{if(vista==='mes')fechaVista=new Date(fechaVista.getFullYear(),fechaVista.getMonth()+1,1);else fechaVista=addDays(fechaVista,vista==='semana'?7:1);cargar()});
+        $('hoy').addEventListener('click',()=>{fechaVista=new Date();fechaSeleccionada=new Date();cargar()});
+        $('toggleTareas').addEventListener('click',()=>{const p=$('panelTareas'),hidden=p.classList.toggle('hidden');$('layout').style.gridTemplateColumns=hidden?'1fr':'';$('toggleTareas').textContent=hidden?'Mostrar tareas':'Ocultar tareas'});
+        cargar();
+    })();
+</script>
+</body>
+</html>

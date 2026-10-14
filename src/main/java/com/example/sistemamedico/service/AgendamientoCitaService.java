@@ -44,6 +44,12 @@ public class AgendamientoCitaService {
 
     private final CorreoService correoService;
 
+    // CU-16: detectar eventos que bloquean la agenda médica.
+    private final AgendaMedicaBloqueoService agendaMedicaBloqueoService;
+
+    // CU-16: coordinar citas y eventos del mismo médico.
+    private final AgendaMedicaConcurrenciaService agendaMedicaConcurrenciaService;
+
 
     // =====================================================
     // CONSTRUCTOR
@@ -57,7 +63,9 @@ public class AgendamientoCitaService {
             HorarioMedico_Repositorio horarioMedicoRepository,
             Cita_Repositorio citaRepository,
             ConsultaMedica_Repositorio consultaMedicaRepository,
-            CorreoService correoService
+            CorreoService correoService,
+            AgendaMedicaBloqueoService agendaMedicaBloqueoService,
+            AgendaMedicaConcurrenciaService agendaMedicaConcurrenciaService
     ) {
 
         this.sucursalRepository =
@@ -80,6 +88,12 @@ public class AgendamientoCitaService {
 
         this.correoService =
                 correoService;
+
+        this.agendaMedicaBloqueoService =
+                agendaMedicaBloqueoService;
+
+        this.agendaMedicaConcurrenciaService =
+                agendaMedicaConcurrenciaService;
     }
 
 
@@ -169,7 +183,17 @@ public class AgendamientoCitaService {
                         sucursalId,
                         especialidadId,
                         "DISPONIBLE"
-                );
+                )
+                .stream()
+                .filter(horario ->
+                        !agendaMedicaBloqueoService.existeConflicto(
+                                medicoId,
+                                horario.getFecha(),
+                                horario.getHoraInicio(),
+                                horario.getHoraFin()
+                        )
+                )
+                .toList();
     }
 
 // =====================================================
@@ -396,6 +420,9 @@ public class AgendamientoCitaService {
         }
 
 
+        // CU-16: adquirir bloqueo antes de consultar el horario.
+        agendaMedicaConcurrenciaService.bloquearMedico(medicoId);
+
         // =================================================
         // BUSCAR MÉDICO
         // =================================================
@@ -483,7 +510,7 @@ public class AgendamientoCitaService {
 
         HorarioMedico horario =
                 horarioMedicoRepository
-                        .findById(
+                        .bloquearPorId(
                                 horarioId
                         )
                         .orElseThrow(
@@ -627,6 +654,17 @@ public class AgendamientoCitaService {
             );
         }
 
+
+        // =================================================
+        // CU-16: NO RESERVAR CITAS SOBRE EVENTOS DEL MÉDICO
+        // =================================================
+
+        agendaMedicaBloqueoService.validarHorario(
+                medico.getId(),
+                horario.getFecha(),
+                horario.getHoraInicio(),
+                horario.getHoraFin()
+        );
 
         // =================================================
         // CREAR CITA
@@ -882,6 +920,9 @@ public class AgendamientoCitaService {
         }
 
 
+        // CU-16: coordinar el seguimiento con eventos y citas.
+        agendaMedicaConcurrenciaService.bloquearMedico(medico.getId());
+
         // =================================================
         // VALIDAR PACIENTE
         // =================================================
@@ -1026,7 +1067,7 @@ public class AgendamientoCitaService {
 
         HorarioMedico horario =
                 horarioMedicoRepository
-                        .findById(
+                        .bloquearPorId(
                                 horarioId
                         )
                         .orElseThrow(
@@ -1155,6 +1196,17 @@ public class AgendamientoCitaService {
             );
         }
 
+
+        // =================================================
+        // CU-16: NO AGENDAR SEGUIMIENTOS SOBRE EVENTOS
+        // =================================================
+
+        agendaMedicaBloqueoService.validarHorario(
+                medico.getId(),
+                horario.getFecha(),
+                horario.getHoraInicio(),
+                horario.getHoraFin()
+        );
 
         // =================================================
         // CREAR CITA DE SEGUIMIENTO
