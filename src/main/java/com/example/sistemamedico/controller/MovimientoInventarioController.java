@@ -3,11 +3,9 @@ package com.example.sistemamedico.controller;
 
 import com.example.sistemamedico.Repositorio.InventarioMedicamento_Repositorio;
 import com.example.sistemamedico.Repositorio.MovimientoInventario_Repositorio;
-
 import com.example.sistemamedico.model.InventarioMedicamento;
 import com.example.sistemamedico.model.MovimientoInventario;
 import com.example.sistemamedico.model.Usuario;
-
 import com.example.sistemamedico.service.MovimientoInventarioService;
 
 import jakarta.persistence.criteria.Predicate;
@@ -17,25 +15,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-
 import org.springframework.format.annotation.DateTimeFormat;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-
 import org.springframework.web.bind.annotation.*;
-
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -43,14 +35,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/farmacia/bitacora")
 public class MovimientoInventarioController {
 
     // =====================================================
-    // REPOSITORIOS Y SERVICIO
+    // CU-15: REPOSITORIOS Y SERVICIO
     // =====================================================
 
     private final MovimientoInventario_Repositorio
@@ -62,25 +54,26 @@ public class MovimientoInventarioController {
     private final MovimientoInventarioService
             movimientoService;
 
+    // =====================================================
+    // TOKEN PARA EVITAR DOBLE ENVÍO
+    // =====================================================
+
+    private static final String TOKEN_FORMULARIO =
+            "CU15_TOKEN_MOVIMIENTO_FARMACIA";
 
     // =====================================================
     // CONSTRUCTOR
     // =====================================================
 
     public MovimientoInventarioController(
-
             MovimientoInventario_Repositorio movimientoRepositorio,
-
             InventarioMedicamento_Repositorio inventarioRepositorio,
-
             MovimientoInventarioService movimientoService
     ) {
-
         this.movimientoRepositorio = movimientoRepositorio;
         this.inventarioRepositorio = inventarioRepositorio;
         this.movimientoService = movimientoService;
     }
-
 
     // =====================================================
     // VALIDAR SESIÓN DEL PERSONAL DE FARMACIA
@@ -99,9 +92,9 @@ public class MovimientoInventarioController {
             return null;
         }
 
-        String rol = usuario.getRol().getNombre();
-
-        if (!"FARMACIA".equalsIgnoreCase(rol)) {
+        if (!"FARMACIA".equalsIgnoreCase(
+                usuario.getRol().getNombre()
+        )) {
             return null;
         }
 
@@ -111,7 +104,6 @@ public class MovimientoInventarioController {
 
         return usuario;
     }
-
 
     // =====================================================
     // CU-15: LISTADO CON FILTROS DINÁMICOS
@@ -148,13 +140,10 @@ public class MovimientoInventarioController {
             LocalDate fechaHasta,
 
             Model model,
-
             HttpSession session
     ) {
 
-        // =================================================
         // 1. VALIDAR SESIÓN
-        // =================================================
 
         Usuario usuarioSesion =
                 obtenerUsuarioFarmacia(session);
@@ -163,23 +152,16 @@ public class MovimientoInventarioController {
             return "redirect:/personal/login";
         }
 
-
-        // =================================================
-        // 2. VALIDAR TIPO DE MOVIMIENTO
-        // =================================================
+        // 2. VALIDAR TIPO
 
         if (tipo != null && (tipo < 0 || tipo > 6)) {
-
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Tipo de movimiento no válido."
             );
         }
 
-
-        // =================================================
-        // 3. VALIDAR RANGO DE FECHAS
-        // =================================================
+        // 3. VALIDAR FECHAS
 
         if (fechaDesde != null
                 && fechaHasta != null
@@ -190,16 +172,11 @@ public class MovimientoInventarioController {
                     "La fecha inicial no puede ser posterior a la final."
             );
 
-            // EVITA EJECUTAR UN RANGO INVERTIDO
-
             fechaDesde = null;
             fechaHasta = null;
         }
 
-
-        // =================================================
-        // 4. LIMPIAR FILTROS DE TEXTO
-        // =================================================
+        // 4. LIMPIAR FILTROS
 
         String referenciaFiltro =
                 referencia == null || referencia.isBlank()
@@ -211,13 +188,7 @@ public class MovimientoInventarioController {
                         ? null
                         : usuario.trim();
 
-
-        // =================================================
-        // 5. CONVERTIR RANGO DE FECHAS
-        //
-        // FECHA DESDE: 00:00 DEL DÍA INICIAL
-        // FECHA HASTA: ANTES DE 00:00 DEL DÍA SIGUIENTE
-        // =================================================
+        // 5. PREPARAR FECHAS
 
         LocalDateTime desde =
                 fechaDesde == null
@@ -229,13 +200,9 @@ public class MovimientoInventarioController {
                         ? null
                         : fechaHasta.plusDays(1).atStartOfDay();
 
-
-        // =================================================
-        // 6. CONSTRUIR FILTROS DINÁMICAMENTE
-        //
-        // SOLO SE AGREGAN LOS FILTROS QUE TENGAN VALOR.
-        // ESTO EVITA EL ERROR lower(bytea).
-        // =================================================
+        // 6. CONSTRUIR FILTROS
+        // Evitar consultas con parámetros nulos
+        // que provoquen el error lower(bytea).
 
         Specification<MovimientoInventario> filtros =
                 (root, query, cb) -> {
@@ -243,13 +210,7 @@ public class MovimientoInventarioController {
                     List<Predicate> condiciones =
                             new ArrayList<>();
 
-
-                    // =====================================
-                    // TIPO DE MOVIMIENTO
-                    // =====================================
-
                     if (tipo != null) {
-
                         condiciones.add(
                                 cb.equal(
                                         root.get("tipoMovimiento"),
@@ -258,13 +219,7 @@ public class MovimientoInventarioController {
                         );
                     }
 
-
-                    // =====================================
-                    // MEDICAMENTO
-                    // =====================================
-
                     if (medicamentoId != null) {
-
                         condiciones.add(
                                 cb.equal(
                                         root.get("medicamentoId"),
@@ -273,13 +228,7 @@ public class MovimientoInventarioController {
                         );
                     }
 
-
-                    // =====================================
-                    // SUCURSAL
-                    // =====================================
-
                     if (sucursalId != null) {
-
                         condiciones.add(
                                 cb.equal(
                                         root.get("sucursalId"),
@@ -288,13 +237,7 @@ public class MovimientoInventarioController {
                         );
                     }
 
-
-                    // =====================================
-                    // NÚMERO DE REFERENCIA
-                    // =====================================
-
                     if (referenciaFiltro != null) {
-
                         condiciones.add(
                                 cb.like(
                                         cb.lower(
@@ -306,13 +249,7 @@ public class MovimientoInventarioController {
                         );
                     }
 
-
-                    // =====================================
-                    // USUARIO RESPONSABLE
-                    // =====================================
-
                     if (usuarioFiltro != null) {
-
                         condiciones.add(
                                 cb.like(
                                         cb.lower(
@@ -324,13 +261,7 @@ public class MovimientoInventarioController {
                         );
                     }
 
-
-                    // =====================================
-                    // FECHA INICIAL
-                    // =====================================
-
                     if (desde != null) {
-
                         condiciones.add(
                                 cb.greaterThanOrEqualTo(
                                         root.get("fechaHora"),
@@ -339,13 +270,7 @@ public class MovimientoInventarioController {
                         );
                     }
 
-
-                    // =====================================
-                    // FECHA FINAL
-                    // =====================================
-
                     if (hastaExclusiva != null) {
-
                         condiciones.add(
                                 cb.lessThan(
                                         root.get("fechaHora"),
@@ -354,28 +279,18 @@ public class MovimientoInventarioController {
                         );
                     }
 
-
-                    // =====================================
-                    // COMBINAR FILTROS
-                    // =====================================
-
                     return cb.and(
                             condiciones.toArray(new Predicate[0])
                     );
                 };
 
-
-        // =================================================
-        // 7. PAGINACIÓN Y ORDENAMIENTO
-        // =================================================
+        // 7. PAGINACIÓN
 
         int paginaSegura = Math.max(0, pagina);
 
         Page<MovimientoInventario> movimientos =
                 movimientoRepositorio.findAll(
-
                         filtros,
-
                         PageRequest.of(
                                 paginaSegura,
                                 10,
@@ -386,10 +301,7 @@ public class MovimientoInventarioController {
                         )
                 );
 
-
-        // =================================================
-        // 8. OBTENER NOMBRES DE MEDICAMENTOS Y SUCURSALES
-        // =================================================
+        // 8. NOMBRES DE MEDICAMENTOS Y SUCURSALES
 
         List<InventarioMedicamento> inventarios =
                 inventarioRepositorio.findAll();
@@ -405,7 +317,6 @@ public class MovimientoInventarioController {
 
         Map<Long, String> opcionesSucursales =
                 new TreeMap<>();
-
 
         for (InventarioMedicamento inventario : inventarios) {
 
@@ -425,7 +336,6 @@ public class MovimientoInventarioController {
 
             String nombreSucursal =
                     inventario.getSucursal().getNombre();
-
 
             nombresMedicamentos.put(
                     idMedicamento,
@@ -448,10 +358,7 @@ public class MovimientoInventarioController {
             );
         }
 
-
-        // =================================================
         // 9. ENVIAR DATOS A THYMELEAF
-        // =================================================
 
         model.addAttribute(
                 "movimientos",
@@ -483,64 +390,29 @@ public class MovimientoInventarioController {
                 opcionesSucursales
         );
 
-
-        // =================================================
-        // 10. CONSERVAR FILTROS EN LA PANTALLA
-        // =================================================
+        // 10. CONSERVAR FILTROS
 
         model.addAttribute("tipo", tipo);
-
-        model.addAttribute(
-                "medicamentoId",
-                medicamentoId
-        );
-
-        model.addAttribute(
-                "sucursalId",
-                sucursalId
-        );
-
-        model.addAttribute(
-                "referencia",
-                referenciaFiltro
-        );
-
-        model.addAttribute(
-                "usuarioFiltro",
-                usuarioFiltro
-        );
-
-        model.addAttribute(
-                "fechaDesde",
-                fechaDesde
-        );
-
-        model.addAttribute(
-                "fechaHasta",
-                fechaHasta
-        );
-
+        model.addAttribute("medicamentoId", medicamentoId);
+        model.addAttribute("sucursalId", sucursalId);
+        model.addAttribute("referencia", referenciaFiltro);
+        model.addAttribute("usuarioFiltro", usuarioFiltro);
+        model.addAttribute("fechaDesde", fechaDesde);
+        model.addAttribute("fechaHasta", fechaHasta);
 
         return "farmacia/bitacora/listar";
     }
 
-
     // =====================================================
-    // CU-15: MOSTRAR FORMULARIO NUEVO MOVIMIENTO
+    // CU-15: MOSTRAR FORMULARIO
     // =====================================================
 
     @GetMapping("/nuevo")
     @Transactional(readOnly = true)
     public String mostrarFormulario(
-
             Model model,
-
             HttpSession session
     ) {
-
-        // =================================================
-        // VALIDAR SESIÓN
-        // =================================================
 
         Usuario usuario =
                 obtenerUsuarioFarmacia(session);
@@ -549,10 +421,24 @@ public class MovimientoInventarioController {
             return "redirect:/personal/login";
         }
 
+        // CREAR TOKEN NUEVO PARA ESTA CARGA
+        // Se consume una única vez durante el POST.
 
-        // =================================================
+        String token = UUID.randomUUID().toString();
+
+        synchronized (session) {
+            session.setAttribute(
+                    TOKEN_FORMULARIO,
+                    token
+            );
+        }
+
+        model.addAttribute(
+                "tokenFormulario",
+                token
+        );
+
         // CONSULTAR INVENTARIOS ACTIVOS
-        // =================================================
 
         List<InventarioOpcion> inventarios =
                 inventarioRepositorio.findAll()
@@ -565,17 +451,11 @@ public class MovimientoInventarioController {
                                         && i.getSucursal() != null
                         )
                         .map(i -> new InventarioOpcion(
-
                                 i.getId(),
-
                                 i.getMedicamento().getNombre(),
-
                                 i.getSucursal().getNombre(),
-
                                 i.getStockActual(),
-
                                 i.getMedicamento().getStockMinimo()
-
                         ))
                         .sorted(
                                 Comparator.comparing(
@@ -585,26 +465,14 @@ public class MovimientoInventarioController {
                         )
                         .toList();
 
-
-        // =================================================
-        // TIPOS MANUALES PARA FARMACIA
-        //
-        // 4 Y 5 REQUIEREN ADMINISTRADOR.
-        // 6 ES AUTOMÁTICO.
-        // =================================================
+        // FARMACIA: SOLO TIPOS 0 A 3
 
         List<TipoOpcion> tiposMovimiento = List.of(
-
                 new TipoOpcion(0, "Compra"),
-
                 new TipoOpcion(1, "Devolución"),
-
                 new TipoOpcion(2, "Venta"),
-
                 new TipoOpcion(3, "Reclamo")
-
         );
-
 
         model.addAttribute(
                 "inventarios",
@@ -621,24 +489,18 @@ public class MovimientoInventarioController {
                 usuario.getNombreUsuario()
         );
 
-
         return "farmacia/bitacora/crear";
     }
 
-
     // =====================================================
     // CU-15: CONSULTAR EXISTENCIAS
-    //
-    // NO MODIFICA EL INVENTARIO.
     // =====================================================
 
     @GetMapping("/stock")
     @ResponseBody
     @Transactional(readOnly = true)
     public ResponseEntity<?> consultarStock(
-
             @RequestParam Long inventarioId,
-
             HttpSession session
     ) {
 
@@ -646,7 +508,6 @@ public class MovimientoInventarioController {
                 obtenerUsuarioFarmacia(session);
 
         if (usuario == null) {
-
             return ResponseEntity.status(
                     HttpStatus.FORBIDDEN
             ).body(
@@ -657,12 +518,10 @@ public class MovimientoInventarioController {
             );
         }
 
-
         InventarioMedicamento inventario =
                 inventarioRepositorio
                         .findById(inventarioId)
                         .orElse(null);
-
 
         if (inventario == null
                 || !Boolean.TRUE.equals(inventario.getActivo())) {
@@ -677,31 +536,20 @@ public class MovimientoInventarioController {
             );
         }
 
-
-        // =================================================
-        // RESPUESTA JSON PARA EL FORMULARIO
-        // =================================================
-
         return ResponseEntity.ok(
                 new StockRespuesta(
-
                         inventario.getId(),
-
                         inventario.getMedicamento().getNombre(),
-
                         inventario.getSucursal().getNombre(),
-
                         inventario.getStockActual(),
-
                         inventario.getMedicamento().getStockMinimo()
-
                 )
         );
     }
 
-
     // =====================================================
     // CU-15: REGISTRAR MOVIMIENTO MANUAL
+    // CON PROTECCIÓN CONTRA DOBLE ENVÍO
     // =====================================================
 
     @PostMapping("/nuevo")
@@ -725,14 +573,15 @@ public class MovimientoInventarioController {
             @RequestParam(required = false)
             String motivo,
 
+            @RequestParam(required = false)
+            String tokenFormulario,
+
             HttpSession session,
 
             RedirectAttributes redirectAttributes
     ) {
 
-        // =================================================
-        // VALIDAR IDENTIDAD DEL USUARIO
-        // =================================================
+        // VALIDAR USUARIO
 
         Usuario usuario =
                 obtenerUsuarioFarmacia(session);
@@ -741,89 +590,88 @@ public class MovimientoInventarioController {
             return "redirect:/personal/login";
         }
 
-
         // =================================================
-        // REGISTRAR MOVIMIENTO MEDIANTE EL SERVICIO
+        // COMPROBAR TOKEN Y PROCESAR UNA SOLA VEZ
+        //
+        // La sincronización por sesión evita que dos
+        // solicitudes simultáneas del mismo formulario
+        // superen juntas la comprobación del token.
         // =================================================
 
-        try {
+        synchronized (session) {
 
-            MovimientoInventario movimiento =
-                    movimientoService.registrarMovimientoManual(
+            Object tokenGuardado =
+                    session.getAttribute(TOKEN_FORMULARIO);
 
-                            inventarioId,
+            if (tokenFormulario == null
+                    || tokenFormulario.isBlank()
+                    || !(tokenGuardado instanceof String)
+                    || !tokenFormulario.equals(tokenGuardado)) {
 
-                            tipoMovimiento,
+                redirectAttributes.addFlashAttribute(
+                        "mensajeError",
+                        "El formulario ya fue enviado o ha caducado. "
+                                + "Abra un formulario nuevo."
+                );
 
-                            cantidad,
+                return "redirect:/farmacia/bitacora/nuevo";
+            }
 
-                            costoUnitario,
+            // CONSUMIR EL TOKEN ANTES DE REGISTRAR
 
-                            numeroReferencia,
+            session.removeAttribute(TOKEN_FORMULARIO);
 
-                            motivo,
+            try {
 
-                            usuario.getNombreUsuario(),
+                MovimientoInventario movimiento =
+                        movimientoService.registrarMovimientoManual(
+                                inventarioId,
+                                tipoMovimiento,
+                                cantidad,
+                                costoUnitario,
+                                numeroReferencia,
+                                motivo,
+                                usuario.getNombreUsuario(),
+                                usuario.getRol().getNombre()
+                        );
 
-                            usuario.getRol().getNombre()
+                String nombreTipo =
+                        obtenerNombreTipo(tipoMovimiento);
 
-                    );
+                redirectAttributes.addFlashAttribute(
+                        "mensajeExito",
+                        "Movimiento registrado exitosamente. "
+                                + "Tipo: " + nombreTipo
+                                + ". Cantidad: " + cantidad
+                                + ". Stock actualizado: "
+                                + movimiento.getStockNuevo()
+                );
 
+                return "redirect:/farmacia/bitacora";
 
-            // =================================================
-            // MENSAJE DE REGISTRO EXITOSO
-            // =================================================
+            } catch (IllegalArgumentException ex) {
 
-            String nombreTipo =
-                    obtenerNombreTipo(tipoMovimiento);
+                redirectAttributes.addFlashAttribute(
+                        "mensajeError",
+                        ex.getMessage()
+                );
 
-            redirectAttributes.addFlashAttribute(
-                    "mensajeExito",
-
-                    "Movimiento registrado exitosamente. " +
-                            "Tipo: " + nombreTipo +
-                            ". Cantidad: " + cantidad +
-                            ". Stock actualizado: " +
-                            movimiento.getStockNuevo()
-            );
-
-
-            return "redirect:/farmacia/bitacora";
-
-        } catch (IllegalArgumentException ex) {
-
-            // =================================================
-            // MOSTRAR ERROR DE VALIDACIÓN
-            // =================================================
-
-            redirectAttributes.addFlashAttribute(
-                    "mensajeError",
-                    ex.getMessage()
-            );
-
-            return "redirect:/farmacia/bitacora/nuevo";
+                return "redirect:/farmacia/bitacora/nuevo";
+            }
         }
     }
 
-
     // =====================================================
-    // CU-15: VER DETALLE DE UN MOVIMIENTO
+    // CU-15: DETALLE DE MOVIMIENTO
     // =====================================================
 
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     public String verDetalle(
-
             @PathVariable Long id,
-
             Model model,
-
             HttpSession session
     ) {
-
-        // =================================================
-        // VALIDAR SESIÓN
-        // =================================================
 
         Usuario usuario =
                 obtenerUsuarioFarmacia(session);
@@ -831,11 +679,6 @@ public class MovimientoInventarioController {
         if (usuario == null) {
             return "redirect:/personal/login";
         }
-
-
-        // =================================================
-        // BUSCAR MOVIMIENTO
-        // =================================================
 
         MovimientoInventario movimiento =
                 movimientoRepositorio
@@ -847,7 +690,6 @@ public class MovimientoInventarioController {
                                 )
                         );
 
-
         model.addAttribute(
                 "movimiento",
                 movimiento
@@ -858,10 +700,8 @@ public class MovimientoInventarioController {
                 usuario.getNombreUsuario()
         );
 
-
         return "farmacia/bitacora/detalle";
     }
-
 
     // =====================================================
     // NOMBRE DEL TIPO DE MOVIMIENTO
@@ -874,77 +714,50 @@ public class MovimientoInventarioController {
         }
 
         return switch (tipo) {
-
             case 0 -> "Compra";
-
             case 1 -> "Devolución";
-
             case 2 -> "Venta";
-
             case 3 -> "Reclamo";
-
             case 4 -> "Ajuste+";
-
             case 5 -> "Ajuste-";
-
             case 6 -> "Despacho";
-
             default -> "Desconocido";
         };
     }
 
-
     // =====================================================
-    // OPCIONES DEL INVENTARIO PARA THYMELEAF
+    // DTO: OPCIONES DE INVENTARIO
     // =====================================================
 
     public record InventarioOpcion(
-
             Long id,
-
             String medicamento,
-
             String sucursal,
-
             Integer stockActual,
-
             Integer stockMinimo
-
     ) {
     }
 
-
     // =====================================================
-    // OPCIONES DE LOS TIPOS DE MOVIMIENTO
+    // DTO: TIPOS DE MOVIMIENTO
     // =====================================================
 
     public record TipoOpcion(
-
             Integer codigo,
-
             String nombre
-
     ) {
     }
 
-
     // =====================================================
-    // RESPUESTA JSON DE EXISTENCIAS
+    // DTO: RESPUESTA DE STOCK
     // =====================================================
 
     public record StockRespuesta(
-
             Long inventarioId,
-
             String medicamento,
-
             String sucursal,
-
             Integer stockActual,
-
             Integer stockMinimo
-
     ) {
     }
-
 }

@@ -7,7 +7,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Listado de Usuarios</title>
+    <title>Panel Administrativo | Sistema Médico</title>
 
     <style>
 
@@ -371,7 +371,7 @@
         }
 
         /* ==========================================
-           DISEÑO RESPONSIVE
+           RESPONSIVE
         ========================================== */
 
         @media (max-width: 800px) {
@@ -393,6 +393,7 @@
         }
 
     </style>
+
 </head>
 
 <body>
@@ -408,7 +409,7 @@
         <h2>Panel Administrativo</h2>
 
         <!-- ======================================
-             ADMINISTRACIÓN DE USUARIOS
+             USUARIOS
         ====================================== -->
 
         <div class="titulo-menu">
@@ -420,15 +421,14 @@
            class="activo-menu">
 
             📋 Listar Usuarios
-
         </a>
 
         <a href="/admin/usuarios/crear"
            th:href="@{/admin/usuarios/crear}">
 
             ➕ Crear Usuario
-
         </a>
+
 
         <!-- ======================================
              CU-14: MANTENIMIENTO DE CATÁLOGOS
@@ -444,7 +444,6 @@
            th:href="@{/admin/especialidades}">
 
             🩺 Especialidades
-
         </a>
 
         <!-- 2. SUCURSALES -->
@@ -453,7 +452,6 @@
            th:href="@{/admin/sucursales}">
 
             🏥 Sucursales
-
         </a>
 
         <!-- 3. ESTADOS DE CITA -->
@@ -462,7 +460,6 @@
            th:href="@{/admin/estados-cita}">
 
             📋 Estados de Cita
-
         </a>
 
         <!-- 4. LABORATORIOS -->
@@ -471,7 +468,6 @@
            th:href="@{/admin/laboratorios}">
 
             🧪 Laboratorios
-
         </a>
 
         <!-- 5. EXÁMENES DE LABORATORIO -->
@@ -480,7 +476,6 @@
            th:href="@{/admin/examenes-laboratorio}">
 
             🔬 Exámenes de Laboratorio
-
         </a>
 
         <!-- 6. MEDICAMENTOS -->
@@ -489,7 +484,6 @@
            th:href="@{/admin/medicamentos}">
 
             💊 Medicamentos
-
         </a>
 
         <!-- 7. ROLES -->
@@ -498,7 +492,6 @@
            th:href="@{/admin/roles}">
 
             🛡️ Roles
-
         </a>
 
         <!-- 8. INVENTARIO DE MEDICAMENTOS -->
@@ -507,8 +500,20 @@
            th:href="@{/admin/inventario-medicamentos}">
 
             📦 Inventario de Medicamentos
-
         </a>
+
+
+        <!-- ======================================
+             CU-15: AJUSTES DE INVENTARIO
+             NUEVO BOTÓN INCORPORADO
+        ====================================== -->
+
+        <a href="/admin/inventario-medicamentos/ajustes"
+           th:href="@{/admin/inventario-medicamentos/ajustes}">
+
+            📋 Ajustes de Inventario — CU-15
+        </a>
+
 
         <!-- 9. ESPECIALIDADES POR SEDE -->
 
@@ -516,8 +521,8 @@
            th:href="@{/branch-specialty}">
 
             🏥 Especialidades por Sede
-
         </a>
+
 
         <!-- ======================================
              CERRAR SESIÓN
@@ -528,10 +533,10 @@
            class="cerrar-sesion">
 
             Cerrar Sesión
-
         </a>
 
     </aside>
+
 
     <!-- ==========================================
          CONTENIDO PRINCIPAL
@@ -543,23 +548,20 @@
 
             <h1>Listado de Usuarios</h1>
 
-            <!-- ==================================
-                 MENSAJE DE ÉXITO
-            ================================== -->
+            <!-- MENSAJE DE ÉXITO -->
 
             <div class="mensaje-exito"
                  th:if="${exito}"
                  th:text="${exito}">
             </div>
 
-            <!-- ==================================
-                 MENSAJE DE ERROR
-            ================================== -->
+            <!-- MENSAJE DE ERROR -->
 
             <div class="mensaje-error-general"
                  th:if="${errorGeneral}"
                  th:text="${errorGeneral}">
             </div>
+
 
             <!-- ==================================
                  BÚSQUEDA DE USUARIOS
@@ -618,7 +620,6 @@
                             class="btn-buscar">
 
                         🔍 Buscar
-
                     </button>
 
                 </form>
@@ -628,10 +629,10 @@
                    class="btn-crear">
 
                     Crear Usuario
-
                 </a>
 
             </div>
+
 
             <!-- ==================================
                  TABLA DE USUARIOS
@@ -642,7 +643,6 @@
                 <table>
 
                     <thead>
-
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
@@ -652,7 +652,6 @@
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
-
                     </thead>
 
                     <tbody>
@@ -695,7 +694,8 @@
 
                         </td>
 
-                        <!-- ACCIONES DE USUARIO -->
+
+                        <!-- ACCIONES DEL USUARIO -->
 
                         <td class="acciones">
 
@@ -704,7 +704,6 @@
                                     onclick="mostrarMenuAcciones(this)">
 
                                 ⋮
-
                             </button>
 
                             <div class="menu-acciones">
@@ -715,7 +714,6 @@
                                    class="editar">
 
                                     Editar
-
                                 </a>
 
                                 <!-- ELIMINAR -->
@@ -726,7 +724,6 @@
                                         onclick="abrirModalEliminar(this)">
 
                                     Eliminar
-
                                 </button>
 
                             </div>
@@ -734,6 +731,7 @@
                         </td>
 
                     </tr>
+
 
                     <!-- SIN RESULTADOS -->
 
@@ -743,7 +741,6 @@
                             class="sin-datos">
 
                             No se encontraron datos de usuarios.
-
                         </td>
 
                     </tr>
@@ -754,8 +751,9 @@
 
             </div>
 
+
             <!-- ==================================
-                 PAGINACIÓN DE USUARIOS
+                 PAGINACIÓN
             ================================== -->
 
             <div class="paginacion">
@@ -807,6 +805,7 @@
 
                 </div>
 
+
                 <!-- TOTAL DE REGISTROS -->
 
                 <div>
@@ -819,15 +818,20 @@
 
                 </div>
 
+
                 <!-- NAVEGACIÓN DE PÁGINAS -->
 
                 <div class="paginas">
 
                     <a th:if="${usuarios.hasPrevious()}"
-                       th:href="@{/admin/usuarios(campo=${campo},buscar=${buscar},pagina=${paginaActual - 1},tamanio=${tamanio})}">
+                       th:href="@{/admin/usuarios(
+                           campo=${campo},
+                           buscar=${buscar},
+                           pagina=${paginaActual - 1},
+                           tamanio=${tamanio}
+                       )}">
 
                         Anterior
-
                     </a>
 
                     <span class="pagina-actual">
@@ -847,10 +851,14 @@
                     </span>
 
                     <a th:if="${usuarios.hasNext()}"
-                       th:href="@{/admin/usuarios(campo=${campo},buscar=${buscar},pagina=${paginaActual + 1},tamanio=${tamanio})}">
+                       th:href="@{/admin/usuarios(
+                           campo=${campo},
+                           buscar=${buscar},
+                           pagina=${paginaActual + 1},
+                           tamanio=${tamanio}
+                       )}">
 
                         Siguiente
-
                     </a>
 
                 </div>
@@ -863,8 +871,9 @@
 
 </div>
 
+
 <!-- ==========================================
-     MODAL CONFIRMAR ELIMINACIÓN
+     MODAL PARA ELIMINACIÓN DE USUARIOS
 ========================================== -->
 
 <div id="modalEliminar"
@@ -895,14 +904,12 @@
                         onclick="cerrarModalEliminar()">
 
                     Cancelar
-
                 </button>
 
                 <button type="submit"
                         class="btn-confirmar-eliminar">
 
                     Eliminar
-
                 </button>
 
             </div>
@@ -912,6 +919,7 @@
     </div>
 
 </div>
+
 
 <!-- ==========================================
      JAVASCRIPT
@@ -939,6 +947,7 @@
         menu.classList.toggle("mostrar");
     }
 
+
     // ======================================
     // CERRAR MENÚ AL HACER CLIC FUERA
     // ======================================
@@ -957,6 +966,7 @@
         }
 
     });
+
 
     // ======================================
     // ABRIR MODAL DE ELIMINACIÓN
@@ -988,6 +998,7 @@
             });
     }
 
+
     // ======================================
     // CERRAR MODAL
     // ======================================
@@ -998,8 +1009,9 @@
             "none";
     }
 
+
     // ======================================
-    // CERRAR MODAL AL TOCAR FUERA
+    // CERRAR MODAL AL HACER CLIC FUERA
     // ======================================
 
     document.getElementById("modalEliminar")

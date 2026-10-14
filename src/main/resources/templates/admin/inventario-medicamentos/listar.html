@@ -1,60 +1,371 @@
+
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Inventario de Medicamentos | CU-14</title>
-    <link rel="stylesheet" th:href="@{/css/cu14-inventario.css}" href="/css/cu14-inventario.css">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Inventario de Medicamentos | CU-14 y CU-15</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/cu14-inventario.css}"
+          href="/css/cu14-inventario.css">
 </head>
-<body><main class="contenedor">
+
+<body>
+
+<main class="contenedor">
+
     <h1>CU-14: Inventario de Medicamentos</h1>
-    <p>Administrador: <strong th:text="${adminName}">admin1</strong></p>
-    <p>Gestione las existencias por medicamento y sucursal sin borrar despachos históricos.</p>
+
+    <p>
+        Administrador:
+        <strong th:text="${adminName}">admin1</strong>
+    </p>
+
+    <p>
+        Gestione las existencias por medicamento y sucursal
+        sin borrar despachos históricos.
+    </p>
+
+    <!-- ==========================================
+         ACCIONES PRINCIPALES
+    ========================================== -->
+
     <nav class="acciones">
-        <a class="btn" th:href="@{/admin/inventario-medicamentos/crear}">+ Crear inventario</a>
-        <a class="btn btn-gris" th:href="@{/admin/usuarios}">Volver al panel administrativo</a>
-        <a class="btn btn-gris" th:href="@{/admin/medicamentos}">Medicamentos</a>
-        <a class="btn btn-gris" th:href="@{/}">← Volver al inicio</a>
+
+        <a class="btn"
+           th:href="@{/admin/inventario-medicamentos/crear}">
+            + Crear inventario
+        </a>
+
+        <!-- CU-15: NUEVA OPCIÓN -->
+
+        <a class="btn btn-verde"
+           th:href="@{/admin/inventario-medicamentos/ajustes}">
+            📋 Registrar Ajuste CU-15
+        </a>
+
+        <a class="btn btn-gris"
+           th:href="@{/admin/usuarios}">
+            Volver al panel administrativo
+        </a>
+
+        <a class="btn btn-gris"
+           th:href="@{/admin/medicamentos}">
+            Medicamentos
+        </a>
+
+        <a class="btn btn-gris"
+           th:href="@{/}">
+            ← Volver al inicio
+        </a>
+
     </nav>
-    <div class="alerta exito" th:if="${mensajeExito}" th:text="${mensajeExito}"></div>
-    <div class="alerta error" th:if="${mensajeError}" th:text="${mensajeError}"></div>
-    <form method="get" class="filtros" th:action="@{/admin/inventario-medicamentos}">
-        <label for="buscar">Buscar por medicamento o sede:</label>
-        <input id="buscar" name="buscar" type="search" placeholder="Nombre del medicamento o sucursal" th:value="${buscar}" maxlength="150">
-        <label for="tamanio">Mostrar:</label><select id="tamanio" name="tamanio">
-        <option value="10" th:selected="${tamanio == 10}">10 registros</option>
-        <option value="25" th:selected="${tamanio == 25}">25 registros</option>
-        <option value="50" th:selected="${tamanio == 50}">50 registros</option></select>
-        <input type="hidden" name="pagina" value="0"><button class="btn" type="submit">Buscar</button>
-        <a class="btn btn-gris" th:href="@{/admin/inventario-medicamentos}">Limpiar</a>
+
+    <!-- ==========================================
+         MENSAJES
+    ========================================== -->
+
+    <div class="alerta exito"
+         th:if="${mensajeExito}"
+         th:text="${mensajeExito}">
+    </div>
+
+    <div class="alerta error"
+         th:if="${mensajeError}"
+         th:text="${mensajeError}">
+    </div>
+
+    <!-- ==========================================
+         FILTROS
+    ========================================== -->
+
+    <form method="get"
+          class="filtros"
+          th:action="@{/admin/inventario-medicamentos}">
+
+        <label for="buscar">
+            Buscar por medicamento o sede:
+        </label>
+
+        <input id="buscar"
+               name="buscar"
+               type="search"
+               placeholder="Nombre del medicamento o sucursal"
+               th:value="${buscar}"
+               maxlength="150">
+
+        <label for="tamanio">
+            Mostrar:
+        </label>
+
+        <select id="tamanio"
+                name="tamanio">
+
+            <option value="10"
+                    th:selected="${tamanio == 10}">
+                10 registros
+            </option>
+
+            <option value="25"
+                    th:selected="${tamanio == 25}">
+                25 registros
+            </option>
+
+            <option value="50"
+                    th:selected="${tamanio == 50}">
+                50 registros
+            </option>
+
+        </select>
+
+        <input type="hidden"
+               name="pagina"
+               value="0">
+
+        <button class="btn"
+                type="submit">
+            Buscar
+        </button>
+
+        <a class="btn btn-gris"
+           th:href="@{/admin/inventario-medicamentos}">
+            Limpiar
+        </a>
+
     </form>
-    <div class="tabla-externa"><table>
-        <thead><tr><th>ID</th><th>Medicamento</th><th>Sucursal</th><th>Stock actual</th><th>Stock mínimo</th><th>Alerta</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody>
-        <tr th:each="i : ${inventarios.content}">
-            <td th:text="${i.id}">1</td>
-            <td th:text="${i.medicamento.nombre}">Paracetamol</td>
-            <td th:text="${i.sucursal.nombre}">Hospital Central</td>
-            <td th:text="${i.stockActual}">0</td>
-            <td th:text="${i.medicamento.stockMinimo}">10</td>
-            <td><span class="estado-inactivo" th:if="${i.tieneStockBajo()}">Stock bajo</span>
-                <span class="estado-activo" th:unless="${i.tieneStockBajo()}">Adecuado</span></td>
-            <td><span class="estado-activo" th:if="${i.activo}">Activo</span>
-                <span class="estado-inactivo" th:unless="${i.activo}">Inactivo</span></td>
-            <td><div class="acciones-fila">
-                <a class="btn btn-chico" th:if="${i.activo}" th:href="@{/admin/inventario-medicamentos/editar/{id}(id=${i.id})}">Ajustar stock</a>
-                <form th:if="${i.activo and i.stockActual == 0}" method="post" th:action="@{/admin/inventario-medicamentos/desactivar/{id}(id=${i.id})}" onsubmit="return confirm('¿Desactivar este inventario sin stock?')">
-                    <input type="hidden" name="detalle" value="Desactivación administrativa de inventario sin existencias">
-                    <button class="btn btn-rojo btn-chico" type="submit">Desactivar</button></form>
-                <span class="ayuda" th:if="${i.activo and i.stockActual > 0}">Para desactivar, stock 0</span>
-                <form th:unless="${i.activo}" method="post" th:action="@{/admin/inventario-medicamentos/reactivar/{id}(id=${i.id})}" onsubmit="return confirm('¿Reactivar este inventario?')">
-                    <input type="hidden" name="detalle" value="Reactivación administrativa de inventario">
-                    <button class="btn btn-verde btn-chico" type="submit">Reactivar</button></form>
-            </div></td>
-        </tr>
-        <tr th:if="${inventarios.totalElements == 0}"><td colspan="8" class="sin-datos">No se encontraron inventarios.</td></tr>
-        </tbody></table></div>
-    <div class="paginacion"><span>Total de registros: <strong th:text="${inventarios.totalElements}">0</strong></span>
-        <div class="paginacion-enlaces"><a class="btn btn-chico" th:if="${inventarios.hasPrevious()}" th:href="@{/admin/inventario-medicamentos(buscar=${buscar},tamanio=${tamanio},pagina=${inventarios.number - 1})}">Anterior</a>
-            <span>Página <strong th:text="${inventarios.number + 1}">1</strong> de <strong th:text="${inventarios.totalPages > 0 ? inventarios.totalPages : 1}">1</strong></span>
-            <a class="btn btn-chico" th:if="${inventarios.hasNext()}" th:href="@{/admin/inventario-medicamentos(buscar=${buscar},tamanio=${tamanio},pagina=${inventarios.number + 1})}">Siguiente</a></div></div>
-    <p class="nota">El inventario con existencias positivas no puede desactivarse. Todo ajuste de stock requiere un motivo y queda auditado. No se alteran recetas ni despachos anteriores.</p>
-</main></body></html>
+
+    <!-- ==========================================
+         TABLA DE INVENTARIOS
+    ========================================== -->
+
+    <div class="tabla-externa">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Medicamento</th>
+                <th>Sucursal</th>
+                <th>Stock actual</th>
+                <th>Stock mínimo</th>
+                <th>Alerta</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="i : ${inventarios.content}">
+
+                <td th:text="${i.id}">
+                    1
+                </td>
+
+                <td th:text="${i.medicamento.nombre}">
+                    Paracetamol
+                </td>
+
+                <td th:text="${i.sucursal.nombre}">
+                    Hospital Central
+                </td>
+
+                <td th:text="${i.stockActual}">
+                    0
+                </td>
+
+                <td th:text="${i.medicamento.stockMinimo}">
+                    10
+                </td>
+
+                <!-- ALERTA DE STOCK -->
+
+                <td>
+
+                    <span class="estado-inactivo"
+                          th:if="${i.tieneStockBajo()}">
+                        Stock bajo
+                    </span>
+
+                    <span class="estado-activo"
+                          th:unless="${i.tieneStockBajo()}">
+                        Adecuado
+                    </span>
+
+                </td>
+
+                <!-- ESTADO DEL INVENTARIO -->
+
+                <td>
+
+                    <span class="estado-activo"
+                          th:if="${i.activo}">
+                        Activo
+                    </span>
+
+                    <span class="estado-inactivo"
+                          th:unless="${i.activo}">
+                        Inactivo
+                    </span>
+
+                </td>
+
+                <!-- ACCIONES -->
+
+                <td>
+
+                    <div class="acciones-fila">
+
+                        <!-- CU-14: AJUSTE ORIGINAL -->
+
+                        <a class="btn btn-chico"
+                           th:if="${i.activo}"
+                           th:href="@{/admin/inventario-medicamentos/editar/{id}(id=${i.id})}">
+                            Ajustar stock
+                        </a>
+
+                        <!-- CU-15: REGISTRO EN BITÁCORA -->
+
+                        <a class="btn btn-verde btn-chico"
+                           th:if="${i.activo}"
+                           th:href="@{/admin/inventario-medicamentos/ajustes}">
+                            Movimiento CU-15
+                        </a>
+
+                        <!-- DESACTIVACIÓN -->
+
+                        <form th:if="${i.activo and i.stockActual == 0}"
+                              method="post"
+                              th:action="@{/admin/inventario-medicamentos/desactivar/{id}(id=${i.id})}"
+                              onsubmit="return confirm('¿Desactivar este inventario sin stock?')">
+
+                            <input type="hidden"
+                                   name="detalle"
+                                   value="Desactivación administrativa de inventario sin existencias">
+
+                            <button class="btn btn-rojo btn-chico"
+                                    type="submit">
+                                Desactivar
+                            </button>
+
+                        </form>
+
+                        <span class="ayuda"
+                              th:if="${i.activo and i.stockActual > 0}">
+                            Para desactivar, stock 0
+                        </span>
+
+                        <!-- REACTIVACIÓN -->
+
+                        <form th:unless="${i.activo}"
+                              method="post"
+                              th:action="@{/admin/inventario-medicamentos/reactivar/{id}(id=${i.id})}"
+                              onsubmit="return confirm('¿Reactivar este inventario?')">
+
+                            <input type="hidden"
+                                   name="detalle"
+                                   value="Reactivación administrativa de inventario">
+
+                            <button class="btn btn-verde btn-chico"
+                                    type="submit">
+                                Reactivar
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            <!-- SIN RESULTADOS -->
+
+            <tr th:if="${inventarios.totalElements == 0}">
+
+                <td colspan="8"
+                    class="sin-datos">
+                    No se encontraron inventarios.
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- ==========================================
+         PAGINACIÓN
+    ========================================== -->
+
+    <div class="paginacion">
+
+        <span>
+            Total de registros:
+            <strong th:text="${inventarios.totalElements}">
+                0
+            </strong>
+        </span>
+
+        <div class="paginacion-enlaces">
+
+            <a class="btn btn-chico"
+               th:if="${inventarios.hasPrevious()}"
+               th:href="@{/admin/inventario-medicamentos(
+                    buscar=${buscar},
+                    tamanio=${tamanio},
+                    pagina=${inventarios.number - 1}
+               )}">
+                Anterior
+            </a>
+
+            <span>
+                Página
+                <strong th:text="${inventarios.number + 1}">
+                    1
+                </strong>
+                de
+                <strong th:text="${inventarios.totalPages > 0 ? inventarios.totalPages : 1}">
+                    1
+                </strong>
+            </span>
+
+            <a class="btn btn-chico"
+               th:if="${inventarios.hasNext()}"
+               th:href="@{/admin/inventario-medicamentos(
+                    buscar=${buscar},
+                    tamanio=${tamanio},
+                    pagina=${inventarios.number + 1}
+               )}">
+                Siguiente
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         INFORMACIÓN
+    ========================================== -->
+
+    <p class="nota">
+        Los inventarios con existencias positivas no pueden
+        desactivarse. Los ajustes administrativos del CU-15
+        registran el stock anterior y nuevo, la justificación,
+        el usuario responsable y la fecha del movimiento.
+        No se alteran recetas ni despachos anteriores.
+    </p>
+
+</main>
+
+</body>
+</html>

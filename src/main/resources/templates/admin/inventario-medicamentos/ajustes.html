@@ -1,0 +1,680 @@
+
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Ajustes de Inventario | CU-15</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f6fa;
+      color: #26374a;
+    }
+
+    header {
+      background: #1f4e79;
+      color: white;
+      padding: 25px 35px;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+    }
+
+    header p {
+      margin: 0;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 35px auto;
+      padding: 0 20px;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    }
+
+    h2, h3 {
+      color: #1f4e79;
+    }
+
+    .descripcion {
+      color: #5b6c7e;
+      line-height: 1.6;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 18px 0 8px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      padding: 12px;
+      font-family: inherit;
+      font-size: 15px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    .campos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .informacion {
+      background: #e8f2fc;
+      border-left: 5px solid #1976d2;
+      padding: 20px;
+      margin: 25px 0;
+      border-radius: 7px;
+    }
+
+    .estadisticas {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .dato {
+      padding: 18px;
+      background: white;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .dato span {
+      display: block;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .dato strong {
+      font-size: 26px;
+      color: #1f4e79;
+    }
+
+    .alerta {
+      background: #fff3cd;
+      color: #856404;
+      padding: 14px;
+      border-radius: 7px;
+      margin-top: 16px;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #842029;
+      padding: 14px;
+      border-radius: 7px;
+      margin: 20px 0;
+    }
+
+    .exito {
+      background: #d4edda;
+      color: #155724;
+      padding: 14px;
+      border-radius: 7px;
+      margin: 20px 0;
+    }
+
+    .acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 13px 20px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .btn-gris {
+      background: #687784;
+    }
+
+    .ayuda {
+      color: #64748b;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 700px) {
+
+      .campos,
+      .estadisticas {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+
+  <h1>Ajustes Administrativos de Inventario</h1>
+
+  <p>
+    CU-15 | Control y trazabilidad de medicamentos
+  </p>
+
+</header>
+
+<main>
+
+  <div class="panel">
+
+    <h2>Registrar Ajuste de Existencias</h2>
+
+    <p>
+      Administrador:
+      <strong th:text="${adminName}">
+        Administrador
+      </strong>
+    </p>
+
+    <p class="descripcion">
+      Corrija existencias mediante ajustes positivos
+      o negativos. Cada operación se registrará
+      en la bitácora con el usuario responsable,
+      la cantidad, la justificación y los stocks
+      anterior y nuevo.
+    </p>
+
+    <!-- ==========================================
+         MENSAJES
+    ========================================== -->
+
+    <div class="exito"
+         th:if="${mensajeExito}"
+         th:text="${mensajeExito}">
+    </div>
+
+    <div class="error"
+         th:if="${mensajeError}"
+         th:text="${mensajeError}">
+    </div>
+
+    <!-- ==========================================
+         FORMULARIO ADMINISTRATIVO
+    ========================================== -->
+
+    <form method="post"
+          th:action="@{/admin/inventario-medicamentos/ajustes}"
+          id="formAjuste">
+
+      <!-- ======================================
+           CU-15: TOKEN CONTRA DOBLE ENVÍO
+      ====================================== -->
+
+      <input type="hidden"
+             name="tokenFormulario"
+             th:value="${tokenFormulario}">
+
+      <!-- ======================================
+           INVENTARIO
+      ====================================== -->
+
+      <label for="inventarioId">
+        Medicamento y Sucursal *
+      </label>
+
+      <select id="inventarioId"
+              name="inventarioId"
+              required>
+
+        <option value="">
+          Seleccione un inventario
+        </option>
+
+        <option th:each="i : ${inventarios}"
+                th:value="${i.id}"
+                th:text="${i.medicamento + ' — ' + i.sucursal}"
+                th:attr="data-stock=${i.stockActual},
+                                 data-minimo=${i.stockMinimo}">
+
+          Medicamento — Sucursal
+
+        </option>
+
+      </select>
+
+      <!-- ======================================
+           TIPO Y CANTIDAD
+      ====================================== -->
+
+      <div class="campos">
+
+        <div>
+
+          <label for="tipoMovimiento">
+            Tipo de Ajuste *
+          </label>
+
+          <select id="tipoMovimiento"
+                  name="tipoMovimiento"
+                  required>
+
+            <option value="">
+              Seleccione un ajuste
+            </option>
+
+            <option value="4">
+              Ajuste positivo (+)
+            </option>
+
+            <option value="5">
+              Ajuste negativo (-)
+            </option>
+
+          </select>
+
+        </div>
+
+        <div>
+
+          <label for="cantidad">
+            Cantidad *
+          </label>
+
+          <input type="number"
+                 id="cantidad"
+                 name="cantidad"
+                 min="1"
+                 step="1"
+                 placeholder="Ejemplo: 5"
+                 required>
+
+        </div>
+
+      </div>
+
+      <!-- ======================================
+           REFERENCIA
+      ====================================== -->
+
+      <label for="numeroReferencia">
+        Número de Referencia
+      </label>
+
+      <input type="text"
+             id="numeroReferencia"
+             name="numeroReferencia"
+             maxlength="120"
+             placeholder="Ejemplo: AJUSTE-CU15-001">
+
+      <!-- ======================================
+           JUSTIFICACIÓN
+      ====================================== -->
+
+      <label for="motivo">
+        Justificación del Ajuste *
+      </label>
+
+      <textarea id="motivo"
+                name="motivo"
+                minlength="10"
+                maxlength="500"
+                required
+                placeholder="Explique por qué se realizará el ajuste de inventario."></textarea>
+
+      <p class="ayuda">
+        La justificación debe contener
+        entre 10 y 500 caracteres.
+      </p>
+
+      <!-- ======================================
+           INFORMACIÓN DEL INVENTARIO
+      ====================================== -->
+
+      <div class="informacion">
+
+        <h3>Información del Inventario</h3>
+
+        <div class="estadisticas">
+
+          <div class="dato">
+
+            <span>Stock actual</span>
+
+            <strong id="stockActual">
+              —
+            </strong>
+
+          </div>
+
+          <div class="dato">
+
+            <span>Stock mínimo</span>
+
+            <strong id="stockMinimo">
+              —
+            </strong>
+
+          </div>
+
+          <div class="dato">
+
+            <span>Stock proyectado</span>
+
+            <strong id="stockProyectado">
+              —
+            </strong>
+
+          </div>
+
+        </div>
+
+        <!-- MENSAJE DE STOCK -->
+
+        <div class="alerta"
+             id="mensajeStock"
+             hidden>
+        </div>
+
+        <p class="ayuda">
+          El cálculo es orientativo. El servidor
+          verificará nuevamente las existencias
+          antes de registrar el ajuste.
+        </p>
+
+      </div>
+
+      <!-- ======================================
+           BOTONES
+      ====================================== -->
+
+      <div class="acciones">
+
+        <button class="btn"
+                id="btnRegistrar"
+                type="submit"
+                disabled>
+
+          Registrar Ajuste
+
+        </button>
+
+        <a class="btn btn-gris"
+           th:href="@{/admin/inventario-medicamentos}">
+
+          Cancelar
+
+        </a>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</main>
+
+<!-- ==========================================
+     JAVASCRIPT
+========================================== -->
+
+<script>
+
+  // ==========================================
+  // ELEMENTOS
+  // ==========================================
+
+  const inventario =
+          document.getElementById("inventarioId");
+
+  const tipo =
+          document.getElementById("tipoMovimiento");
+
+  const cantidad =
+          document.getElementById("cantidad");
+
+  const stockActual =
+          document.getElementById("stockActual");
+
+  const stockMinimo =
+          document.getElementById("stockMinimo");
+
+  const stockProyectado =
+          document.getElementById("stockProyectado");
+
+  const mensajeStock =
+          document.getElementById("mensajeStock");
+
+  const btnRegistrar =
+          document.getElementById("btnRegistrar");
+
+  const motivo =
+          document.getElementById("motivo");
+
+  const formAjuste =
+          document.getElementById("formAjuste");
+
+  // CU-15: IMPEDIR DOBLE ENVÍO
+
+  let formularioEnviado = false;
+
+  // ==========================================
+  // CALCULAR STOCK PROYECTADO
+  // ==========================================
+
+  function calcular() {
+
+    const opcion =
+            inventario.selectedOptions[0];
+
+    const stock =
+            Number(opcion?.dataset.stock);
+
+    const minimo =
+            Number(opcion?.dataset.minimo);
+
+    const movimiento =
+            Number(tipo.value);
+
+    const cantidadNumero =
+            Number(cantidad.value);
+
+    const inventarioValido =
+            inventario.value !== "";
+
+    const tipoValido =
+            tipo.value === "4" || tipo.value === "5";
+
+    const cantidadValida =
+            cantidad.value !== ""
+            && Number.isSafeInteger(cantidadNumero)
+            && cantidadNumero > 0;
+
+    stockActual.textContent =
+            inventarioValido ? stock : "—";
+
+    stockMinimo.textContent =
+            inventarioValido ? minimo : "—";
+
+    stockProyectado.textContent = "—";
+
+    mensajeStock.hidden = true;
+
+    btnRegistrar.disabled = true;
+
+    if (formularioEnviado
+            || !inventarioValido
+            || !tipoValido
+            || !cantidadValida) {
+
+      return;
+    }
+
+    const nuevo =
+            movimiento === 4
+                    ? stock + cantidadNumero
+                    : stock - cantidadNumero;
+
+    stockProyectado.textContent = nuevo;
+
+    // ======================================
+    // VALIDAR STOCK INSUFICIENTE
+    // ======================================
+
+    if (nuevo < 0) {
+
+      mensajeStock.hidden = false;
+
+      mensajeStock.textContent =
+              "Stock insuficiente para realizar este ajuste.";
+
+      return;
+    }
+
+    // ======================================
+    // VALIDAR RANGO DE ENTEROS
+    // ======================================
+
+    if (!Number.isSafeInteger(nuevo)
+            || nuevo > 2147483647) {
+
+      mensajeStock.hidden = false;
+
+      mensajeStock.textContent =
+              "El stock resultante está fuera del rango permitido.";
+
+      return;
+    }
+
+    // ======================================
+    // ADVERTENCIA DE STOCK BAJO
+    // ======================================
+
+    if (nuevo <= minimo) {
+
+      mensajeStock.hidden = false;
+
+      mensajeStock.textContent =
+              "Advertencia: el stock proyectado estará bajo el mínimo.";
+    }
+
+    // ======================================
+    // VALIDAR JUSTIFICACIÓN
+    // ======================================
+
+    const motivoValido =
+            motivo.value.trim().length >= 10
+            && motivo.value.trim().length <= 500;
+
+    btnRegistrar.disabled = !motivoValido;
+  }
+
+  // ==========================================
+  // EVENTOS DEL FORMULARIO
+  // ==========================================
+
+  inventario.addEventListener(
+          "change",
+          calcular
+  );
+
+  tipo.addEventListener(
+          "change",
+          calcular
+  );
+
+  cantidad.addEventListener(
+          "input",
+          calcular
+  );
+
+  motivo.addEventListener(
+          "input",
+          calcular
+  );
+
+  // ==========================================
+  // EVITAR DOBLE CLIC
+  // ==========================================
+
+  formAjuste.addEventListener(
+          "submit",
+          function (evento) {
+
+            if (formularioEnviado) {
+              evento.preventDefault();
+              return;
+            }
+
+            calcular();
+
+            if (btnRegistrar.disabled
+                    || !formAjuste.checkValidity()) {
+
+              evento.preventDefault();
+              return;
+            }
+
+            formularioEnviado = true;
+
+            btnRegistrar.disabled = true;
+
+            btnRegistrar.textContent =
+                    "Registrando ajuste...";
+          }
+  );
+
+  // ==========================================
+  // INICIALIZACIÓN
+  // ==========================================
+
+  calcular();
+
+</script>
+
+</body>
+</html>

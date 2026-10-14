@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 public class MovimientoInventarioService {
 
     // =====================================================
-    // TIPOS DE MOVIMIENTOS
+    // CU-15: TIPOS DE MOVIMIENTOS
     // =====================================================
 
     private static final int COMPRA = 0;
@@ -27,20 +27,16 @@ public class MovimientoInventarioService {
     private static final int AJUSTE_POSITIVO = 4;
     private static final int AJUSTE_NEGATIVO = 5;
 
-    // EL TIPO 6 (DESPACHO) SERA AUTOMATICO.
-    // NO SE PERMITE EN EL REGISTRO MANUAL.
-
+    // Tipo 6: despacho automático del CU-11.
+    // No está permitido en este registro manual.
 
     // =====================================================
     // REPOSITORIOS
     // =====================================================
 
-    private final InventarioMedicamento_Repositorio
-            inventarioRepositorio;
+    private final InventarioMedicamento_Repositorio inventarioRepositorio;
 
-    private final MovimientoInventario_Repositorio
-            movimientoRepositorio;
-
+    private final MovimientoInventario_Repositorio movimientoRepositorio;
 
     // =====================================================
     // CONSTRUCTOR
@@ -54,7 +50,6 @@ public class MovimientoInventarioService {
         this.inventarioRepositorio = inventarioRepositorio;
         this.movimientoRepositorio = movimientoRepositorio;
     }
-
 
     // =====================================================
     // CU-15: REGISTRAR MOVIMIENTO MANUAL
@@ -89,13 +84,11 @@ public class MovimientoInventarioService {
             );
         }
 
-
         // =================================================
         // 2. VALIDAR USUARIO Y ROL
         // =================================================
 
-        if (nombreUsuario == null ||
-                nombreUsuario.isBlank()) {
+        if (nombreUsuario == null || nombreUsuario.isBlank()) {
 
             throw new IllegalArgumentException(
                     "No se identificó al usuario responsable."
@@ -124,7 +117,6 @@ public class MovimientoInventarioService {
             );
         }
 
-
         // =================================================
         // 3. VALIDAR TIPO DE MOVIMIENTO
         // =================================================
@@ -136,30 +128,26 @@ public class MovimientoInventarioService {
             );
         }
 
-        if (tipoMovimiento < COMPRA ||
-                tipoMovimiento > AJUSTE_NEGATIVO) {
+        if (tipoMovimiento < COMPRA
+                || tipoMovimiento > AJUSTE_NEGATIVO) {
 
             throw new IllegalArgumentException(
                     "Tipo de movimiento no permitido para registro manual."
             );
         }
 
-
         // =================================================
         // 4. VALIDAR PERMISOS PARA AJUSTES
         // =================================================
 
-        if (
-                (tipoMovimiento == AJUSTE_POSITIVO ||
-                        tipoMovimiento == AJUSTE_NEGATIVO)
-                        && !esAdministrador
-        ) {
+        if ((tipoMovimiento == AJUSTE_POSITIVO
+                || tipoMovimiento == AJUSTE_NEGATIVO)
+                && !esAdministrador) {
 
             throw new IllegalArgumentException(
                     "Los ajustes de inventario requieren permisos de administración."
             );
         }
-
 
         // =================================================
         // 5. VALIDAR CANTIDAD
@@ -171,7 +159,6 @@ public class MovimientoInventarioService {
                     "La cantidad debe ser un número entero positivo."
             );
         }
-
 
         // =================================================
         // 6. VALIDAR COSTO UNITARIO
@@ -200,8 +187,8 @@ public class MovimientoInventarioService {
                 );
             }
 
-            if (costoUnitario.precision() -
-                    costoUnitario.scale() > 10) {
+            if (costoUnitario.precision()
+                    - costoUnitario.scale() > 10) {
 
                 throw new IllegalArgumentException(
                         "El costo unitario supera el valor permitido."
@@ -210,12 +197,10 @@ public class MovimientoInventarioService {
 
         } else {
 
-            // EL COSTO UNITARIO SOLO SE SOLICITA
-            // PARA MOVIMIENTOS DE COMPRA.
+            // Solo las compras registran costo unitario.
 
             costoUnitario = null;
         }
-
 
         // =================================================
         // 7. VALIDAR NÚMERO DE REFERENCIA
@@ -223,8 +208,8 @@ public class MovimientoInventarioService {
 
         String referenciaLimpia = null;
 
-        if (numeroReferencia != null &&
-                !numeroReferencia.isBlank()) {
+        if (numeroReferencia != null
+                && !numeroReferencia.isBlank()) {
 
             referenciaLimpia = numeroReferencia.trim();
 
@@ -236,7 +221,6 @@ public class MovimientoInventarioService {
             }
         }
 
-
         // =================================================
         // 8. VALIDAR MOTIVO O NOTAS
         // =================================================
@@ -245,15 +229,15 @@ public class MovimientoInventarioService {
                 motivo == null ? "" : motivo.trim();
 
         boolean requiereMotivo =
-                tipoMovimiento == DEVOLUCION ||
-                        tipoMovimiento == RECLAMO ||
-                        tipoMovimiento == AJUSTE_POSITIVO ||
-                        tipoMovimiento == AJUSTE_NEGATIVO;
+                tipoMovimiento == DEVOLUCION
+                        || tipoMovimiento == RECLAMO
+                        || tipoMovimiento == AJUSTE_POSITIVO
+                        || tipoMovimiento == AJUSTE_NEGATIVO;
 
         if (requiereMotivo) {
 
-            if (motivoLimpio.length() < 10 ||
-                    motivoLimpio.length() > 500) {
+            if (motivoLimpio.length() < 10
+                    || motivoLimpio.length() > 500) {
 
                 throw new IllegalArgumentException(
                         "El motivo debe contener entre 10 y 500 caracteres."
@@ -270,27 +254,33 @@ public class MovimientoInventarioService {
 
         if (tipoMovimiento == VENTA) {
 
-            // EL FORMULARIO DE VENTA NO SOLICITA NOTAS.
+            // El formulario de venta no solicita notas.
 
             motivoLimpio = "";
         }
 
-
         // =================================================
-        // 9. BUSCAR INVENTARIO EN POSTGRESQL
+        // 9. BUSCAR Y BLOQUEAR INVENTARIO
+        //
+        // MEJORA CU-15:
+        // Utilizamos PESSIMISTIC_WRITE.
+        //
+        // El bloqueo se mantiene durante la transacción,
+        // evitando que dos solicitudes que utilicen este
+        // mecanismo actualicen el mismo inventario
+        // simultáneamente.
         // =================================================
 
         InventarioMedicamento inventario =
-                inventarioRepositorio.findById(inventarioId)
+                inventarioRepositorio.bloquearPorId(inventarioId)
                         .orElseThrow(() ->
                                 new IllegalArgumentException(
                                         "No se encontró el inventario seleccionado."
                                 )
                         );
 
-
         // =================================================
-        // 10. VALIDAR QUE EL INVENTARIO ESTÉ ACTIVO
+        // 10. VALIDAR INVENTARIO ACTIVO
         // =================================================
 
         if (!Boolean.TRUE.equals(inventario.getActivo())) {
@@ -300,13 +290,11 @@ public class MovimientoInventarioService {
             );
         }
 
-
         // =================================================
-        // 11. OBTENER EL STOCK ACTUAL
+        // 11. VALIDAR STOCK ACTUAL
         // =================================================
 
-        Integer stockAnterior =
-                inventario.getStockActual();
+        Integer stockAnterior = inventario.getStockActual();
 
         if (stockAnterior == null || stockAnterior < 0) {
 
@@ -315,16 +303,14 @@ public class MovimientoInventarioService {
             );
         }
 
-
         // =================================================
         // 12. DETERMINAR ENTRADA O SALIDA
         // =================================================
 
         boolean esEntrada =
-                tipoMovimiento == COMPRA ||
-                        tipoMovimiento == DEVOLUCION ||
-                        tipoMovimiento == AJUSTE_POSITIVO;
-
+                tipoMovimiento == COMPRA
+                        || tipoMovimiento == DEVOLUCION
+                        || tipoMovimiento == AJUSTE_POSITIVO;
 
         // =================================================
         // 13. CALCULAR STOCK PROYECTADO
@@ -339,16 +325,16 @@ public class MovimientoInventarioService {
 
         } else {
 
-            // VENTA, RECLAMO Y AJUSTE NEGATIVO
+            // Venta, reclamo o ajuste negativo.
 
             if (cantidad > stockAnterior) {
 
                 throw new IllegalArgumentException(
-                        "Stock insuficiente. Stock actual: " +
-                                stockAnterior +
-                                ". No se puede registrar una salida de " +
-                                cantidad +
-                                " unidades."
+                        "Stock insuficiente. Stock actual: "
+                                + stockAnterior
+                                + ". No se puede registrar una salida de "
+                                + cantidad
+                                + " unidades."
                 );
             }
 
@@ -356,13 +342,12 @@ public class MovimientoInventarioService {
                     (long) stockAnterior - cantidad;
         }
 
-
         // =================================================
-        // 14. IMPEDIR DESBORDAMIENTO DE ENTEROS
+        // 14. IMPEDIR STOCK NEGATIVO O DESBORDAMIENTO
         // =================================================
 
-        if (stockProyectado < 0 ||
-                stockProyectado > Integer.MAX_VALUE) {
+        if (stockProyectado < 0
+                || stockProyectado > Integer.MAX_VALUE) {
 
             throw new IllegalArgumentException(
                     "El stock resultante está fuera del rango permitido."
@@ -371,21 +356,19 @@ public class MovimientoInventarioService {
 
         int stockNuevo = (int) stockProyectado;
 
-
         // =================================================
-        // 15. ACTUALIZAR EXISTENCIAS
+        // 15. ACTUALIZAR STOCK UNA SOLA VEZ
         //
-        // @VERSION EN InventarioMedicamento
-        // PROTEGE LAS ACTUALIZACIONES JPA.
+        // @Version continúa activo en
+        // InventarioMedicamento.
         // =================================================
 
         inventario.setStockActual(stockNuevo);
 
         inventarioRepositorio.saveAndFlush(inventario);
 
-
         // =================================================
-        // 16. CREAR REGISTRO DE BITÁCORA
+        // 16. CREAR MOVIMIENTO DE BITÁCORA
         // =================================================
 
         MovimientoInventario movimiento =
@@ -420,23 +403,25 @@ public class MovimientoInventarioService {
         );
 
         movimiento.setMotivo(
-                motivoLimpio.isBlank() ? null : motivoLimpio
+                motivoLimpio.isBlank()
+                        ? null
+                        : motivoLimpio
         );
 
         movimiento.setRegistradoPor(usuarioLimpio);
 
         movimiento.setActivo(true);
 
+        // El despachoDetalleId no se asigna:
+        // corresponde exclusivamente al tipo 6.
 
         // =================================================
         // 17. GUARDAR MOVIMIENTO
         //
-        // SI FALLA LA BITÁCORA,
-        // SE REVIERTE TAMBIÉN EL CAMBIO DE STOCK.
+        // Si falla la inserción, la transacción
+        // revierte también el cambio de stock.
         // =================================================
 
         return movimientoRepositorio.saveAndFlush(movimiento);
-
     }
-
 }
