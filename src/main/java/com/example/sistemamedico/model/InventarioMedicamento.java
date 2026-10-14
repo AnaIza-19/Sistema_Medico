@@ -1,7 +1,7 @@
+
 package com.example.sistemamedico.model;
 
 import jakarta.persistence.*;
-
 
 @Entity
 @Table(
@@ -64,7 +64,7 @@ public class InventarioMedicamento {
 
 
     // =====================================================
-    // ACTIVO
+    // ESTADO DEL INVENTARIO
     // =====================================================
 
     @Column(
@@ -72,6 +72,25 @@ public class InventarioMedicamento {
             nullable = false
     )
     private Boolean activo;
+
+
+    // =====================================================
+    // CU-15: CONTROL DE CONCURRENCIA OPTIMISTA
+    //
+    // Evita que dos transacciones JPA actualicen
+    // simultáneamente el mismo inventario
+    // utilizando una versión desactualizada.
+    //
+    // Hibernate administra este valor.
+    // No debe incrementarse manualmente.
+    // =====================================================
+
+    @Version
+    @Column(
+            name = "row_version",
+            nullable = false
+    )
+    private Long rowVersion;
 
 
     // =====================================================
@@ -96,6 +115,9 @@ public class InventarioMedicamento {
         if (activo == null) {
             activo = true;
         }
+
+        // La versión la administra Hibernate
+        // mediante @Version.
     }
 
 
@@ -103,12 +125,23 @@ public class InventarioMedicamento {
     // MÉTODOS AUXILIARES
     // =====================================================
 
+    // -----------------------------------------------------
+    // VERIFICAR SI TIENE EXISTENCIAS
+    // -----------------------------------------------------
+
     public boolean tieneStock() {
 
         return stockActual != null
                 && stockActual > 0;
     }
 
+
+    // -----------------------------------------------------
+    // VERIFICAR STOCK BAJO
+    //
+    // Compara las existencias actuales
+    // con el stock mínimo del medicamento.
+    // -----------------------------------------------------
 
     public boolean tieneStockBajo() {
 
@@ -128,6 +161,13 @@ public class InventarioMedicamento {
     }
 
 
+    // -----------------------------------------------------
+    // VERIFICAR SI PUEDE DESPACHAR
+    //
+    // Evita autorizar cantidades mayores
+    // a las existencias disponibles.
+    // -----------------------------------------------------
+
     public boolean puedeDespachar(
             Integer cantidad
     ) {
@@ -143,20 +183,27 @@ public class InventarioMedicamento {
     // GETTERS Y SETTERS
     // =====================================================
 
+
+    // -----------------------------------------------------
+    // ID
+    // -----------------------------------------------------
+
     public Long getId() {
         return id;
     }
-
 
     public void setId(Long id) {
         this.id = id;
     }
 
 
+    // -----------------------------------------------------
+    // MEDICAMENTO
+    // -----------------------------------------------------
+
     public Medicamento getMedicamento() {
         return medicamento;
     }
-
 
     public void setMedicamento(
             Medicamento medicamento
@@ -165,10 +212,13 @@ public class InventarioMedicamento {
     }
 
 
+    // -----------------------------------------------------
+    // SUCURSAL
+    // -----------------------------------------------------
+
     public Sucursal getSucursal() {
         return sucursal;
     }
-
 
     public void setSucursal(
             Sucursal sucursal
@@ -177,10 +227,13 @@ public class InventarioMedicamento {
     }
 
 
+    // -----------------------------------------------------
+    // STOCK ACTUAL
+    // -----------------------------------------------------
+
     public Integer getStockActual() {
         return stockActual;
     }
-
 
     public void setStockActual(
             Integer stockActual
@@ -189,14 +242,30 @@ public class InventarioMedicamento {
     }
 
 
+    // -----------------------------------------------------
+    // ACTIVO
+    // -----------------------------------------------------
+
     public Boolean getActivo() {
         return activo;
     }
-
 
     public void setActivo(
             Boolean activo
     ) {
         this.activo = activo;
     }
+
+
+    // -----------------------------------------------------
+    // CU-15: VERSIÓN DEL INVENTARIO
+    //
+    // Solo getter. Hibernate administra
+    // automáticamente las actualizaciones.
+    // -----------------------------------------------------
+
+    public Long getRowVersion() {
+        return rowVersion;
+    }
+
 }

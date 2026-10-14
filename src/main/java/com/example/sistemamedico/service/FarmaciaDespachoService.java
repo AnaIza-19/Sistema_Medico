@@ -4,6 +4,7 @@ import com.example.sistemamedico.Repositorio.DespachoMedicamentoDetalle_Reposito
 import com.example.sistemamedico.Repositorio.DespachoMedicamento_Repositorio;
 import com.example.sistemamedico.Repositorio.InventarioMedicamento_Repositorio;
 import com.example.sistemamedico.Repositorio.Medicamento_Repositorio;
+import com.example.sistemamedico.Repositorio.MovimientoInventario_Repositorio;
 import com.example.sistemamedico.Repositorio.RecetaMedicaDetalle_Repositorio;
 import com.example.sistemamedico.Repositorio.RecetaMedica_Repositorio;
 
@@ -11,10 +12,12 @@ import com.example.sistemamedico.model.DespachoMedicamento;
 import com.example.sistemamedico.model.DespachoMedicamentoDetalle;
 import com.example.sistemamedico.model.InventarioMedicamento;
 import com.example.sistemamedico.model.Medicamento;
+import com.example.sistemamedico.model.MovimientoInventario;
 import com.example.sistemamedico.model.RecetaMedica;
 import com.example.sistemamedico.model.RecetaMedicaDetalle;
 import com.example.sistemamedico.model.Usuario;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +53,8 @@ public class FarmaciaDespachoService {
 
     private final DespachoMedicamentoDetalle_Repositorio despachoDetalleRepositorio;
 
+    private final MovimientoInventario_Repositorio movimientoRepositorio;
+
 
     // =====================================================
     // CONSTRUCTOR
@@ -60,7 +66,8 @@ public class FarmaciaDespachoService {
             Medicamento_Repositorio medicamentoRepositorio,
             InventarioMedicamento_Repositorio inventarioRepositorio,
             DespachoMedicamento_Repositorio despachoRepositorio,
-            DespachoMedicamentoDetalle_Repositorio despachoDetalleRepositorio
+            DespachoMedicamentoDetalle_Repositorio despachoDetalleRepositorio,
+            MovimientoInventario_Repositorio movimientoRepositorio
     ) {
 
         this.recetaRepositorio =
@@ -80,6 +87,8 @@ public class FarmaciaDespachoService {
 
         this.despachoDetalleRepositorio =
                 despachoDetalleRepositorio;
+
+        this.movimientoRepositorio = movimientoRepositorio;
     }
 
 
@@ -89,6 +98,7 @@ public class FarmaciaDespachoService {
     // =====================================================
 
     @Transactional
+    @CacheEvict(cacheNames = "inventariosAdmin", allEntries = true)
     public DespachoMedicamento confirmarDespacho(
             Long recetaId,
             Usuario personalFarmacia,
@@ -519,6 +529,38 @@ public class FarmaciaDespachoService {
 
 
         // =================================================
+        // CU-15: VALIDAR SALIDAS ACUMULADAS POR INVENTARIO
+        // Una misma receta puede incluir varios renglones
+        // correspondientes al mismo medicamento.
+        // =================================================
+
+        Map<Long, Integer> salidasPorInventario = new HashMap<>();
+        Map<Long, InventarioMedicamento> inventariosPorId = new HashMap<>();
+
+        for (ItemPreparado item : itemsPreparados) {
+            Long inventarioId = item.inventario.getId();
+            int total = Math.addExact(
+                    salidasPorInventario.getOrDefault(inventarioId, 0),
+                    item.cantidad
+            );
+            salidasPorInventario.put(inventarioId, total);
+            inventariosPorId.put(inventarioId, item.inventario);
+        }
+
+        for (Map.Entry<Long, Integer> entrada : salidasPorInventario.entrySet()) {
+            InventarioMedicamento inventario =
+                    inventariosPorId.get(entrada.getKey());
+            if (!inventario.puedeDespachar(entrada.getValue())) {
+                throw new IllegalArgumentException(
+                        "Stock insuficiente para " +
+                                inventario.getMedicamento().getNombre() +
+                                ". Cantidad total solicitada: " + entrada.getValue() +
+                                ". Disponible: " + inventario.getStockActual() + "."
+                );
+            }
+        }
+
+        // =================================================
         // CREAR ENCABEZADO DEL DESPACHO
         // =================================================
 
@@ -611,30 +653,49 @@ public class FarmaciaDespachoService {
             );
 
 
-            despachoDetalleRepositorio.save(
+            // Guardar primero el detalle para obtener su ID.
+            // La restricción UNIQUE de movimiento_inventario
+            // impide vincular dos movimientos al mismo detalle.
+            detalleDespacho = despachoDetalleRepositorio.saveAndFlush(
                     detalleDespacho
             );
 
+            // Descontar UNA sola vez; el movimiento es la evidencia,
+            // NO hace un segundo descuento.
+            int stockAnterior = item.inventario.getStockActual();
+            if (!item.inventario.puedeDespachar(item.cantidad)) {
+                throw new IllegalArgumentException(
+                        "Stock insuficiente para " +
+                                item.medicamentoDespachado.getNombre() + "."
+                );
+            }
+            int stockNuevo = stockAnterior - item.cantidad;
+            item.inventario.setStockActual(stockNuevo);
 
-            // =============================================
-            // DESCONTAR INVENTARIO
-            // =============================================
+            // @Version verifica row_version y genera un conflicto
+            // ante actualizaciones simultáneas mediante JPA.
+            inventarioRepositorio.saveAndFlush(item.inventario);
 
-            int nuevoStock =
-                    item.inventario
-                            .getStockActual()
-                            -
-                            item.cantidad;
-
-
-            item.inventario.setStockActual(
-                    nuevoStock
+            MovimientoInventario movimiento = new MovimientoInventario();
+            movimiento.setInventarioId(item.inventario.getId());
+            movimiento.setMedicamentoId(item.medicamentoDespachado.getId());
+            movimiento.setSucursalId(sucursalId);
+            movimiento.setTipoMovimiento((short) 6); // DESPACHO AUTOMÁTICO
+            movimiento.setCantidad(item.cantidad);
+            movimiento.setStockAnterior(stockAnterior);
+            movimiento.setStockNuevo(stockNuevo);
+            movimiento.setCostoUnitario(null);
+            movimiento.setNumeroReferencia("DESPACHO-" + despacho.getId());
+            movimiento.setMotivo(
+                    "Salida automática por despacho confirmado. Receta #" + recetaId
             );
+            movimiento.setRegistradoPor(personalFarmacia.getNombreUsuario());
+            movimiento.setActivo(true);
+            movimiento.setDespachoDetalleId(detalleDespacho.getId());
 
-
-            inventarioRepositorio.save(
-                    item.inventario
-            );
+            // Misma transacción: si falla la bitácora, se revierten
+            // detalle, despacho, stock y desactivación de receta.
+            movimientoRepositorio.saveAndFlush(movimiento);
         }
 
 

@@ -1,0 +1,920 @@
+
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Nuevo Movimiento | CU-15</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fa;
+            color: #243447;
+        }
+
+        .encabezado {
+            background: #1f4e79;
+            color: white;
+            padding: 25px 35px;
+        }
+
+        .encabezado h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+        }
+
+        .encabezado p {
+            margin: 0;
+        }
+
+        .contenedor {
+            max-width: 1050px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        h2, h3 {
+            color: #1f4e79;
+        }
+
+        .descripcion {
+            color: #607083;
+            line-height: 1.6;
+        }
+
+        .grid-formulario {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .campo-completo {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #c6d1dc;
+            border-radius: 7px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(25,118,210,0.12);
+        }
+
+        textarea {
+            min-height: 105px;
+            resize: vertical;
+        }
+
+        .ayuda {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .obligatorio {
+            color: #cf2e2e;
+        }
+
+        .stock-panel {
+            margin: 25px 0;
+            padding: 22px;
+            background: #eaf4ff;
+            border: 1px solid #bdd8f3;
+            border-left: 5px solid #1976d2;
+            border-radius: 9px;
+        }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .dato-stock {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .dato-stock span {
+            display: block;
+            margin-bottom: 9px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .dato-stock strong {
+            font-size: 25px;
+            color: #1f4e79;
+        }
+
+        .alerta {
+            display: none;
+            margin-top: 18px;
+            padding: 13px;
+            border-radius: 7px;
+            font-weight: bold;
+        }
+
+        .alerta-error {
+            color: #842029;
+            background: #f8d7da;
+            border: 1px solid #f5c2c7;
+        }
+
+        .alerta-advertencia {
+            color: #7c5200;
+            background: #fff3cd;
+            border: 1px solid #ffe69c;
+        }
+
+        .mensaje-error {
+            padding: 13px;
+            margin: 20px 0;
+            background: #f8d7da;
+            color: #842029;
+            border-radius: 7px;
+        }
+
+        .botones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 13px 20px;
+            border: none;
+            border-radius: 7px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .boton-guardar {
+            background: #188754;
+            color: white;
+        }
+
+        .boton-guardar:hover {
+            background: #12663f;
+        }
+
+        .boton-guardar:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .boton-cancelar {
+            background: #687784;
+            color: white;
+        }
+
+        .oculto {
+            display: none !important;
+        }
+
+        @media (max-width: 700px) {
+
+            .grid-formulario,
+            .stock-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                padding: 20px;
+            }
+
+            .encabezado h1 {
+                font-size: 25px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header class="encabezado">
+
+    <h1>Nuevo Movimiento de Inventario</h1>
+
+    <p>
+        CU-15 | Registro y actualización de existencias
+    </p>
+
+</header>
+
+
+<main class="contenedor">
+
+    <section class="panel">
+
+        <h2>Registrar Movimiento</h2>
+
+        <p class="descripcion">
+            Seleccione el inventario y el tipo de movimiento.
+            El sistema calculará las existencias proyectadas
+            antes de registrar la operación.
+        </p>
+
+        <p>
+            Usuario:
+            <strong th:text="${usuarioActual}">
+                Personal de Farmacia
+            </strong>
+        </p>
+
+
+        <!-- MENSAJE DE ERROR DEL CONTROLADOR -->
+
+        <div class="mensaje-error"
+             th:if="${mensajeError}"
+             th:text="${mensajeError}">
+        </div>
+
+
+        <!-- FORMULARIO -->
+
+        <form id="formMovimiento"
+              method="post"
+              th:action="@{/farmacia/bitacora/nuevo}">
+
+
+            <div class="grid-formulario">
+
+                <!-- INVENTARIO -->
+
+                <div class="campo campo-completo">
+
+                    <label for="inventarioId">
+                        Medicamento y Sucursal
+                        <span class="obligatorio">*</span>
+                    </label>
+
+                    <select id="inventarioId"
+                            name="inventarioId"
+                            required>
+
+                        <option value="">
+                            Seleccione un medicamento y una sucursal
+                        </option>
+
+                        <option th:each="inventario : ${inventarios}"
+                                th:value="${inventario.id}"
+                                th:text="${inventario.medicamento + ' — ' + inventario.sucursal}">
+                            Paracetamol — Hospital Central
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- TIPO -->
+
+                <div class="campo">
+
+                    <label for="tipoMovimiento">
+                        Tipo de Movimiento
+                        <span class="obligatorio">*</span>
+                    </label>
+
+                    <select id="tipoMovimiento"
+                            name="tipoMovimiento"
+                            required>
+
+                        <option value="">
+                            Seleccione una operación
+                        </option>
+
+                        <option th:each="tipo : ${tiposMovimiento}"
+                                th:value="${tipo.codigo}"
+                                th:text="${tipo.nombre}">
+                            Compra
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- CANTIDAD -->
+
+                <div class="campo">
+
+                    <label for="cantidad">
+                        Cantidad
+                        <span class="obligatorio">*</span>
+                    </label>
+
+                    <input id="cantidad"
+                           name="cantidad"
+                           type="number"
+                           min="1"
+                           step="1"
+                           required
+                           placeholder="Ejemplo: 10">
+
+                </div>
+
+
+                <!-- COSTO UNITARIO -->
+
+                <div class="campo oculto"
+                     id="campoCosto">
+
+                    <label for="costoUnitario">
+                        Costo Unitario (Q)
+                        <span class="obligatorio">*</span>
+                    </label>
+
+                    <input id="costoUnitario"
+                           name="costoUnitario"
+                           type="number"
+                           min="0.01"
+                           step="0.01"
+                           placeholder="Ejemplo: 15.50">
+
+                    <span class="ayuda">
+                        Obligatorio únicamente para compras.
+                    </span>
+
+                </div>
+
+
+                <!-- REFERENCIA -->
+
+                <div class="campo oculto"
+                     id="campoReferencia">
+
+                    <label for="numeroReferencia"
+                           id="etiquetaReferencia">
+
+                        Número de Referencia
+
+                    </label>
+
+                    <input id="numeroReferencia"
+                           name="numeroReferencia"
+                           type="text"
+                           maxlength="120"
+                           placeholder="Referencia opcional">
+
+                </div>
+
+
+                <!-- MOTIVO -->
+
+                <div class="campo campo-completo oculto"
+                     id="campoMotivo">
+
+                    <label for="motivo"
+                           id="etiquetaMotivo">
+                        Motivo / Notas
+                    </label>
+
+                    <textarea id="motivo"
+                              name="motivo"
+                              maxlength="500"
+                              placeholder="Ingrese la justificación del movimiento"></textarea>
+
+                    <span class="ayuda"
+                          id="ayudaMotivo">
+
+                        Escriba una justificación clara.
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- PANEL DE EXISTENCIAS -->
+
+            <div class="stock-panel"
+                 id="panelStock">
+
+                <h3>Información del Inventario</h3>
+
+                <div class="stock-grid">
+
+                    <div class="dato-stock">
+
+                        <span>Stock actual</span>
+
+                        <strong id="stockActual">—</strong>
+
+                    </div>
+
+                    <div class="dato-stock">
+
+                        <span>Stock mínimo</span>
+
+                        <strong id="stockMinimo">—</strong>
+
+                    </div>
+
+                    <div class="dato-stock">
+
+                        <span>Stock proyectado</span>
+
+                        <strong id="stockProyectado">—</strong>
+
+                    </div>
+
+                    <div class="dato-stock">
+
+                        <span>Operación</span>
+
+                        <strong id="tipoOperacion">—</strong>
+
+                    </div>
+
+                </div>
+
+
+                <div id="alertaInsuficiente"
+                     class="alerta alerta-error"
+                     role="alert">
+                </div>
+
+
+                <div id="alertaStockBajo"
+                     class="alerta alerta-advertencia"
+                     role="status">
+                </div>
+
+            </div>
+
+
+            <!-- BOTONES -->
+
+            <div class="botones">
+
+                <button id="btnGuardar"
+                        type="submit"
+                        class="boton boton-guardar"
+                        disabled>
+
+                    Registrar Movimiento
+
+                </button>
+
+                <a class="boton boton-cancelar"
+                   th:href="@{/farmacia/bitacora}">
+
+                    Cancelar
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+
+<script>
+
+    // ==========================================
+    // ELEMENTOS DEL FORMULARIO
+    // ==========================================
+
+    const inventarioSelect =
+        document.getElementById("inventarioId");
+
+    const tipoSelect =
+        document.getElementById("tipoMovimiento");
+
+    const cantidadInput =
+        document.getElementById("cantidad");
+
+    const costoInput =
+        document.getElementById("costoUnitario");
+
+    const referenciaInput =
+        document.getElementById("numeroReferencia");
+
+    const motivoInput =
+        document.getElementById("motivo");
+
+    const btnGuardar =
+        document.getElementById("btnGuardar");
+
+
+    let stockActual = null;
+    let stockMinimo = null;
+    let consultaStockActual = 0;
+
+
+    // ==========================================
+    // CAMPOS SEGÚN TIPO DE MOVIMIENTO
+    // ==========================================
+
+    function actualizarCampos() {
+
+        const tipo = tipoSelect.value;
+
+        document.getElementById("campoCosto")
+            .classList.toggle("oculto", tipo !== "0");
+
+        document.getElementById("campoReferencia")
+            .classList.toggle(
+            "oculto",
+            !["0", "1", "2", "3"].includes(tipo)
+        );
+
+        document.getElementById("campoMotivo")
+            .classList.toggle(
+            "oculto",
+            !["0", "1", "3", "4", "5"].includes(tipo)
+        );
+
+
+        // COSTO PARA COMPRA
+
+        costoInput.required = tipo === "0";
+
+        if (tipo !== "0") {
+            costoInput.value = "";
+        }
+
+
+        // MOTIVO OBLIGATORIO
+
+        const requiereMotivo =
+            ["1", "3", "4", "5"].includes(tipo);
+
+        motivoInput.required = requiereMotivo;
+
+        motivoInput.minLength =
+            requiereMotivo ? 10 : 0;
+
+        if (tipo === "2" || tipo === "") {
+            motivoInput.value = "";
+        }
+
+
+        // REFERENCIA DINÁMICA
+
+        const nombresReferencia = {
+            "0": "Número de Factura",
+            "1": "Número de Devolución",
+            "2": "Número de Venta",
+            "3": "Número de Reclamo"
+        };
+
+        document.getElementById("etiquetaReferencia")
+            .textContent =
+            nombresReferencia[tipo] || "Referencia";
+
+
+        // MOTIVO DINÁMICO
+
+        const nombresMotivo = {
+            "0": "Notas (opcional)",
+            "1": "Motivo de Devolución",
+            "3": "Motivo del Reclamo",
+            "4": "Notas / Justificación",
+            "5": "Notas / Justificación"
+        };
+
+        document.getElementById("etiquetaMotivo")
+            .textContent =
+            nombresMotivo[tipo] || "Motivo";
+
+
+        document.getElementById("ayudaMotivo")
+            .textContent =
+            requiereMotivo
+                ? "Obligatorio: entre 10 y 500 caracteres."
+                : "Campo opcional.";
+
+        calcularStock();
+    }
+
+
+    // ==========================================
+    // CONSULTAR STOCK DEL INVENTARIO
+    // ==========================================
+
+    async function consultarStock() {
+
+        const id = inventarioSelect.value;
+
+        const numeroConsulta = ++consultaStockActual;
+
+        stockActual = null;
+        stockMinimo = null;
+
+        document.getElementById("stockActual")
+            .textContent = "—";
+
+        document.getElementById("stockMinimo")
+            .textContent = "—";
+
+        calcularStock();
+
+        if (!id) {
+            return;
+        }
+
+        try {
+
+            const respuesta = await fetch(
+                "/farmacia/bitacora/stock?inventarioId=" +
+                encodeURIComponent(id),
+                { credentials: "same-origin" }
+            );
+
+            if (!respuesta.ok) {
+                throw new Error("No se pudo consultar el inventario.");
+            }
+
+            const datos = await respuesta.json();
+
+            // EVITAR RESPUESTAS ANTIGUAS
+            if (numeroConsulta !== consultaStockActual) {
+                return;
+            }
+
+            stockActual = datos.stockActual;
+            stockMinimo = datos.stockMinimo;
+
+            document.getElementById("stockActual")
+                .textContent = stockActual;
+
+            document.getElementById("stockMinimo")
+                .textContent = stockMinimo;
+
+            calcularStock();
+
+        } catch (error) {
+
+            if (numeroConsulta !== consultaStockActual) {
+                return;
+            }
+
+            stockActual = null;
+            stockMinimo = null;
+
+            calcularStock();
+
+            document.getElementById("alertaInsuficiente")
+                .textContent = error.message;
+
+            document.getElementById("alertaInsuficiente")
+                .style.display = "block";
+        }
+    }
+
+
+    // ==========================================
+    // CALCULAR STOCK PROYECTADO
+    // ==========================================
+
+    function calcularStock() {
+
+        const tipo = tipoSelect.value;
+
+        const cantidadTexto = cantidadInput.value;
+
+        const cantidad = Number(cantidadTexto);
+
+        const alertaInsuficiente =
+            document.getElementById("alertaInsuficiente");
+
+        const alertaStockBajo =
+            document.getElementById("alertaStockBajo");
+
+        alertaInsuficiente.style.display = "none";
+        alertaStockBajo.style.display = "none";
+
+
+        let formularioValido =
+            inventarioSelect.value !== "" &&
+            tipo !== "" &&
+            stockActual !== null &&
+            Number.isInteger(cantidad) &&
+            cantidad > 0;
+
+
+        if (tipo === "0") {
+
+            const costo = Number(costoInput.value);
+
+            const costoTexto = costoInput.value;
+
+            const decimales =
+                costoTexto.includes(".")
+                    ? costoTexto.split(".")[1].length
+                    : 0;
+
+            formularioValido =
+                formularioValido &&
+                costoTexto !== "" &&
+                Number.isFinite(costo) &&
+                costo > 0 &&
+                decimales <= 2;
+        }
+
+
+        if (["1", "3", "4", "5"].includes(tipo)) {
+
+            formularioValido =
+                formularioValido &&
+                motivoInput.value.trim().length >= 10 &&
+                motivoInput.value.trim().length <= 500;
+        }
+
+
+        const esEntrada =
+            ["0", "1", "4"].includes(tipo);
+
+        const esSalida =
+            ["2", "3", "5"].includes(tipo);
+
+
+        document.getElementById("tipoOperacion")
+            .textContent =
+            esEntrada
+                ? "Entrada"
+                : esSalida
+                    ? "Salida"
+                    : "—";
+
+
+        if (
+            stockActual === null ||
+            !Number.isInteger(cantidad) ||
+            cantidad <= 0 ||
+            (!esEntrada && !esSalida)
+        ) {
+
+            document.getElementById("stockProyectado")
+                .textContent = "—";
+
+            btnGuardar.disabled = true;
+
+            return;
+        }
+
+
+        const proyectado =
+            esEntrada
+                ? stockActual + cantidad
+                : stockActual - cantidad;
+
+
+        document.getElementById("stockProyectado")
+            .textContent = proyectado;
+
+
+        // STOCK INSUFICIENTE
+
+        if (proyectado < 0) {
+
+            alertaInsuficiente.textContent =
+                "Stock insuficiente. Stock actual: " +
+                stockActual +
+                ". No se puede registrar una salida de " +
+                cantidad +
+                " unidades.";
+
+            alertaInsuficiente.style.display = "block";
+
+            formularioValido = false;
+        }
+
+
+        // STOCK BAJO
+
+        if (
+            proyectado >= 0 &&
+            stockMinimo !== null &&
+            proyectado <= stockMinimo
+        ) {
+
+            alertaStockBajo.textContent =
+                "Stock bajo — disponible: " +
+                proyectado +
+                " (mínimo: " +
+                stockMinimo +
+                ").";
+
+            alertaStockBajo.style.display = "block";
+        }
+
+
+        btnGuardar.disabled = !formularioValido;
+    }
+
+
+    // ==========================================
+    // EVENTOS
+    // ==========================================
+
+    inventarioSelect.addEventListener(
+        "change",
+        consultarStock
+    );
+
+    tipoSelect.addEventListener(
+        "change",
+        actualizarCampos
+    );
+
+    cantidadInput.addEventListener(
+        "input",
+        calcularStock
+    );
+
+    costoInput.addEventListener(
+        "input",
+        calcularStock
+    );
+
+    motivoInput.addEventListener(
+        "input",
+        calcularStock
+    );
+
+    referenciaInput.addEventListener(
+        "input",
+        calcularStock
+    );
+
+
+    // ==========================================
+    // CONTROL DE ENVÍO
+    // ==========================================
+
+    document.getElementById("formMovimiento")
+        .addEventListener("submit", function(evento) {
+
+            calcularStock();
+
+            if (btnGuardar.disabled) {
+                evento.preventDefault();
+            }
+        });
+
+
+    // ==========================================
+    // ESTADO INICIAL
+    // ==========================================
+
+    actualizarCampos();
+
+</script>
+
+</body>
+</html>

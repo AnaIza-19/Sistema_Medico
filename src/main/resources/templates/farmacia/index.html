@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org">
@@ -9,9 +10,13 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Farmacia</title>
+    <title>Panel de Farmacia | Sistema Médico</title>
 
     <style>
+
+        /* ==========================================
+           ESTILOS GENERALES
+        ========================================== */
 
         * {
             box-sizing: border-box;
@@ -19,22 +24,27 @@
 
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            color: #333;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fa;
+            color: #26374a;
         }
+
+        /* ==========================================
+           ENCABEZADO
+        ========================================== */
 
         .encabezado {
             background: #1f4e79;
             color: white;
-            padding: 22px 35px;
+            padding: 25px 40px;
 
             display: flex;
             justify-content: space-between;
             align-items: center;
 
+            gap: 20px;
             flex-wrap: wrap;
-            gap: 15px;
         }
 
         .encabezado h1 {
@@ -43,7 +53,7 @@
         }
 
         .encabezado p {
-            margin: 6px 0 0;
+            margin: 8px 0 0;
         }
 
         .usuario {
@@ -51,135 +61,249 @@
         }
 
         .usuario p {
-            margin: 3px 0;
+            margin: 5px 0;
         }
 
         .cerrar-sesion {
+            display: inline-block;
+            margin-top: 10px;
             color: white;
             text-decoration: none;
             font-weight: bold;
         }
 
+        .cerrar-sesion:hover {
+            text-decoration: underline;
+        }
+
+        /* ==========================================
+           CONTENEDOR
+        ========================================== */
+
         .contenedor {
-            width: 90%;
-            max-width: 1200px;
+            width: 92%;
+            max-width: 1250px;
             margin: 40px auto;
         }
 
-        .tarjeta {
+        .panel {
             background: white;
-            padding: 30px;
-
-            border-radius: 12px;
-
-            box-shadow:
-                    0 2px 10px
-                    rgba(0,0,0,0.10);
+            padding: 35px;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
         }
 
         h2 {
             margin-top: 0;
             color: #1f4e79;
-            font-size: 28px;
+            font-size: 29px;
         }
 
         .descripcion {
+            color: #617184;
             margin-bottom: 30px;
-            color: #555;
+            line-height: 1.6;
         }
 
+        /* ==========================================
+           TARJETAS DE OPCIONES
+        ========================================== */
+
         .opciones {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
         }
 
         .opcion {
-            flex: 1;
-            min-width: 260px;
+            background: #f7f9fc;
+            padding: 28px;
+            border-radius: 12px;
+            border: 1px solid #dce5ef;
 
-            background: #f8f9fa;
-            padding: 25px;
+            display: flex;
+            flex-direction: column;
 
-            border-radius: 10px;
-            border: 1px solid #ddd;
+            transition:
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease;
+        }
+
+        .opcion:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
+        .icono {
+            width: 62px;
+            height: 62px;
+            border-radius: 15px;
+            background: #e4effb;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 29px;
+            margin-bottom: 20px;
         }
 
         .opcion h3 {
-            margin-top: 0;
             color: #1f4e79;
+            font-size: 23px;
+            margin: 0 0 14px;
         }
+
+        .opcion p {
+            color: #5c6e80;
+            line-height: 1.6;
+            margin-top: 0;
+        }
+
+        .funciones {
+            padding-left: 20px;
+            margin-bottom: 23px;
+            line-height: 1.9;
+            color: #34495e;
+        }
+
+        .funciones li::marker {
+            color: #1976d2;
+        }
+
+        /* ==========================================
+           BOTONES
+        ========================================== */
 
         .btn {
-            display: inline-block;
-
-            margin-top: 15px;
-
-            padding: 12px 20px;
-
-            background: #198754;
-            color: white;
-
+            display: block;
+            padding: 14px 20px;
+            border-radius: 8px;
             text-decoration: none;
-
-            border-radius: 6px;
-
+            color: white;
             font-weight: bold;
+            text-align: center;
+
+            margin-top: auto;
+
+            transition: background 0.2s ease;
         }
 
-        .btn:hover {
+        .btn-verde {
+            background: #198754;
+        }
+
+        .btn-verde:hover {
             background: #157347;
+        }
+
+        .btn-azul {
+            background: #1976d2;
+        }
+
+        .btn-azul:hover {
+            background: #125ca6;
+        }
+
+        /* ==========================================
+           INFORMACIÓN
+        ========================================== */
+
+        .informacion {
+            margin-top: 28px;
+            padding: 18px 20px;
+            border-radius: 9px;
+            border-left: 4px solid #1976d2;
+            background: #eaf4ff;
+            color: #35536f;
+            line-height: 1.6;
+        }
+
+        /* ==========================================
+           RESPONSIVE
+        ========================================== */
+
+        @media (max-width: 800px) {
+
+            .opciones {
+                grid-template-columns: 1fr;
+            }
+
+            .encabezado {
+                padding: 24px;
+            }
+
+            .encabezado h1 {
+                font-size: 28px;
+            }
+
+            .usuario {
+                text-align: left;
+            }
+
+            .contenedor {
+                margin: 22px auto;
+            }
+
+            .panel {
+                padding: 22px;
+            }
         }
 
     </style>
 
 </head>
 
-
 <body>
 
+<!-- ==========================================
+     ENCABEZADO DE FARMACIA
+========================================== -->
 
-<div class="encabezado">
+<header class="encabezado">
 
     <div>
 
-        <h1>
-            Farmacia
-        </h1>
+        <h1>Farmacia</h1>
 
         <p>
-            CU-11 Despacho de Medicamentos
+            Sistema Médico Hospitalario |
+            CU-11 y CU-15
         </p>
 
     </div>
 
 
+    <!-- INFORMACIÓN DEL USUARIO -->
+
     <div class="usuario">
 
         <p>
+
             <strong>Personal:</strong>
 
             <span th:text="${personalFarmacia.nombreCompleto}">
                 Personal
             </span>
+
         </p>
 
         <p>
-            Rol:
-            <strong>FARMACIA</strong>
+            Rol: <strong>FARMACIA</strong>
         </p>
 
         <p th:if="${personalFarmacia.sucursal != null}">
+
             Sucursal:
 
             <strong th:text="${personalFarmacia.sucursal.nombre}">
                 Sucursal
             </strong>
+
         </p>
 
-        <a
-                class="cerrar-sesion"
-                th:href="@{/personal/cerrar-sesion}">
+        <a class="cerrar-sesion"
+           th:href="@{/personal/cerrar-sesion}">
 
             Cerrar sesión
 
@@ -187,46 +311,65 @@
 
     </div>
 
-</div>
+</header>
 
 
-<div class="contenedor">
+<!-- ==========================================
+     PANEL PRINCIPAL
+========================================== -->
 
+<main class="contenedor">
 
-    <div class="tarjeta">
+    <section class="panel">
 
-        <h2>
-            Panel de Farmacia
-        </h2>
-
+        <h2>Panel de Farmacia</h2>
 
         <p class="descripcion">
-
-            Gestión del despacho de medicamentos
-            prescritos por el médico.
-
+            Administre los despachos de medicamentos
+            y consulte el historial de movimientos
+            de inventario del hospital.
         </p>
 
+
+        <!-- ==================================
+             OPCIONES DEL MÓDULO
+        ================================== -->
 
         <div class="opciones">
 
 
+            <!-- ==============================
+                 CU-11: DESPACHOS
+            ============================== -->
+
             <div class="opcion">
 
-                <h3>
-                    Nuevo Despacho
-                </h3>
+                <div class="icono" aria-hidden="true">
+                    💊
+                </div>
+
+                <h3>Despacho de Medicamentos</h3>
 
                 <p>
-                    Buscar una receta médica vigente
-                    y preparar los medicamentos
-                    para su despacho.
+                    Consulte recetas médicas vigentes
+                    y prepare la entrega de medicamentos
+                    a los pacientes.
                 </p>
 
+                <ul class="funciones">
 
-                <a
-                        class="btn"
-                        th:href="@{/farmacia/despacho}">
+                    <li>Buscar recetas médicas</li>
+
+                    <li>Verificar medicamentos prescritos</li>
+
+                    <li>Consultar existencias disponibles</li>
+
+                    <li>Registrar despachos</li>
+
+                </ul>
+
+                <a class="btn btn-verde"
+                   th:href="@{/farmacia/despacho}">
 
                     Nuevo Despacho
 
@@ -235,14 +378,69 @@
             </div>
 
 
+            <!-- ==============================
+                 CU-15: BITÁCORA
+            ============================== -->
+
+            <div class="opcion">
+
+                <div class="icono" aria-hidden="true">
+                    📋
+                </div>
+
+                <h3>Bitácora de Inventario</h3>
+
+                <p>
+                    Consulte y registre movimientos
+                    de entrada y salida de medicamentos,
+                    con trazabilidad de existencias.
+                </p>
+
+                <ul class="funciones">
+
+                    <li>Consultar el historial de movimientos</li>
+
+                    <li>Buscar por medicamento y sucursal</li>
+
+                    <li>Registrar entradas y salidas manuales</li>
+
+                    <li>Consultar el detalle de cada operación</li>
+
+                </ul>
+
+                <a class="btn btn-azul"
+                   th:href="@{/farmacia/bitacora}">
+
+                    Abrir Bitácora de Inventario
+
+                </a>
+
+            </div>
+
         </div>
 
 
-    </div>
+        <!-- ==================================
+             INFORMACIÓN DEL MÓDULO
+        ================================== -->
 
+        <div class="informacion">
 
-</div>
+            <strong>Control de inventario:</strong>
 
+            Los movimientos registrados en la bitácora
+            permiten consultar las existencias anteriores,
+            las nuevas existencias, la fecha y el
+            usuario responsable.
+
+            La integración de los despachos automáticos
+            con la bitácora se encuentra pendiente.
+
+        </div>
+
+    </section>
+
+</main>
 
 </body>
 </html>

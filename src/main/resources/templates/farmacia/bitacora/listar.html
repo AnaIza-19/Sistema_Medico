@@ -1,0 +1,999 @@
+
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Bitácora de Inventario | CU-15</title>
+
+    <style>
+
+        /* ==========================================
+           CONFIGURACIÓN GENERAL
+        ========================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fa;
+            color: #233447;
+        }
+
+        /* ==========================================
+           ENCABEZADO
+        ========================================== */
+
+        .encabezado {
+            background: #1f4e79;
+            color: white;
+            padding: 25px 35px;
+        }
+
+        .encabezado h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+        }
+
+        .encabezado p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        /* ==========================================
+           CONTENEDOR PRINCIPAL
+        ========================================== */
+
+        .contenedor {
+            max-width: 1450px;
+            margin: 35px auto;
+            padding: 0 22px;
+        }
+
+        .panel {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        .subtitulo {
+            color: #1f4e79;
+            margin-top: 0;
+        }
+
+        .usuario {
+            color: #52677b;
+            margin-bottom: 22px;
+        }
+
+        /* ==========================================
+           BOTONES
+        ========================================== */
+
+        .acciones-superiores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 11px 17px;
+            border: none;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #1976d2;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .boton:hover {
+            background: #135da6;
+        }
+
+        .boton-gris {
+            background: #687784;
+        }
+
+        .boton-gris:hover {
+            background: #4f5d68;
+        }
+
+        .boton-verde {
+            background: #188754;
+        }
+
+        .boton-verde:hover {
+            background: #11663f;
+        }
+
+        .boton-pequeno {
+            padding: 8px 13px;
+            font-size: 13px;
+        }
+
+        /* ==========================================
+           MENSAJES
+        ========================================== */
+
+        .mensaje-exito {
+            padding: 14px;
+            margin-bottom: 20px;
+            border-radius: 7px;
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #b8dfc1;
+        }
+
+        .mensaje-error {
+            padding: 14px;
+            margin-bottom: 20px;
+            border-radius: 7px;
+            color: #842029;
+            background: #f8d7da;
+            border: 1px solid #f5c2c7;
+        }
+
+        /* ==========================================
+           INFORMACIÓN
+        ========================================== */
+
+        .informacion {
+            padding: 15px;
+            margin-bottom: 25px;
+            background: #e7f2fc;
+            color: #254c70;
+            border-left: 4px solid #1976d2;
+            border-radius: 6px;
+            line-height: 1.6;
+        }
+
+        /* ==========================================
+           FILTROS
+        ========================================== */
+
+        .titulo-filtros {
+            color: #1f4e79;
+            margin-top: 30px;
+        }
+
+        .filtros-bitacora {
+            display: grid;
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            padding: 22px;
+            margin: 20px 0 30px;
+            border-radius: 10px;
+            background: #f4f7fa;
+        }
+
+        .campo-filtro {
+            min-width: 0;
+        }
+
+        .campo-filtro label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .campo-filtro input,
+        .campo-filtro select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #c9d3df;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .campo-filtro input:focus,
+        .campo-filtro select:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .filtros-acciones {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: end;
+            gap: 10px;
+        }
+
+        /* ==========================================
+           TABLA
+        ========================================== */
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1250px;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #1f4e79;
+            color: white;
+            padding: 13px 10px;
+            text-align: left;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 13px 10px;
+            border-bottom: 1px solid #dee5eb;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f4f7fa;
+        }
+
+        tbody tr:hover {
+            background: #eaf2fa;
+        }
+
+        /* ==========================================
+           TIPO DE MOVIMIENTO
+        ========================================== */
+
+        .tipo {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .entrada {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .salida {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .automatico {
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
+
+        .activo {
+            color: #16803f;
+            font-weight: bold;
+        }
+
+        .inactivo {
+            color: #b42318;
+            font-weight: bold;
+        }
+
+        .sin-datos {
+            text-align: center;
+            color: #64748b;
+            padding: 30px;
+        }
+
+        /* ==========================================
+           PAGINACIÓN
+        ========================================== */
+
+        .paginacion {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .paginacion-enlaces {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* ==========================================
+           ADAPTACIÓN A MÓVILES
+        ========================================== */
+
+        @media (max-width: 850px) {
+
+            .filtros-bitacora {
+                grid-template-columns: 1fr;
+            }
+
+            .encabezado {
+                padding: 22px;
+            }
+
+            .encabezado h1 {
+                font-size: 25px;
+            }
+
+            .contenedor {
+                padding: 0 12px;
+                margin: 20px auto;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- ==========================================
+     ENCABEZADO
+========================================== -->
+
+<header class="encabezado">
+
+    <h1>
+        Bitácora de Movimientos de Inventario
+    </h1>
+
+    <p>
+        CU-15 | Control y trazabilidad de medicamentos
+    </p>
+
+</header>
+
+
+<main class="contenedor">
+
+    <section class="panel">
+
+        <!-- ==================================
+             TÍTULO Y USUARIO
+        ================================== -->
+
+        <h2 class="subtitulo">
+            Historial de Movimientos
+        </h2>
+
+        <p class="usuario">
+
+            Personal de Farmacia:
+
+            <strong th:text="${usuarioActual}">
+                Usuario
+            </strong>
+
+        </p>
+
+
+        <!-- ==================================
+             ACCIONES PRINCIPALES
+        ================================== -->
+
+        <div class="acciones-superiores">
+
+            <a class="boton boton-verde"
+               th:href="@{/farmacia/bitacora/nuevo}">
+
+                + Nuevo Movimiento
+
+            </a>
+
+            <a class="boton boton-gris"
+               th:href="@{/farmacia}">
+
+                Volver a Farmacia
+
+            </a>
+
+            <a class="boton boton-gris"
+               th:href="@{/}">
+
+                Volver al Portal
+
+            </a>
+
+        </div>
+
+
+        <!-- ==================================
+             MENSAJES
+        ================================== -->
+
+        <div class="mensaje-exito"
+             role="status"
+             th:if="${mensajeExito}"
+             th:text="${mensajeExito}">
+        </div>
+
+        <div class="mensaje-error"
+             role="alert"
+             th:if="${mensajeError}"
+             th:text="${mensajeError}">
+        </div>
+
+
+        <!-- ==================================
+             INFORMACIÓN
+        ================================== -->
+
+        <div class="informacion">
+
+            Esta bitácora registra las entradas y
+            salidas de medicamentos.
+
+            Cada movimiento conserva el stock anterior,
+            el stock nuevo, el usuario responsable y
+            la fecha del registro.
+
+            Los despachos automáticos se integrarán
+            posteriormente con el módulo de Farmacia.
+
+        </div>
+
+
+        <!-- ==================================
+             FILTROS DE BÚSQUEDA
+        ================================== -->
+
+        <h3 class="titulo-filtros">
+            Buscar Movimientos
+        </h3>
+
+        <form method="get"
+              th:action="@{/farmacia/bitacora}"
+              class="filtros-bitacora">
+
+
+            <!-- TIPO -->
+
+            <div class="campo-filtro">
+
+                <label for="tipo">
+                    Tipo de movimiento
+                </label>
+
+                <select id="tipo"
+                        name="tipo">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    <option value="0"
+                            th:selected="${tipo == 0}">
+                        Compra
+                    </option>
+
+                    <option value="1"
+                            th:selected="${tipo == 1}">
+                        Devolución
+                    </option>
+
+                    <option value="2"
+                            th:selected="${tipo == 2}">
+                        Venta
+                    </option>
+
+                    <option value="3"
+                            th:selected="${tipo == 3}">
+                        Reclamo
+                    </option>
+
+                    <option value="4"
+                            th:selected="${tipo == 4}">
+                        Ajuste+
+                    </option>
+
+                    <option value="5"
+                            th:selected="${tipo == 5}">
+                        Ajuste-
+                    </option>
+
+                    <option value="6"
+                            th:selected="${tipo == 6}">
+                        Despacho
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- MEDICAMENTO -->
+
+            <div class="campo-filtro">
+
+                <label for="medicamentoId">
+                    Medicamento
+                </label>
+
+                <select id="medicamentoId"
+                        name="medicamentoId">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    <option
+                            th:each="opcion : ${opcionesMedicamentos}"
+                            th:value="${opcion.key}"
+                            th:text="${opcion.value}"
+                            th:selected="${medicamentoId != null and medicamentoId == opcion.key}">
+                        Medicamento
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- SUCURSAL -->
+
+            <div class="campo-filtro">
+
+                <label for="sucursalId">
+                    Sucursal
+                </label>
+
+                <select id="sucursalId"
+                        name="sucursalId">
+
+                    <option value="">
+                        Todas
+                    </option>
+
+                    <option
+                            th:each="opcion : ${opcionesSucursales}"
+                            th:value="${opcion.key}"
+                            th:text="${opcion.value}"
+                            th:selected="${sucursalId != null and sucursalId == opcion.key}">
+                        Sucursal
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- REFERENCIA -->
+
+            <div class="campo-filtro">
+
+                <label for="referencia">
+                    Número de referencia
+                </label>
+
+                <input type="text"
+                       id="referencia"
+                       name="referencia"
+                       maxlength="120"
+                       placeholder="Ejemplo: PRUEBA-CU15"
+                       th:value="${referencia}">
+
+            </div>
+
+
+            <!-- USUARIO -->
+
+            <div class="campo-filtro">
+
+                <label for="usuario">
+                    Usuario responsable
+                </label>
+
+                <input type="text"
+                       id="usuario"
+                       name="usuario"
+                       maxlength="100"
+                       placeholder="Ejemplo: carlos.farmacia"
+                       th:value="${usuarioFiltro}">
+
+            </div>
+
+
+            <!-- FECHA DESDE -->
+
+            <div class="campo-filtro">
+
+                <label for="fechaDesde">
+                    Fecha desde
+                </label>
+
+                <input type="date"
+                       id="fechaDesde"
+                       name="fechaDesde"
+                       th:value="${fechaDesde}">
+
+            </div>
+
+
+            <!-- FECHA HASTA -->
+
+            <div class="campo-filtro">
+
+                <label for="fechaHasta">
+                    Fecha hasta
+                </label>
+
+                <input type="date"
+                       id="fechaHasta"
+                       name="fechaHasta"
+                       th:value="${fechaHasta}">
+
+            </div>
+
+
+            <!-- BOTONES DE BÚSQUEDA -->
+
+            <div class="filtros-acciones">
+
+                <button type="submit"
+                        class="boton">
+
+                    Buscar
+
+                </button>
+
+                <a class="boton boton-gris"
+                   th:href="@{/farmacia/bitacora}">
+
+                    Limpiar
+
+                </a>
+
+            </div>
+
+        </form>
+
+
+        <!-- ==================================
+             TABLA DE MOVIMIENTOS
+        ================================== -->
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo</th>
+                    <th>Medicamento</th>
+                    <th>Sucursal</th>
+                    <th>Cantidad</th>
+                    <th>Stock anterior</th>
+                    <th>Stock nuevo</th>
+                    <th>Costo unitario</th>
+                    <th>Referencia</th>
+                    <th>Usuario</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <!-- REGISTROS ENCONTRADOS -->
+
+                <tr th:each="movimiento : ${movimientos.content}">
+
+
+                    <!-- ID -->
+
+                    <td th:text="${movimiento.id}">
+                        1
+                    </td>
+
+
+                    <!-- TIPO -->
+
+                    <td>
+
+                        <span
+                                class="tipo"
+                                th:classappend="${movimiento.tipoMovimiento == 6} ? 'automatico' : (${movimiento.tipoMovimiento == 0 or movimiento.tipoMovimiento == 1 or movimiento.tipoMovimiento == 4} ? 'entrada' : 'salida')"
+                                th:switch="${movimiento.tipoMovimiento}">
+
+                            <span th:case="0">
+                                Compra
+                            </span>
+
+                            <span th:case="1">
+                                Devolución
+                            </span>
+
+                            <span th:case="2">
+                                Venta
+                            </span>
+
+                            <span th:case="3">
+                                Reclamo
+                            </span>
+
+                            <span th:case="4">
+                                Ajuste+
+                            </span>
+
+                            <span th:case="5">
+                                Ajuste-
+                            </span>
+
+                            <span th:case="6">
+                                Despacho
+                            </span>
+
+                            <span th:case="*">
+                                Desconocido
+                            </span>
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- NOMBRE DEL MEDICAMENTO -->
+
+                    <td th:text="${nombresMedicamentos[movimiento.medicamentoId] != null
+                            ? nombresMedicamentos[movimiento.medicamentoId]
+                            : 'Medicamento ID ' + movimiento.medicamentoId}">
+
+                        Medicamento de Prueba CU14
+
+                    </td>
+
+
+                    <!-- NOMBRE DE LA SUCURSAL -->
+
+                    <td th:text="${nombresSucursales[movimiento.sucursalId] != null
+                            ? nombresSucursales[movimiento.sucursalId]
+                            : 'Sucursal ID ' + movimiento.sucursalId}">
+
+                        Sucursal de Prueba CU14
+
+                    </td>
+
+
+                    <!-- CANTIDAD -->
+
+                    <td th:text="${movimiento.cantidad}">
+                        5
+                    </td>
+
+
+                    <!-- STOCK ANTERIOR -->
+
+                    <td th:text="${movimiento.stockAnterior}">
+                        0
+                    </td>
+
+
+                    <!-- STOCK NUEVO -->
+
+                    <td th:text="${movimiento.stockNuevo}">
+                        5
+                    </td>
+
+
+                    <!-- COSTO UNITARIO -->
+
+                    <td th:text="${movimiento.costoUnitario != null
+                            ? 'Q ' + movimiento.costoUnitario
+                            : '—'}">
+
+                        Q 15.50
+
+                    </td>
+
+
+                    <!-- NÚMERO DE REFERENCIA -->
+
+                    <td th:text="${movimiento.numeroReferencia != null
+                            ? movimiento.numeroReferencia
+                            : '—'}">
+
+                        PRUEBA-CU15-001
+
+                    </td>
+
+
+                    <!-- USUARIO -->
+
+                    <td th:text="${movimiento.registradoPor}">
+                        carlos.farmacia
+                    </td>
+
+
+                    <!-- FECHA -->
+
+                    <td th:text="${#temporals.format(
+                            movimiento.fechaHora,
+                            'dd/MM/yyyy HH:mm'
+                    )}">
+
+                        14/10/2026 01:13
+
+                    </td>
+
+
+                    <!-- ESTADO -->
+
+                    <td>
+
+                        <span class="activo"
+                              th:if="${movimiento.activo}">
+
+                            Activo
+
+                        </span>
+
+                        <span class="inactivo"
+                              th:unless="${movimiento.activo}">
+
+                            Inactivo
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- ACCIONES -->
+
+                    <td>
+
+                        <a class="boton boton-pequeno"
+                           th:href="@{/farmacia/bitacora/{id}(id=${movimiento.id})}">
+
+                            Ver
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+
+                <!-- NO SE ENCONTRARON RESULTADOS -->
+
+                <tr th:if="${movimientos.totalElements == 0}">
+
+                    <td colspan="13"
+                        class="sin-datos">
+
+                        No se encontraron resultados.
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- ==================================
+             PAGINACIÓN
+        ================================== -->
+
+        <div class="paginacion">
+
+
+            <!-- TOTAL DE REGISTROS -->
+
+            <div>
+
+                Total de movimientos:
+
+                <strong th:text="${movimientos.totalElements}">
+                    0
+                </strong>
+
+            </div>
+
+
+            <!-- CONTROLES DE PÁGINA -->
+
+            <div class="paginacion-enlaces">
+
+
+                <!-- ANTERIOR -->
+
+                <a class="boton boton-gris"
+                   th:if="${movimientos.hasPrevious()}"
+                   th:href="@{/farmacia/bitacora(
+                       pagina=${movimientos.number - 1},
+                       tipo=${tipo},
+                       medicamentoId=${medicamentoId},
+                       sucursalId=${sucursalId},
+                       referencia=${referencia},
+                       usuario=${usuarioFiltro},
+                       fechaDesde=${fechaDesde},
+                       fechaHasta=${fechaHasta}
+                   )}">
+
+                    Anterior
+
+                </a>
+
+
+                <!-- PÁGINA ACTUAL -->
+
+                <span>
+
+                    Página
+
+                    <strong th:text="${movimientos.number + 1}">
+                        1
+                    </strong>
+
+                    de
+
+                    <strong th:text="${movimientos.totalPages == 0
+                            ? 1
+                            : movimientos.totalPages}">
+                        1
+                    </strong>
+
+                </span>
+
+
+                <!-- SIGUIENTE -->
+
+                <a class="boton boton-gris"
+                   th:if="${movimientos.hasNext()}"
+                   th:href="@{/farmacia/bitacora(
+                       pagina=${movimientos.number + 1},
+                       tipo=${tipo},
+                       medicamentoId=${medicamentoId},
+                       sucursalId=${sucursalId},
+                       referencia=${referencia},
+                       usuario=${usuarioFiltro},
+                       fechaDesde=${fechaDesde},
+                       fechaHasta=${fechaHasta}
+                   )}">
+
+                    Siguiente
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

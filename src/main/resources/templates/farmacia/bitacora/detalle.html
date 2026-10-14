@@ -1,0 +1,379 @@
+
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Detalle de Movimiento | CU-15</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f6fa;
+            color: #243447;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .encabezado {
+            background: #1f4e79;
+            color: white;
+            padding: 25px 35px;
+        }
+
+        .encabezado h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .encabezado p {
+            margin: 0;
+        }
+
+        .contenedor {
+            max-width: 1050px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            color: #1f4e79;
+        }
+
+        .usuario {
+            color: #64748b;
+        }
+
+        .grid-detalle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 25px;
+        }
+
+        .dato {
+            background: #f5f8fb;
+            padding: 17px;
+            border: 1px solid #e0e7ef;
+            border-radius: 8px;
+        }
+
+        .dato label {
+            display: block;
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .dato strong {
+            display: block;
+            color: #1f4e79;
+            font-size: 18px;
+            overflow-wrap: anywhere;
+        }
+
+        .stock {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .stock-item {
+            background: #eaf4ff;
+            border-radius: 9px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stock-item span {
+            display: block;
+            color: #52677b;
+            margin-bottom: 10px;
+        }
+
+        .stock-item strong {
+            color: #1f4e79;
+            font-size: 28px;
+        }
+
+        .notas {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f5f8fb;
+            overflow-wrap: anywhere;
+        }
+
+        .notas h3 {
+            margin-top: 0;
+            color: #1f4e79;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 12px 18px;
+            border-radius: 7px;
+            background: #1976d2;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .boton-gris {
+            background: #687784;
+        }
+
+        .estado-activo {
+            color: #188754;
+        }
+
+        .estado-inactivo {
+            color: #b42318;
+        }
+
+        @media (max-width: 650px) {
+            .grid-detalle,
+            .stock {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="encabezado">
+
+    <h1>Detalle de Movimiento</h1>
+
+    <p>CU-15 | Bitácora de Inventario</p>
+
+</header>
+
+<main class="contenedor">
+
+    <section class="panel">
+
+        <h2>
+            Movimiento No.
+
+            <span th:text="${movimiento.id}">
+                1
+            </span>
+        </h2>
+
+        <p class="usuario">
+
+            Consultado por:
+
+            <strong th:text="${usuarioActual}">
+                Personal de Farmacia
+            </strong>
+
+        </p>
+
+        <!-- DATOS GENERALES -->
+
+        <div class="grid-detalle">
+
+            <div class="dato">
+                <label>Tipo de movimiento</label>
+
+                <strong th:switch="${movimiento.tipoMovimiento}">
+
+                    <span th:case="0">Compra</span>
+                    <span th:case="1">Devolución</span>
+                    <span th:case="2">Venta</span>
+                    <span th:case="3">Reclamo</span>
+                    <span th:case="4">Ajuste positivo</span>
+                    <span th:case="5">Ajuste negativo</span>
+                    <span th:case="6">Despacho automático</span>
+                    <span th:case="*">Desconocido</span>
+
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>Fecha y hora</label>
+
+                <strong th:text="${#temporals.format(movimiento.fechaHora, 'dd/MM/yyyy HH:mm:ss')}">
+                    14/10/2026 01:13:00
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>ID de inventario</label>
+
+                <strong th:text="${movimiento.inventarioId}">
+                    10
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>ID de medicamento</label>
+
+                <strong th:text="${movimiento.medicamentoId}">
+                    11
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>ID de sucursal</label>
+
+                <strong th:text="${movimiento.sucursalId}">
+                    4
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>Cantidad</label>
+
+                <strong th:text="${movimiento.cantidad}">
+                    5
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>Costo unitario</label>
+
+                <strong th:text="${movimiento.costoUnitario != null ? 'Q ' + movimiento.costoUnitario : 'No aplica'}">
+                    Q 15.50
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>Número de referencia</label>
+
+                <strong th:text="${movimiento.numeroReferencia != null ? movimiento.numeroReferencia : 'Sin referencia'}">
+                    PRUEBA-CU15-001
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>Registrado por</label>
+
+                <strong th:text="${movimiento.registradoPor}">
+                    carlos.farmacia
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>Estado</label>
+
+                <strong th:class="${movimiento.activo} ? 'estado-activo' : 'estado-inactivo'"
+                        th:text="${movimiento.activo} ? 'Activo' : 'Inactivo'">
+                    Activo
+                </strong>
+            </div>
+
+            <div class="dato">
+                <label>ID de detalle de despacho</label>
+
+                <strong th:text="${movimiento.despachoDetalleId != null ? movimiento.despachoDetalleId : 'No aplica'}">
+                    No aplica
+                </strong>
+            </div>
+
+        </div>
+
+        <!-- RESUMEN DE EXISTENCIAS -->
+
+        <div class="stock">
+
+            <div class="stock-item">
+
+                <span>Stock anterior</span>
+
+                <strong th:text="${movimiento.stockAnterior}">
+                    0
+                </strong>
+
+            </div>
+
+            <div class="stock-item">
+
+                <span>Cantidad del movimiento</span>
+
+                <strong th:text="${movimiento.cantidad}">
+                    5
+                </strong>
+
+            </div>
+
+            <div class="stock-item">
+
+                <span>Stock nuevo</span>
+
+                <strong th:text="${movimiento.stockNuevo}">
+                    5
+                </strong>
+
+            </div>
+
+        </div>
+
+        <!-- MOTIVO O NOTAS -->
+
+        <div class="notas">
+
+            <h3>Motivo / Notas</h3>
+
+            <p th:text="${movimiento.motivo != null ? movimiento.motivo : 'Sin observaciones registradas.'}">
+                Observaciones del movimiento.
+            </p>
+
+        </div>
+
+        <!-- ACCIONES -->
+
+        <div class="acciones">
+
+            <a class="boton"
+               th:href="@{/farmacia/bitacora}">
+
+                ← Volver a la Bitácora
+
+            </a>
+
+            <a class="boton boton-gris"
+               th:href="@{/farmacia}">
+
+                Panel de Farmacia
+
+            </a>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>
