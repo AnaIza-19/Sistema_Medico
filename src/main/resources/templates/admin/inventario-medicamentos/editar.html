@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ajustar Stock | CU-14</title>
+    <link rel="stylesheet" th:href="@{/css/cu14-inventario.css}" href="/css/cu14-inventario.css"></head>
+<body><main class="contenedor form-contenedor">
+    <h1>Ajustar Stock de Inventario</h1>
+    <p>Administrador: <strong th:text="${adminName}">admin1</strong></p>
+    <div class="alerta error" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <div class="nota"><p><strong>Medicamento:</strong> <span th:text="${inventario.medicamento.nombre}">Paracetamol</span></p>
+        <p><strong>Sucursal:</strong> <span th:text="${inventario.sucursal.nombre}">Hospital Central</span></p>
+        <p><strong>Stock actual:</strong> <span th:text="${inventario.stockActual}">10</span></p>
+        <p><strong>Stock mínimo:</strong> <span th:text="${inventario.medicamento.stockMinimo}">5</span></p></div>
+    <form method="post" th:action="@{/admin/inventario-medicamentos/editar/{id}(id=${inventario.id})}">
+        <div class="campo"><label for="stockNuevo">Nuevo stock total (unidades) *</label>
+            <input id="stockNuevo" type="number" name="stockNuevo" min="0" step="1" required th:value="${inventario.stockActual}">
+            <small>Ingrese la cantidad total correcta, no la diferencia. La operación se registra en auditoría.</small></div>
+        <div class="campo"><label for="detalle">Justificación del ajuste *</label>
+            <textarea id="detalle" name="detalle" minlength="5" maxlength="500" required placeholder="Ej.: Recuento físico de inventario, ingreso de existencias verificadas"></textarea></div>
+        <div class="acciones"><button class="btn" type="submit">Guardar ajuste de stock</button>
+            <a class="btn btn-gris" th:href="@{/admin/inventario-medicamentos}">Cancelar / Volver</a></div>
+    </form></main></body></html>

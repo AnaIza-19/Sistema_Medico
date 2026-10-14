@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Especialidad | Sistema Médico Hospitalario</title>
+    <style>
+        :root { color-scheme: light; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f3f6fa; color: #202c3a; font-family: Arial, Helvetica, sans-serif; }
+        .contenedor { max-width: 1160px; margin: 34px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 3px 18px rgba(15, 42, 77, .09); }
+        h1 { color: #17365d; font-size: 29px; margin: 0 0 9px; }
+        h2 { color: #263d55; margin-top: 26px; }
+        .subtitulo { margin-top: 0; color: #566577; }
+        .acciones, .filtros, .paginacion, .botones { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .acciones { margin: 24px 0; }
+        .filtros { background: #f7f9fc; padding: 16px; border-radius: 9px; margin: 20px 0; }
+        .btn { display: inline-block; padding: 11px 16px; background: #1976d2; color: #fff; border: 0; border-radius: 6px; font-size: 14px; text-decoration: none; cursor: pointer; font-family: inherit; }
+        .btn:hover { filter: brightness(.92); }
+        .btn-gris { background: #697681; }
+        .btn-verde { background: #16804a; }
+        .btn-rojo { background: #c73543; }
+        .btn-chico { padding: 8px 11px; }
+        .btn:disabled { opacity: .55; cursor: not-allowed; }
+        label { font-weight: bold; }
+        input, select, textarea { font: inherit; border: 1px solid #bac4d0; border-radius: 6px; padding: 10px 12px; background: #fff; max-width: 100%; }
+        input:focus, textarea:focus, select:focus { outline: 2px solid #b7d7fa; border-color: #1976d2; }
+        .alerta { border-radius: 6px; padding: 13px 15px; margin: 17px 0; }
+        .exito { background: #e1f5e7; color: #135c2c; }
+        .error { background: #fbe3e5; color: #92252c; }
+        .tabla-externa { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 18px 0; }
+        th, td { padding: 12px; border: 1px solid #dce2eb; text-align: left; vertical-align: middle; }
+        th { background: #17365d; color: #fff; }
+        tbody tr:nth-child(even) { background: #f4f7fa; }
+        .estado-activo { color: #16713b; font-weight: bold; }
+        .estado-inactivo { color: #b22e3a; font-weight: bold; }
+        .acciones-fila { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .acciones-fila form { margin: 0; }
+        .paginacion { justify-content: space-between; margin-top: 17px; }
+        .paginacion-enlaces { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .sin-datos { text-align: center; color: #64748b; padding: 24px; }
+        .formulario { max-width: 740px; margin-top: 25px; }
+        .campo { margin-bottom: 20px; }
+        .campo label { display: block; margin-bottom: 8px; }
+        .campo input, .campo textarea { width: 100%; }
+        .campo textarea { min-height: 108px; resize: vertical; }
+        .ayuda { display: block; color: #65758a; font-size: 12px; margin-top: 6px; }
+        .obligatorio { color: #c62828; }
+        .botones { margin-top: 25px; }
+        .nota { padding: 13px; background: #eaf3fc; border-radius: 7px; color: #23527c; }
+        @media (max-width: 660px) { .contenedor { margin: 12px; padding: 18px; } h1 { font-size: 24px; } .filtros > * { width: 100%; } }
+    </style>
+</head>
+<body>
+<main class="contenedor">
+    <h1>Editar Especialidad</h1>
+    <p class="subtitulo">Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <p>Actualice los datos de la especialidad seleccionada.</p>
+
+    <div class="alerta error" role="alert" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+
+    <form class="formulario" method="post"
+          th:action="@{/admin/especialidades/editar/{id}(id=${especialidad.id})}">
+        <div class="campo">
+            <label for="id">ID</label>
+            <input id="id" type="text" th:value="${especialidad.id}" readonly>
+        </div>
+
+        <div class="campo">
+            <label for="nombre">Nombre <span class="obligatorio">*</span></label>
+            <input id="nombre" type="text" name="nombre" required maxlength="200"
+                   th:value="${especialidad.nombre}">
+        </div>
+
+        <div class="campo">
+            <label for="descripcion">Descripción <span class="obligatorio">*</span></label>
+            <textarea id="descripcion" name="descripcion" required maxlength="500"
+                      th:text="${especialidad.descripcion}"></textarea>
+            <small class="ayuda">Obligatoria para guardar; máximo 500 caracteres.</small>
+        </div>
+
+        <div class="campo">
+            <label for="precio">Precio de consulta (Q)</label>
+            <input id="precio" type="number" name="precio" min="0.01" step="0.01"
+                   th:value="${especialidad.precio}">
+            <small class="ayuda">Deje vacío para conservar el precio actual.</small>
+        </div>
+
+        <p class="nota">Estado actual:
+            <strong th:text="${especialidad.activo ? 'Activo' : 'Inactivo'}">Activo</strong>.
+            La reactivación o desactivación se realiza desde el listado.
+        </p>
+        <div class="botones">
+            <button class="btn" type="submit">Actualizar especialidad</button>
+            <a class="btn btn-gris" th:href="@{/admin/especialidades}">Cancelar</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

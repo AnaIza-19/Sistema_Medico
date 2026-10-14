@@ -1,3 +1,4 @@
+
 package com.example.sistemamedico.model;
 
 import jakarta.persistence.*;
@@ -8,19 +9,45 @@ import java.math.BigDecimal;
 @Table(name = "especialidades")
 public class Especialidad {
 
+    // ==========================================
+    // IDENTIFICADOR
+    // ==========================================
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
 
+    // ==========================================
+    // NOMBRE DE LA ESPECIALIDAD
+    // CU-14: MÁXIMO 200 CARACTERES
+    // ==========================================
+
+
     @Column(
             name = "nombre",
             nullable = false,
-            unique = true,
-            length = 100
+            length = 200
     )
     private String nombre;
 
+
+
+    // ==========================================
+    // DESCRIPCIÓN
+    // CU-14: MÁXIMO 500 CARACTERES
+    // ==========================================
+
+    @Column(
+            name = "descripcion",
+            length = 500
+    )
+    private String descripcion;
+
+
+    // ==========================================
+    // ESTADO ACTIVO / INACTIVO
+    // ==========================================
 
     @Column(
             name = "activo",
@@ -28,6 +55,11 @@ public class Especialidad {
     )
     private Boolean activo = true;
 
+
+    // ==========================================
+    // PRECIO DE CONSULTA
+    // CONSERVADO PARA CU-03 Y CU-06
+    // ==========================================
 
     @Column(
             name = "precio",
@@ -37,9 +69,17 @@ public class Especialidad {
     private BigDecimal precio;
 
 
+    // ==========================================
+    // CONSTRUCTOR
+    // ==========================================
+
     public Especialidad() {
     }
 
+
+    // ==========================================
+    // GETTERS Y SETTERS
+    // ==========================================
 
     public Long getId() {
         return id;
@@ -56,6 +96,15 @@ public class Especialidad {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
 

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Medicamento | CU-14</title>
+    <link rel="stylesheet" th:href="@{/css/cu14-medicamentos.css}" href="/css/cu14-medicamentos.css">
+</head>
+<body>
+<main class="contenedor form">
+    <h1>Editar Medicamento</h1>
+    <p class="subtitulo">Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <p>Registro ID <strong th:text="${medicamento.id}">1</strong></p>
+    <div class="alerta error" role="alert" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <form method="post" th:action="@{/admin/medicamentos/editar/{id}(id=${medicamento.id})}">
+        <div class="campo">
+            <label for="nombre">Nombre *</label>
+            <input id="nombre" name="nombre" type="text" maxlength="150" required th:value="${medicamento.nombre}">
+        </div>
+        <div class="form-dos">
+            <div class="campo">
+                <label for="precio">Precio unitario (Q) *</label>
+                <input id="precio" name="precio" type="number" min="0.01" max="99999999.99" step="0.01" required th:value="${medicamento.precio}">
+            </div>
+            <div class="campo">
+                <label for="unidad">Unidad *</label>
+                <input id="unidad" name="unidad" type="text" maxlength="50" required th:value="${medicamento.unidad}">
+            </div>
+        </div>
+        <div class="campo">
+            <label for="stockMinimo">Stock mínimo *</label>
+            <input id="stockMinimo" name="stockMinimo" type="number" min="0" step="1" required th:value="${medicamento.stockMinimo}">
+            <small>Editar el stock mínimo no cambia el stock real de los inventarios existentes.</small>
+        </div>
+        <div class="botones">
+            <button class="btn" type="submit">Guardar cambios</button>
+            <a class="btn btn-gris" th:href="@{/admin/medicamentos}">Cancelar / Volver</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Crear Inventario | CU-14</title>
+    <link rel="stylesheet" th:href="@{/css/cu14-inventario.css}" href="/css/cu14-inventario.css"></head>
+<body><main class="contenedor form-contenedor">
+    <h1>Crear Inventario de Medicamentos</h1>
+    <p>Administrador: <strong th:text="${adminName}">admin1</strong></p>
+    <div class="alerta error" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <p class="nota">Cada combinación de medicamento y sucursal puede existir una sola vez, incluso si está inactiva.</p>
+    <form method="post" th:action="@{/admin/inventario-medicamentos/crear}">
+        <div class="campo"><label for="medicamentoId">Medicamento *</label>
+            <select id="medicamentoId" name="medicamentoId" required><option value="">-- Seleccione medicamento --</option>
+                <option th:each="m : ${medicamentos}" th:value="${m.id}" th:text="${m.nombre}">Medicamento</option></select></div>
+        <div class="campo"><label for="sucursalId">Sucursal *</label>
+            <select id="sucursalId" name="sucursalId" required><option value="">-- Seleccione sucursal --</option>
+                <option th:each="s : ${sucursales}" th:value="${s.id}" th:text="${s.nombre}">Sucursal</option></select></div>
+        <div class="campo"><label for="stockActual">Stock inicial (unidades) *</label>
+            <input id="stockActual" name="stockActual" type="number" required min="0" step="1" value="0"></div>
+        <div class="campo"><label for="detalle">Motivo de creación *</label>
+            <textarea id="detalle" name="detalle" required minlength="5" maxlength="500" placeholder="Ej.: Registro de nuevo inventario de prueba en sucursal"></textarea></div>
+        <div class="acciones"><button type="submit" class="btn">Guardar inventario</button>
+            <a class="btn btn-gris" th:href="@{/admin/inventario-medicamentos}">Cancelar / Volver</a></div>
+    </form></main></body></html>

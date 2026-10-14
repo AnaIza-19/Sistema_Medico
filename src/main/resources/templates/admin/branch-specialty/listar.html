@@ -4,13 +4,24 @@
       xmlns:th="http://www.thymeleaf.org">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
     <title>Especialidades por Sede - CU-13</title>
 
     <style>
+
+        /* ==========================================
+           CONFIGURACIÓN GENERAL
+        ========================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
             background: #f4f6f9;
@@ -31,8 +42,19 @@
             color: #17365d;
         }
 
+        h2 {
+            color: #253f5c;
+        }
+
+        /* ==========================================
+           BOTONES PRINCIPALES
+        ========================================== */
+
         .acciones-superiores {
             margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .boton {
@@ -45,6 +67,7 @@
             text-decoration: none;
             cursor: pointer;
             font-size: 14px;
+            font-family: inherit;
         }
 
         .boton:hover {
@@ -63,6 +86,14 @@
             background: #6c757d;
         }
 
+        .boton-gris:hover {
+            background: #565e64;
+        }
+
+        /* ==========================================
+           FILTROS DE BÚSQUEDA
+        ========================================== */
+
         .filtros {
             margin: 20px 0;
             display: flex;
@@ -71,11 +102,21 @@
             align-items: center;
         }
 
-        input, select {
+        .filtros label {
+            font-weight: bold;
+        }
+
+        input,
+        select {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            font-family: inherit;
         }
+
+        /* ==========================================
+           TABLA DE ESPECIALIDADES POR SEDE
+        ========================================== */
 
         .tabla-contenedor {
             overflow-x: auto;
@@ -87,10 +128,12 @@
             margin-top: 20px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             border: 1px solid #ddd;
             text-align: center;
+            vertical-align: middle;
         }
 
         th {
@@ -98,9 +141,13 @@
             color: white;
         }
 
-        tr:nth-child(even) {
+        tbody tr:nth-child(even) {
             background: #f2f5f9;
         }
+
+        /* ==========================================
+           ESTADOS
+        ========================================== */
 
         .activo {
             color: green;
@@ -111,6 +158,10 @@
             color: #dc3545;
             font-weight: bold;
         }
+
+        /* ==========================================
+           MENSAJES
+        ========================================== */
 
         .mensaje-exito {
             background: #d4edda;
@@ -128,6 +179,10 @@
             margin: 15px 0;
         }
 
+        /* ==========================================
+           PAGINACIÓN
+        ========================================== */
+
         .paginacion {
             display: flex;
             flex-wrap: wrap;
@@ -142,17 +197,49 @@
             color: #666;
             text-align: center;
         }
+
+        /* ==========================================
+           DISEÑO RESPONSIVE
+        ========================================== */
+
+        @media (max-width: 700px) {
+
+            body {
+                padding: 12px;
+            }
+
+            .contenedor {
+                padding: 18px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .filtros input,
+            .filtros select {
+                max-width: 100%;
+            }
+
+        }
+
     </style>
+
 </head>
 
 <body>
 
-<div class="contenedor">
+<main class="contenedor">
+
+    <!-- ==========================================
+         ENCABEZADO
+    ========================================== -->
 
     <h1>CU-13: Especialidades por Sede</h1>
 
     <p>
         Bienvenido, administrador:
+
         <strong th:text="${usuarioActual}">
             Administrador
         </strong>
@@ -167,52 +254,80 @@
         disponibles en cada sucursal del hospital.
     </p>
 
-    <!-- BOTONES PRINCIPALES -->
+
+    <!-- ==========================================
+         BOTONES PRINCIPALES
+    ========================================== -->
 
     <div class="acciones-superiores">
 
         <a class="boton"
            th:href="@{/branch-specialty/create}">
+
             + Asignar Especialidad
+
         </a>
 
         <a class="boton boton-gris"
            th:href="@{/admin/usuarios}">
+
             Volver al Panel Administrativo
+
+        </a>
+
+        <a class="boton boton-gris"
+           th:href="@{/}">
+
+            ← Volver al Inicio
+
         </a>
 
     </div>
 
-    <!-- MENSAJES -->
+
+    <!-- ==========================================
+         MENSAJES DEL SISTEMA
+    ========================================== -->
 
     <div class="mensaje-exito"
+         role="status"
          th:if="${mensajeExito}"
          th:text="${mensajeExito}">
     </div>
 
     <div class="mensaje-error"
+         role="alert"
          th:if="${mensajeError}"
          th:text="${mensajeError}">
     </div>
 
-    <!-- FILTROS -->
+
+    <!-- ==========================================
+         FILTROS Y BÚSQUEDA
+    ========================================== -->
 
     <form class="filtros"
           method="get"
           th:action="@{/branch-specialty}">
 
-        <label for="buscar">Buscar por ID:</label>
+        <label for="buscar">
+            Buscar por ID:
+        </label>
 
-        <input type="number"
-               id="buscar"
-               name="buscar"
-               min="1"
-               placeholder="Ingrese ID"
-               th:value="${buscar}">
+        <input
+                type="number"
+                id="buscar"
+                name="buscar"
+                min="1"
+                placeholder="Ingrese ID"
+                th:value="${buscar}">
 
-        <label for="tamanio">Mostrar:</label>
+        <label for="tamanio">
+            Mostrar:
+        </label>
 
-        <select id="tamanio" name="tamanio">
+        <select id="tamanio"
+                name="tamanio">
 
             <option value="10"
                     th:selected="${tamanio == 10}">
@@ -235,34 +350,54 @@
                name="pagina"
                value="0">
 
-        <button class="boton" type="submit">
+        <button class="boton"
+                type="submit">
+
             Buscar
+
         </button>
 
         <a class="boton boton-gris"
            th:href="@{/branch-specialty}">
+
             Limpiar
+
         </a>
 
     </form>
 
-    <!-- TABLA DE ASIGNACIONES -->
+
+    <!-- ==========================================
+         TABLA DE ASIGNACIONES
+    ========================================== -->
 
     <div class="tabla-contenedor">
 
         <table>
 
             <thead>
+
             <tr>
+
                 <th>ID</th>
+
                 <th>Sede</th>
+
                 <th>Especialidad</th>
+
                 <th>Estado</th>
+
                 <th>Acciones</th>
+
             </tr>
+
             </thead>
 
             <tbody>
+
+            <!-- ==================================
+                 MOSTRAR ASIGNACIONES
+            ================================== -->
 
             <tr th:each="asignacion : ${asignaciones.content}">
 
@@ -279,25 +414,38 @@
                 </td>
 
                 <td>
-                    <span th:class="${asignacion.activo} ? 'activo' : 'inactivo'"
-                          th:text="${asignacion.activo} ? 'Activo' : 'Inactivo'">
+
+                    <span
+                            th:class="${asignacion.activo} ? 'activo' : 'inactivo'"
+                            th:text="${asignacion.activo} ? 'Activo' : 'Inactivo'">
+
                         Activo
+
                     </span>
+
                 </td>
 
                 <td>
 
+                    <!-- ==========================
+                         ELIMINACIÓN DE ASIGNACIÓN
+                    ========================== -->
+
                     <form method="post"
                           th:action="@{/branch-specialty/delete}"
-                          onsubmit="return confirm('¿Confirmar eliminación?');">
+                          onsubmit="return confirm('¿Está seguro de eliminar esta asignación?');">
 
-                        <input type="hidden"
-                               name="id"
-                               th:value="${asignacion.id}">
+                        <input
+                                type="hidden"
+                                name="id"
+                                th:value="${asignacion.id}">
 
-                        <button type="submit"
+                        <button
+                                type="submit"
                                 class="boton boton-rojo">
+
                             Eliminar
+
                         </button>
 
                     </form>
@@ -306,7 +454,12 @@
 
             </tr>
 
-            <tr th:if="${asignaciones.empty}">
+
+            <!-- ==================================
+                 SIN RESULTADOS
+            ================================== -->
+
+            <tr th:if="${asignaciones.totalElements == 0}">
 
                 <td colspan="5"
                     class="sin-registros">
@@ -323,58 +476,75 @@
 
     </div>
 
-    <!-- INFORMACIÓN DE REGISTROS -->
 
-    <p th:if="${!asignaciones.empty}">
+    <!-- ==========================================
+         TOTAL DE REGISTROS
+    ========================================== -->
 
+    <p>
         Total de registros:
 
         <strong th:text="${asignaciones.totalElements}">
             0
         </strong>
-
     </p>
 
-    <!-- PAGINACIÓN -->
+
+    <!-- ==========================================
+         PAGINACIÓN CORREGIDA
+
+         Se calculan primero las páginas.
+         Los enlaces utilizan variables simples
+         para evitar problemas del editor.
+    ========================================== -->
 
     <div class="paginacion"
-         th:if="${asignaciones.totalPages > 1}">
+         th:if="${asignaciones.totalPages > 1}"
+         th:with="anterior=${asignaciones.number - 1}, siguiente=${asignaciones.number + 1}">
+
+        <!-- BOTÓN ANTERIOR -->
 
         <a class="boton"
            th:if="${asignaciones.hasPrevious()}"
-           th:href="@{/branch-specialty(
-                    pagina=${asignaciones.number - 1},
-                    tamanio=${asignaciones.size},
-                    buscar=${buscar}
-                 )}">
+           th:href="@{/branch-specialty(pagina=${anterior},tamanio=${tamanio},buscar=${buscar})}">
+
             Anterior
+
         </a>
 
+
+        <!-- INFORMACIÓN DE PÁGINA -->
+
         <span>
+
             Página
+
             <strong th:text="${asignaciones.number + 1}">
                 1
             </strong>
+
             de
+
             <strong th:text="${asignaciones.totalPages}">
                 1
             </strong>
+
         </span>
+
+
+        <!-- BOTÓN SIGUIENTE -->
 
         <a class="boton"
            th:if="${asignaciones.hasNext()}"
-           th:href="@{/branch-specialty(
-                    pagina=${asignaciones.number + 1},
-                    tamanio=${asignaciones.size},
-                    buscar=${buscar}
-                 )}">
+           th:href="@{/branch-specialty(pagina=${siguiente},tamanio=${tamanio},buscar=${buscar})}">
+
             Siguiente
+
         </a>
 
     </div>
 
-</div>
+</main>
 
 </body>
 </html>
-

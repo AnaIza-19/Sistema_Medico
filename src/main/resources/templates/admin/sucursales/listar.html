@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catálogo de Sucursales | CU-14</title>
+    <style>
+        *{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#f3f6fa;margin:0;color:#203047}
+        main{max-width:1200px;margin:30px auto;padding:30px;background:white;border-radius:12px;box-shadow:0 3px 16px #17365d12}
+        h1{color:#17365d}.fila{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:20px 0}
+        a.btn,button.btn{border:0;border-radius:6px;padding:11px 14px;background:#1976d2;color:white;text-decoration:none;cursor:pointer;font-size:14px}
+        .btn.gris{background:#697681}.btn.rojo{background:#c73543}.btn.verde{background:#16804a}.btn.chico{padding:8px 11px}
+        input,select{padding:10px;border:1px solid #bac4d0;border-radius:6px;max-width:100%}
+        .tabla{overflow:auto}table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:12px;border:1px solid #dce2eb;text-align:left}
+        th{background:#17365d;color:#fff}tr:nth-child(even){background:#f4f7fa}td form{display:inline}.exito,.error{padding:12px;border-radius:6px;margin:14px 0}.exito{background:#e1f5e7;color:#135c2c}.error{background:#fbe3e5;color:#92252c}
+        .activo{color:green;font-weight:bold}.inactivo{color:#c73543;font-weight:bold}
+        @media(max-width:650px){main{margin:12px;padding:17px}}
+    </style>
+</head>
+<body><main>
+    <h1>CU-14: Administración de Sucursales</h1>
+    <p>Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <div class="fila">
+        <a class="btn" th:href="@{/admin/sucursales/crear}">+ Crear sucursal</a>
+        <a class="btn gris" th:href="@{/admin/usuarios}">Volver al panel administrativo</a>
+        <a class="btn gris" th:href="@{/branch-specialty}">Especialidades por Sede</a>
+        <a class="btn gris" th:href="@{/}">← Volver al inicio</a>
+    </div>
+    <div class="exito" th:if="${mensajeExito}" th:text="${mensajeExito}"></div>
+    <div class="error" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <form class="fila" method="get" th:action="@{/admin/sucursales}">
+        <label for="buscar">Buscar por nombre:</label>
+        <input id="buscar" name="buscar" placeholder="Nombre de sucursal" th:value="${buscar}" maxlength="100">
+        <label for="tamanio">Mostrar:</label>
+        <select name="tamanio" id="tamanio"><option value="10" th:selected="${tamanio == 10}">10</option><option value="25" th:selected="${tamanio == 25}">25</option><option value="50" th:selected="${tamanio == 50}">50</option></select>
+        <input type="hidden" name="pagina" value="0">
+        <button class="btn" type="submit">Buscar</button>
+        <a class="btn gris" th:href="@{/admin/sucursales}">Limpiar</a>
+    </form>
+    <div class="tabla"><table><thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Dirección</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+    <tr th:each="s : ${sucursales.content}">
+        <td th:text="${s.id}">1</td><td th:text="${s.nombre}">Hospital Central</td>
+        <td th:text="${s.telefono != null ? s.telefono : 'Sin registrar'}">—</td>
+        <td th:text="${s.direccion != null ? s.direccion : 'Sin registrar'}">—</td>
+        <td th:text="${s.descripcion != null ? s.descripcion : 'Sin registrar'}">—</td>
+        <td><span class="activo" th:if="${s.activo}">Activo</span><span class="inactivo" th:unless="${s.activo}">Inactivo</span></td>
+        <td>
+            <a class="btn chico" th:href="@{/admin/sucursales/editar/{id}(id=${s.id})}">Editar</a>
+            <form th:if="${s.activo}" method="post" th:action="@{/admin/sucursales/desactivar/{id}(id=${s.id})}" onsubmit="return confirm('¿Desactivar esta sucursal? Puede afectar opciones disponibles en otros módulos.')"><button class="btn rojo chico" type="submit">Eliminar</button></form>
+            <form th:unless="${s.activo}" method="post" th:action="@{/admin/sucursales/reactivar/{id}(id=${s.id})}" onsubmit="return confirm('¿Reactivar esta sucursal?')"><button class="btn verde chico" type="submit">Reactivar</button></form>
+        </td></tr>
+    <tr th:if="${sucursales.totalElements == 0}"><td colspan="7">No se encontraron sucursales.</td></tr>
+    </tbody></table></div>
+    <div class="fila" style="justify-content:space-between">
+        <div>Total de registros: <strong th:text="${sucursales.totalElements}">0</strong></div>
+        <div>
+            <a class="btn chico" th:if="${sucursales.hasPrevious()}" th:href="@{/admin/sucursales(buscar=${buscar},tamanio=${tamanio},pagina=${sucursales.number - 1})}">Anterior</a>
+            Página <strong th:text="${sucursales.number + 1}">1</strong> de <strong th:text="${sucursales.totalPages > 0 ? sucursales.totalPages : 1}">1</strong>
+            <a class="btn chico" th:if="${sucursales.hasNext()}" th:href="@{/admin/sucursales(buscar=${buscar},tamanio=${tamanio},pagina=${sucursales.number + 1})}">Siguiente</a>
+        </div></div>
+    <p style="background:#eaf3fc;padding:13px;border-radius:6px">Eliminar desactiva la sucursal sin borrarla físicamente. No desactives las tres sucursales reales durante las pruebas de integración.</p>
+</main></body></html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Editar Estado de Cita | CU-14</title>
+    <style>
+        *{box-sizing:border-box}body{margin:0;background:#f3f6fa;font-family:Arial,sans-serif;color:#202c3a}
+        main{max-width:850px;margin:45px auto;padding:38px;background:white;border-radius:12px;box-shadow:0 3px 18px #0f2a4d16}
+        h1{margin:0 0 20px;color:#17365d}label{display:block;font-weight:bold;margin-bottom:8px}
+        .campo{margin:19px 0}input,textarea{width:100%;padding:12px;border:1px solid #bac4d0;border-radius:6px;font:inherit}
+        input[readonly]{background:#edf1f6;color:#4b5563}textarea{min-height:110px;resize:vertical}
+        .ayuda{font-size:13px;color:#566577;margin-top:6px}
+        .btn{display:inline-block;padding:12px 16px;background:#1976d2;color:white;border:0;border-radius:6px;text-decoration:none;cursor:pointer;font:inherit}
+        .gris{background:#697681}.acciones{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}
+        .nota{padding:12px;background:#eaf3fc;color:#23527c;border-radius:6px}
+        .error{padding:13px;background:#fbe3e5;color:#92252c;border-radius:6px}
+        @media(max-width:720px){main{margin:12px;padding:20px}}
+    </style>
+</head>
+<body>
+<main>
+    <h1>Editar Estado de Cita</h1>
+    <p>Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <p><strong>ID:</strong> <span th:text="${estado.id}">1</span></p>
+    <p class="nota" th:if="${estado.esSistema}">Estado interno protegido: no se podrá desactivar ni cambiar su código.</p>
+    <div class="error" th:if="${mensajeError}" th:text="${mensajeError}" role="alert"></div>
+
+    <form method="post" th:action="@{/admin/estados-cita/editar/{id}(id=${estado.id})}">
+        <div class="campo">
+            <label for="codigo">Código interno (solo lectura)</label>
+            <input id="codigo" type="text" th:value="${estado.codigo}" readonly>
+            <div class="ayuda">El código utilizado por otros módulos nunca debe cambiarse.</div>
+        </div>
+        <div class="campo">
+            <label for="nombre">Nombre visible *</label>
+            <input id="nombre" name="nombre" required maxlength="100" th:value="${estado.nombre}">
+        </div>
+        <div class="campo">
+            <label for="descripcion">Descripción</label>
+            <textarea id="descripcion" name="descripcion" maxlength="500" th:text="${estado.descripcion}"></textarea>
+        </div>
+        <div class="acciones">
+            <button class="btn" type="submit">Guardar cambios</button>
+            <a class="btn gris" th:href="@{/admin/estados-cita}">Cancelar / Volver</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

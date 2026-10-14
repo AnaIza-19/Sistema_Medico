@@ -1,0 +1,16 @@
+<!DOCTYPE html><html lang="es" xmlns:th="http://www.thymeleaf.org"><head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Editar Sucursal | CU-14</title>
+    <style>*{box-sizing:border-box}body{margin:0;background:#f3f6fa;font-family:Arial,sans-serif;color:#233449}main{max-width:770px;background:white;margin:35px auto;padding:30px;border-radius:12px;box-shadow:0 3px 16px #17365d14}h1{color:#17365d}label{font-weight:bold;display:block;margin:18px 0 7px}input,textarea{width:100%;padding:12px;border:1px solid #bac4d0;border-radius:6px;font:inherit}textarea{min-height:100px;resize:vertical}.btn{display:inline-block;padding:12px 17px;border:0;border-radius:6px;background:#1976d2;color:white;text-decoration:none;cursor:pointer;font-size:14px}.gris{background:#697681}.botones{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}.error{background:#fbe3e5;color:#92252c;padding:12px;border-radius:6px}@media(max-width:650px){main{margin:12px;padding:18px}}</style></head>
+<body><main>
+    <h1>Editar Sucursal</h1><p>Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <p>ID: <strong th:text="${sucursal.id}">1</strong></p>
+    <div class="error" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <form method="post" th:action="@{/admin/sucursales/editar/{id}(id=${sucursal.id})}">
+        <label for="nombre">Nombre *</label><input id="nombre" name="nombre" th:value="${sucursal.nombre}" required maxlength="100">
+        <label for="telefono">Teléfono (8 dígitos) *</label><input id="telefono" name="telefono" th:value="${sucursal.telefono}" required maxlength="8" minlength="8" inputmode="numeric" pattern="[0-9]{8}">
+        <label for="direccion">Dirección *</label><input id="direccion" name="direccion" th:value="${sucursal.direccion}" required maxlength="255">
+        <label for="descripcion">Descripción *</label><textarea id="descripcion" name="descripcion" th:text="${sucursal.descripcion}" required maxlength="500"></textarea>
+        <p style="color:#697681;font-size:13px">Los registros antiguos pueden tener teléfono, dirección y descripción vacíos; complétalos al editar.</p>
+        <div class="botones"><button class="btn" type="submit">Guardar cambios</button><a class="btn gris" th:href="@{/admin/sucursales}">Cancelar / Volver</a></div>
+    </form></main></body></html>

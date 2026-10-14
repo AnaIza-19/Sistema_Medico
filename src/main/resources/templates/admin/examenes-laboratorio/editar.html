@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Examen | CU-14</title>
+    <link rel="stylesheet" th:href="@{/css/cu14-examenes.css}" href="/css/cu14-examenes.css"></head>
+<body><main class="contenedor form-contenedor">
+    <h1>Editar Examen de Laboratorio</h1>
+    <p class="subtitulo">Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <p>Registro ID: <strong th:text="${examen.id}">1</strong></p>
+    <div class="alerta error" role="alert" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <form method="post" th:action="@{/admin/examenes-laboratorio/editar/{id}(id=${examen.id})}">
+        <div class="campo"><label for="nombre">Nombre <span class="obligatorio">*</span></label>
+            <input id="nombre" name="nombre" maxlength="200" th:value="${examen.nombre}" required></div>
+        <div class="campo"><label for="laboratorioId">Laboratorio <span class="obligatorio">*</span></label>
+            <select id="laboratorioId" name="laboratorioId" required>
+                <option value="">-- Seleccione laboratorio activo --</option>
+                <option th:each="lab : ${laboratorios}" th:value="${lab.id}" th:text="${lab.nombre}"
+                        th:selected="${examen.laboratorio != null and examen.laboratorio.id == lab.id}">Laboratorio</option>
+            </select><span class="ayuda">Si este examen es histórico y figura sin laboratorio, seleccione uno activo para actualizarlo.</span></div>
+        <div class="campo"><label for="descripcion">Descripción (opcional)</label>
+            <textarea id="descripcion" name="descripcion" maxlength="500" th:text="${examen.descripcion}"></textarea></div>
+        <div class="form-dos">
+            <div class="campo"><label for="precio">Precio base (Q) <span class="obligatorio">*</span></label>
+                <input id="precio" name="precio" type="number" min="0.01" max="99999999.99" step="0.01" th:value="${examen.precio}" required></div>
+            <div class="campo"><label for="unidad">Unidad (opcional)</label>
+                <input id="unidad" name="unidad" maxlength="100" th:value="${examen.unidad}"></div>
+        </div>
+        <div class="campo"><label for="rangoReferencia">Rango de referencia (opcional)</label>
+            <input id="rangoReferencia" name="rangoReferencia" maxlength="150" th:value="${examen.rangoReferencia}"></div>
+        <div class="botones"><button type="submit" class="btn">Guardar cambios</button>
+            <a class="btn btn-gris" th:href="@{/admin/examenes-laboratorio}">Cancelar / Volver</a></div>
+    </form></main></body></html>

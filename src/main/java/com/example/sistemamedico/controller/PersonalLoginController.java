@@ -1,3 +1,4 @@
+
 package com.example.sistemamedico.controller;
 
 import com.example.sistemamedico.Repositorio.Usuario_Repositorio;
@@ -25,14 +26,12 @@ public class PersonalLoginController {
             Usuario_Repositorio usuarioRepository
     ) {
 
-        this.usuarioRepository =
-                usuarioRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
 
     // =====================================================
-    // MOSTRAR LOGIN DEL PERSONAL INTERNO
-    // CU-05 / CU-06 / CU-07 / CU-08 / CU-09
+    // MOSTRAR LOGIN DEL PERSONAL HOSPITALARIO
     // =====================================================
 
     @GetMapping("/personal/login")
@@ -56,10 +55,11 @@ public class PersonalLoginController {
             Model model,
 
             HttpSession session
+
     ) {
 
         // =================================================
-        // LIMPIAR USUARIO
+        // LIMPIAR NOMBRE DE USUARIO
         // =================================================
 
         String usuarioLimpio =
@@ -69,7 +69,7 @@ public class PersonalLoginController {
 
 
         // =================================================
-        // BUSCAR USUARIO
+        // BUSCAR USUARIO EN POSTGRESQL
         // =================================================
 
         Optional<Usuario> encontrado =
@@ -80,7 +80,7 @@ public class PersonalLoginController {
 
 
         // =================================================
-        // USUARIO NO EXISTE
+        // VALIDAR USUARIO EXISTENTE
         // =================================================
 
         if (encontrado.isEmpty()) {
@@ -94,21 +94,18 @@ public class PersonalLoginController {
         }
 
 
-        Usuario u =
-                encontrado.get();
+        Usuario u = encontrado.get();
 
 
         // =================================================
-        // CONTRASEÑA INCORRECTA
+        // VALIDAR CONTRASEÑA
+        // SE CONSERVA EL MECANISMO ACTUAL DEL PROYECTO
         // =================================================
 
         if (
                 u.getContrasena() == null
                         ||
-                        !u.getContrasena()
-                                .equals(
-                                        contrasena
-                                )
+                        !u.getContrasena().equals(contrasena)
         ) {
 
             model.addAttribute(
@@ -121,7 +118,7 @@ public class PersonalLoginController {
 
 
         // =================================================
-        // CUENTA INACTIVA
+        // VALIDAR CUENTA ACTIVA
         // =================================================
 
         if (
@@ -140,7 +137,7 @@ public class PersonalLoginController {
 
 
         // =================================================
-        // VALIDAR QUE TENGA ROL
+        // VALIDAR ROL ASIGNADO
         // =================================================
 
         if (u.getRol() == null) {
@@ -154,9 +151,7 @@ public class PersonalLoginController {
         }
 
 
-        String rol =
-                u.getRol()
-                        .getNombre();
+        String rol = u.getRol().getNombre();
 
 
         if (
@@ -175,7 +170,93 @@ public class PersonalLoginController {
 
 
         // =================================================
-        // GUARDAR USUARIO INTERNO EN SESIÓN
+        // DEFINIR DESTINO SEGÚN EL ROL
+        // =================================================
+
+        String destino;
+
+
+        // =================================================
+        // RECEPCIONISTA - CU-05
+        // =================================================
+
+        if ("RECEPCIONISTA".equalsIgnoreCase(rol)) {
+
+            destino = "/recepcion";
+        }
+
+
+        // =================================================
+        // CAJERO - CU-06
+        // =================================================
+
+        else if ("CAJERO".equalsIgnoreCase(rol)) {
+
+            destino = "/caja";
+        }
+
+
+        // =================================================
+        // ENFERMERO - CU-07
+        // =================================================
+
+        else if ("ENFERMERO".equalsIgnoreCase(rol)) {
+
+            destino = "/enfermeria";
+        }
+
+
+        // =================================================
+        // MÉDICO - CU-08
+        // =================================================
+
+        else if ("MEDICO".equalsIgnoreCase(rol)) {
+
+            destino = "/medico";
+        }
+
+
+        // =================================================
+        // LABORATORIO - CU-09
+        // CORRECCIÓN AGREGADA
+        // =================================================
+
+        else if ("LABORATORIO".equalsIgnoreCase(rol)) {
+
+            destino = "/laboratorio";
+        }
+
+
+        // =================================================
+        // FARMACIA
+        // CORRECCIÓN AGREGADA
+        // =================================================
+
+        else if ("FARMACIA".equalsIgnoreCase(rol)) {
+
+            destino = "/farmacia";
+        }
+
+
+        // =================================================
+        // ROL NO AUTORIZADO
+        // =================================================
+
+        else {
+
+            session.removeAttribute("usuarioInterno");
+
+            model.addAttribute(
+                    "error",
+                    "No tiene permisos para acceder a este módulo."
+            );
+
+            return "personal/login";
+        }
+
+
+        // =================================================
+        // INICIAR SESIÓN AUTORIZADA
         // =================================================
 
         session.setAttribute(
@@ -185,96 +266,15 @@ public class PersonalLoginController {
 
 
         // =================================================
-        // RECEPCIONISTA
-        // CU-05
+        // REDIRIGIR AL MÓDULO CORRESPONDIENTE
         // =================================================
 
-        if (
-                "RECEPCIONISTA".equalsIgnoreCase(
-                        rol
-                )
-        ) {
-
-            return "redirect:/recepcion";
-        }
-
-
-        // =================================================
-        // CAJERO
-        // CU-06
-        // =================================================
-
-        if (
-                "CAJERO".equalsIgnoreCase(
-                        rol
-                )
-        ) {
-
-            return "redirect:/caja";
-        }
-
-
-        // =================================================
-        // ENFERMERO
-        // CU-07
-        // =================================================
-
-        if (
-                "ENFERMERO".equalsIgnoreCase(
-                        rol
-                )
-        ) {
-
-            return "redirect:/enfermeria";
-        }
-
-
-        // =================================================
-        // MEDICO
-        // CU-08
-        // =================================================
-
-        if (
-                "MEDICO".equalsIgnoreCase(
-                        rol
-                )
-        ) {
-
-            return "redirect:/medico";
-        }
-
-
-        // =================================================
-        // LABORATORIO
-        // CU-09
-        // =================================================
-
-        if ("FARMACIA".equalsIgnoreCase(rol)) {
-            return "redirect:/farmacia";
-        }
-
-
-        // =================================================
-        // ROL NO AUTORIZADO
-        // =================================================
-
-        session.removeAttribute(
-                "usuarioInterno"
-        );
-
-
-        model.addAttribute(
-                "error",
-                "No tiene permisos para acceder a este módulo."
-        );
-
-
-        return "personal/login";
+        return "redirect:" + destino;
     }
 
 
     // =====================================================
-    // CERRAR SESIÓN DEL PERSONAL INTERNO
+    // CERRAR SESIÓN DEL PERSONAL HOSPITALARIO
     // =====================================================
 
     @GetMapping("/personal/cerrar-sesion")
@@ -285,7 +285,6 @@ public class PersonalLoginController {
         session.removeAttribute(
                 "usuarioInterno"
         );
-
 
         return "redirect:/personal/login";
     }

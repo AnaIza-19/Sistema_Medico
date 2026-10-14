@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Laboratorio | CU-14</title>
+
+    <style>
+        * { box-sizing: border-box; }
+        body { margin:0; font-family: Arial, Helvetica, sans-serif; background:#f3f6fa; color:#233044; }
+        .contenedor { max-width:1180px; margin:34px auto; padding:30px; background:white; border-radius:12px; box-shadow:0 3px 18px rgba(15,42,77,.09); }
+        h1 { margin:0 0 10px; color:#17365d; font-size:29px; }
+        .subtitulo { color:#566577; margin-top:0; }
+        .acciones, .filtros, .paginacion, .acciones-fila, .botones { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .acciones { margin:24px 0; }
+        .btn { display:inline-block; padding:11px 16px; background:#1976d2; color:white; text-decoration:none; border:0; border-radius:6px; cursor:pointer; font-size:14px; font-family:inherit; }
+        .btn:hover { filter:brightness(.92); }
+        .btn-gris { background:#697681; }
+        .btn-rojo { background:#c73543; }
+        .btn-verde { background:#16804a; }
+        .btn-chico { padding:8px 11px; }
+        .filtros { padding:16px; background:#f7f9fc; border-radius:9px; margin:20px 0; }
+        label { font-weight:600; }
+        input, textarea, select { font:inherit; padding:10px 12px; border:1px solid #bac4d0; border-radius:6px; background:white; max-width:100%; }
+        input:focus,textarea:focus,select:focus { outline:2px solid #b7d7fa; border-color:#1976d2; }
+        .tabla-contenedor { overflow-x:auto; }
+        table { border-collapse:collapse; width:100%; margin:18px 0; }
+        th,td { text-align:left; border:1px solid #dce2eb; padding:11px; vertical-align:middle; }
+        th { background:#17365d; color:white; }
+        tbody tr:nth-child(even) { background:#f4f7fa; }
+        .activo { color:#16713b; font-weight:bold; }
+        .inactivo { color:#b22e3a; font-weight:bold; }
+        .acciones-fila form { margin:0; }
+        .alerta { padding:13px 15px; border-radius:6px; margin:16px 0; }
+        .exito { background:#e1f5e7; color:#135c2c; }
+        .error { background:#fbe3e5; color:#92252c; }
+        .paginacion { justify-content:space-between; margin:20px 0; }
+        .pagina-enlaces { display:flex; align-items:center; gap:10px; }
+        .nota { padding:13px; border-radius:7px; background:#eaf3fc; color:#23527c; }
+        .formulario { max-width:790px; margin-top:24px; }
+        .campo { margin:18px 0; }
+        .campo label { display:block; margin-bottom:8px; }
+        .campo input, .campo textarea { width:100%; }
+        .campo textarea { min-height:100px; resize:vertical; }
+        .botones { margin-top:28px; }
+        @media(max-width:750px) { .contenedor { margin:12px; padding:18px; } .filtros > * { width:100%; } h1 { font-size:24px; } }
+    </style>
+
+</head>
+<body>
+<main class="contenedor">
+
+    <h1>Crear Laboratorio</h1>
+    <p class="subtitulo">Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <div class="alerta error" role="alert" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <form class="formulario" method="post" th:action="@{/admin/laboratorios/crear}">
+        <div class="campo"><label for="nombre">Nombre *</label><input id="nombre" name="nombre" type="text" maxlength="150" required placeholder="Nombre del laboratorio"></div>
+        <div class="campo"><label for="telefono">Teléfono (8 dígitos) *</label><input id="telefono" name="telefono" type="text" pattern="[0-9]{8}" maxlength="8" required placeholder="22334455"></div>
+        <div class="campo"><label for="direccion">Dirección *</label><input id="direccion" name="direccion" type="text" maxlength="255" required placeholder="Dirección del laboratorio"></div>
+        <div class="campo"><label for="descripcion">Descripción *</label><textarea id="descripcion" name="descripcion" maxlength="500" required placeholder="Descripción del laboratorio"></textarea></div>
+        <div class="botones"><button class="btn" type="submit">Guardar laboratorio</button><a class="btn btn-gris" th:href="@{/admin/laboratorios}">Cancelar / Volver</a></div>
+    </form>
+
+</main>
+</body>
+</html>

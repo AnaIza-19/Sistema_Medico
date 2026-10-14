@@ -1,3 +1,4 @@
+
 package com.example.sistemamedico.config;
 
 import org.springframework.context.annotation.Bean;
@@ -27,7 +28,6 @@ public class SecurityConfig {
 
                         .requestMatchers(
 
-
                                 // =========================
                                 // PORTAL PÚBLICO - CU-00
                                 // =========================
@@ -35,10 +35,13 @@ public class SecurityConfig {
                                 "/",
                                 "/index.html",
 
+                                // ARCHIVOS ESTÁTICOS
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
+                                "/img/**",
 
+                                // VERIFICACIÓN DE DPI
                                 "/api/verificar-dpi",
 
                                 "/login",
@@ -181,7 +184,6 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
 
                         .ignoringRequestMatchers(
-
 
                                 "/api/verificar-dpi",
 

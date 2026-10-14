@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicamentos | CU-14</title>
+    <link rel="stylesheet" th:href="@{/css/cu14-medicamentos.css}" href="/css/cu14-medicamentos.css">
+</head>
+<body>
+<main class="contenedor">
+    <h1>CU-14: Administración de Medicamentos</h1>
+    <p class="subtitulo">Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <p>Mantenimiento del catálogo de medicamentos. Las recetas, despachos e inventarios históricos se conservan.</p>
+    <nav class="acciones" aria-label="Navegación de medicamentos">
+        <a class="btn" th:href="@{/admin/medicamentos/crear}">+ Crear medicamento</a>
+        <a class="btn btn-gris" th:href="@{/admin/usuarios}">Volver al panel administrativo</a>
+        <a class="btn btn-gris" th:href="@{/}">← Volver al inicio</a>
+    </nav>
+
+    <div class="alerta exito" role="status" th:if="${mensajeExito}" th:text="${mensajeExito}"></div>
+    <div class="alerta error" role="alert" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+
+    <form class="filtros" method="get" th:action="@{/admin/medicamentos}">
+        <label for="buscar">Buscar por nombre:</label>
+        <input id="buscar" name="buscar" type="search" maxlength="150" placeholder="Nombre del medicamento" th:value="${buscar}">
+        <label for="tamanio">Mostrar:</label>
+        <select id="tamanio" name="tamanio">
+            <option value="10" th:selected="${tamanio == 10}">10 registros</option>
+            <option value="25" th:selected="${tamanio == 25}">25 registros</option>
+            <option value="50" th:selected="${tamanio == 50}">50 registros</option>
+        </select>
+        <input type="hidden" name="pagina" value="0">
+        <button class="btn" type="submit">Buscar</button>
+        <a class="btn btn-gris" th:href="@{/admin/medicamentos}">Limpiar</a>
+    </form>
+
+    <div class="tabla-externa">
+        <table>
+            <thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Unidad</th><th>Stock mínimo</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>
+            <tr th:each="m : ${medicamentos.content}">
+                <td th:text="${m.id}">1</td>
+                <td th:text="${m.nombre}">Paracetamol</td>
+                <td>Q <span th:text="${m.precio}">10.00</span></td>
+                <td th:text="${m.unidad != null ? m.unidad : 'Sin registrar'}">Tableta</td>
+                <td th:text="${m.stockMinimo}">10</td>
+                <td>
+                    <span class="estado-activo" th:if="${m.activo}">Activo</span>
+                    <span class="estado-inactivo" th:unless="${m.activo}">Inactivo</span>
+                </td>
+                <td><div class="acciones-fila">
+                    <a class="btn btn-chico" th:href="@{/admin/medicamentos/editar/{id}(id=${m.id})}">Editar</a>
+                    <form method="post" th:if="${m.activo}" th:action="@{/admin/medicamentos/desactivar/{id}(id=${m.id})}"
+                          th:attr="data-nombre=${m.nombre}" onsubmit="return confirmarDesactivacion(this)">
+                        <button class="btn btn-rojo btn-chico" type="submit">Eliminar</button>
+                    </form>
+                    <form method="post" th:unless="${m.activo}" th:action="@{/admin/medicamentos/reactivar/{id}(id=${m.id})}"
+                          onsubmit="return confirm('¿Desea reactivar este medicamento?')">
+                        <button class="btn btn-verde btn-chico" type="submit">Reactivar</button>
+                    </form>
+                </div></td>
+            </tr>
+            <tr th:if="${medicamentos.totalElements == 0}"><td class="sin-datos" colspan="7">No se encontraron medicamentos.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="paginacion">
+        <div>Total de registros: <strong th:text="${medicamentos.totalElements}">0</strong></div>
+        <div>
+            <a class="btn btn-chico" th:if="${medicamentos.hasPrevious()}"
+               th:href="@{/admin/medicamentos(buscar=${buscar},tamanio=${tamanio},pagina=${medicamentos.number - 1})}">Anterior</a>
+            Página <strong th:text="${medicamentos.number + 1}">1</strong> de
+            <strong th:text="${medicamentos.totalPages > 0 ? medicamentos.totalPages : 1}">1</strong>
+            <a class="btn btn-chico" th:if="${medicamentos.hasNext()}"
+               th:href="@{/admin/medicamentos(buscar=${buscar},tamanio=${tamanio},pagina=${medicamentos.number + 1})}">Siguiente</a>
+        </div>
+    </div>
+    <p class="nota">Eliminar desactiva el medicamento; no borra físicamente su registro ni modifica los inventarios o recetas anteriores. Pruebe únicamente con un medicamento nuevo.</p>
+</main>
+<script>
+    function confirmarDesactivacion(formulario) {
+        const nombre = formulario.dataset.nombre || 'este medicamento';
+        return confirm('¿Desea desactivar "' + nombre + '"? No se borrará su historial.');
+    }
+</script>
+</body>
+</html>

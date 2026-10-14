@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org">
 
@@ -11,10 +11,14 @@
           content="width=device-width, initial-scale=1.0">
 
     <title>
-        Acceso de Recepción
+        Acceso al Personal Hospitalario
     </title>
 
     <style>
+
+        /* ==========================================
+           CONFIGURACIÓN GENERAL
+        ========================================== */
 
         * {
             box-sizing: border-box;
@@ -28,80 +32,184 @@
             align-items: center;
             justify-content: center;
 
+            padding: 20px;
+
             font-family: Arial, Helvetica, sans-serif;
 
-            background: #f4f7fb;
+            background:
+                    linear-gradient(
+                            135deg,
+                            #eaf3fb,
+                            #f4f7fb,
+                            #d8eafa
+                    );
         }
+
+        /* ==========================================
+           TARJETA DE INICIO DE SESIÓN
+        ========================================== */
 
         .login-card {
 
             width: 100%;
-            max-width: 470px;
+            max-width: 480px;
 
             background: white;
 
             padding: 40px;
 
-            border-radius: 14px;
+            border-radius: 16px;
 
             box-shadow:
-                    0 5px 20px rgba(0,0,0,0.12);
+                    0 10px 35px rgba(0, 0, 0, 0.12);
+
+            border-top: 6px solid #1261a0;
         }
+
+        /* ==========================================
+           LOGOTIPO DEL HOSPITAL
+        ========================================== */
+
+        .logo-contenedor {
+
+            display: flex;
+            justify-content: center;
+
+            margin-bottom: 20px;
+        }
+
+        .logo-hospital {
+
+            width: 70px;
+            height: 70px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #e7f2fc;
+
+            color: #1261a0;
+
+            border-radius: 18px;
+
+            font-size: 44px;
+            font-weight: bold;
+        }
+
+        /* ==========================================
+           ENCABEZADOS
+        ========================================== */
 
         h1 {
 
             text-align: center;
 
             margin-top: 0;
-
-            margin-bottom: 8px;
+            margin-bottom: 10px;
 
             color: #1261a0;
+
+            font-size: 28px;
         }
 
         .subtitulo {
 
             text-align: center;
 
-            color: #666;
+            color: #64748b;
+
+            margin-bottom: 15px;
+
+            font-size: 16px;
+        }
+
+        .etiqueta-acceso {
+
+            text-align: center;
 
             margin-bottom: 30px;
         }
+
+        .etiqueta-acceso span {
+
+            display: inline-block;
+
+            padding: 9px 16px;
+
+            background: #e7f2fc;
+
+            color: #1261a0;
+
+            border-radius: 25px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+        }
+
+        /* ==========================================
+           FORMULARIO
+        ========================================== */
 
         label {
 
             display: block;
 
             margin-top: 15px;
-            margin-bottom: 7px;
+            margin-bottom: 8px;
+
+            color: #243447;
 
             font-weight: bold;
+
+            font-size: 15px;
         }
 
         input {
 
             width: 100%;
 
-            padding: 12px;
+            padding: 13px;
 
             border: 1px solid #cccccc;
 
-            border-radius: 7px;
+            border-radius: 8px;
 
             font-size: 16px;
+
+            background: #ffffff;
+
+            transition:
+                    border-color 0.2s,
+                    box-shadow 0.2s;
         }
+
+        input:focus {
+
+            outline: none;
+
+            border-color: #1261a0;
+
+            box-shadow:
+                    0 0 0 3px rgba(18, 97, 160, 0.12);
+        }
+
+        /* ==========================================
+           BOTÓN INICIAR SESIÓN
+        ========================================== */
 
         button {
 
             width: 100%;
 
-            margin-top: 25px;
+            margin-top: 28px;
 
-            padding: 13px;
+            padding: 14px;
 
             border: none;
 
-            border-radius: 7px;
+            border-radius: 8px;
 
             background: #1261a0;
 
@@ -112,12 +220,22 @@
             font-weight: bold;
 
             cursor: pointer;
+
+            transition:
+                    background-color 0.2s,
+                    transform 0.2s;
         }
 
         button:hover {
 
-            opacity: 0.92;
+            background: #0d4f85;
+
+            transform: translateY(-1px);
         }
+
+        /* ==========================================
+           MENSAJE DE ERROR
+        ========================================== */
 
         .error {
 
@@ -131,16 +249,37 @@
 
             border: 1px solid #f5c2c7;
 
-            border-radius: 7px;
+            border-radius: 8px;
 
             text-align: center;
 
             font-weight: bold;
         }
 
+        /* ==========================================
+           TEXTO INFORMATIVO
+        ========================================== */
+
+        .informacion {
+
+            text-align: center;
+
+            margin-top: 22px;
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+        }
+
+        /* ==========================================
+           VOLVER AL PORTAL
+        ========================================== */
+
         .regresar {
 
-            margin-top: 20px;
+            margin-top: 22px;
 
             text-align: center;
         }
@@ -148,6 +287,31 @@
         .regresar a {
 
             color: #1261a0;
+
+            text-decoration: none;
+
+            font-weight: bold;
+        }
+
+        .regresar a:hover {
+
+            text-decoration: underline;
+        }
+
+        /* ==========================================
+           RESPONSIVE
+        ========================================== */
+
+        @media (max-width: 600px) {
+
+            .login-card {
+                padding: 28px 22px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
         }
 
     </style>
@@ -158,11 +322,32 @@
 <body>
 
 
-<div class="login-card">
+<!-- ==========================================
+     INICIO DE SESIÓN DEL PERSONAL HOSPITALARIO
+========================================== -->
 
+<main class="login-card">
+
+
+    <!-- ======================================
+         LOGO
+    ====================================== -->
+
+    <div class="logo-contenedor">
+
+        <div class="logo-hospital">
+            +
+        </div>
+
+    </div>
+
+
+    <!-- ======================================
+         TÍTULO CORREGIDO
+    ====================================== -->
 
     <h1>
-        Recepción
+        Acceso al Personal Hospitalario
     </h1>
 
 
@@ -173,11 +358,26 @@
     </div>
 
 
+    <div class="etiqueta-acceso">
+
+        <span>
+            Acceso exclusivo para personal autorizado
+        </span>
+
+    </div>
+
+
+    <!-- ======================================
+         FORMULARIO DE INICIO DE SESIÓN
+    ====================================== -->
+
     <form
             th:action="@{/personal/login}"
             method="post"
     >
 
+
+        <!-- USUARIO -->
 
         <label for="usuario">
             Usuario
@@ -188,10 +388,14 @@
                 id="usuario"
                 type="text"
                 name="usuario"
+                placeholder="Ingrese su nombre de usuario"
                 required
                 autocomplete="username"
+                autofocus
         >
 
+
+        <!-- CONTRASEÑA -->
 
         <label for="contrasena">
             Contraseña
@@ -202,38 +406,73 @@
                 id="contrasena"
                 type="password"
                 name="contrasena"
+                placeholder="Ingrese su contraseña"
                 required
                 autocomplete="current-password"
         >
 
 
+        <!-- BOTÓN INICIAR SESIÓN -->
+
         <button type="submit">
+
             Iniciar Sesión
+
         </button>
 
 
     </form>
 
 
+    <!-- ======================================
+         MENSAJE DE ERROR
+    ====================================== -->
+
     <div
             class="error"
+            role="alert"
             th:if="${error}"
             th:text="${error}"
     >
-        Error
+
+        Error de inicio de sesión
+
     </div>
 
+
+    <!-- ======================================
+         INFORMACIÓN DE ACCESO
+    ====================================== -->
+
+    <div class="informacion">
+
+        Acceso para personal de Recepción, Caja,
+        Enfermería, Medicina, Laboratorio y Farmacia.
+
+        <p>
+            El sistema identificará su rol
+            y lo dirigirá al módulo correspondiente.
+        </p>
+
+    </div>
+
+
+    <!-- ======================================
+         REGRESAR AL PORTAL
+    ====================================== -->
 
     <div class="regresar">
 
         <a th:href="@{/}">
-            Regresar al portal
+
+            ← Regresar al portal principal
+
         </a>
 
     </div>
 
 
-</div>
+</main>
 
 
 </body>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Estados de Cita | CU-14</title>
+    <style>
+        *{box-sizing:border-box}
+        body{margin:0;background:#f3f6fa;font-family:Arial,sans-serif;color:#202c3a}
+        main{max-width:1200px;margin:35px auto;padding:30px;background:#fff;border-radius:12px;box-shadow:0 3px 18px #0f2a4d16}
+        h1{margin:0 0 12px;color:#17365d}
+        .navegacion,.filtros,.acciones{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+        .navegacion{margin:24px 0}
+        .filtros{padding:18px;background:#f6f8fb;border-radius:8px;margin-bottom:24px}
+        .btn{display:inline-block;padding:10px 14px;background:#1976d2;color:#fff;border:0;border-radius:6px;text-decoration:none;font-size:14px;cursor:pointer}
+        .btn:hover{filter:brightness(.92)}
+        .gris{background:#697681}.rojo{background:#c73543}.verde{background:#16804a}.pequeno{padding:8px 11px}
+        input,select{padding:10px;border:1px solid #bac4d0;border-radius:6px;font:inherit;max-width:100%}
+        .alerta{padding:13px 15px;border-radius:6px;margin:15px 0}.exito{background:#e1f5e7;color:#135c2c}.error{background:#fbe3e5;color:#92252c}
+        .tabla{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{border:1px solid #dce2eb;padding:12px;text-align:left;vertical-align:middle}th{background:#17365d;color:#fff}tr:nth-child(even) td{background:#f4f7fa}
+        .activo{color:#16713b;font-weight:bold}.inactivo{color:#b22e3a;font-weight:bold}
+        .protegido{color:#23527c;font-weight:bold}.acciones form{margin:0}
+        .paginacion{margin-top:20px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+        .nota{padding:13px;border-radius:7px;background:#eaf3fc;color:#23527c}
+        @media(max-width:750px){main{margin:12px;padding:18px}.filtros>*{width:100%}}
+    </style>
+</head>
+<body>
+<main>
+    <h1>CU-14: Administración de Estados de Cita</h1>
+    <p>Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <p>Gestiona el catálogo de estados sin cambiar los códigos internos utilizados por el hospital.</p>
+
+    <nav class="navegacion" aria-label="Navegación administrativa">
+        <a class="btn" th:href="@{/admin/estados-cita/crear}">+ Crear estado</a>
+        <a class="btn gris" th:href="@{/admin/usuarios}">Volver al panel administrativo</a>
+        <a class="btn gris" th:href="@{/admin/especialidades}">Especialidades</a>
+        <a class="btn gris" th:href="@{/admin/sucursales}">Sucursales</a>
+        <a class="btn gris" th:href="@{/}">← Volver al inicio</a>
+    </nav>
+
+    <div class="alerta exito" th:if="${mensajeExito}" th:text="${mensajeExito}" role="status"></div>
+    <div class="alerta error" th:if="${mensajeError}" th:text="${mensajeError}" role="alert"></div>
+
+    <form class="filtros" method="get" th:action="@{/admin/estados-cita}">
+        <label for="buscar">Buscar por nombre:</label>
+        <input id="buscar" type="search" name="buscar" maxlength="100" placeholder="Ej. Confirmada" th:value="${buscar}">
+        <label for="tamanio">Mostrar:</label>
+        <select id="tamanio" name="tamanio">
+            <option value="10" th:selected="${tamanio == 10}">10</option>
+            <option value="25" th:selected="${tamanio == 25}">25</option>
+            <option value="50" th:selected="${tamanio == 50}">50</option>
+        </select>
+        <input type="hidden" name="pagina" value="0">
+        <button type="submit" class="btn">Buscar</button>
+        <a class="btn gris" th:href="@{/admin/estados-cita}">Limpiar</a>
+    </form>
+
+    <div class="tabla">
+        <table>
+            <thead>
+            <tr><th>ID</th><th>Código</th><th>Nombre</th><th>Descripción</th><th>Estado</th><th>Tipo</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="estado : ${estados.content}">
+                <td th:text="${estado.id}">1</td>
+                <td><code th:text="${estado.codigo}">PENDIENTE_PAGO</code></td>
+                <td th:text="${estado.nombre}">Pendiente de pago</td>
+                <td th:text="${estado.descripcion != null ? estado.descripcion : 'Sin descripción'}">Sin descripción</td>
+                <td>
+                    <span class="activo" th:if="${estado.activo}">Activo</span>
+                    <span class="inactivo" th:unless="${estado.activo}">Inactivo</span>
+                </td>
+                <td>
+                    <span class="protegido" th:if="${estado.esSistema}">Interno / protegido</span>
+                    <span th:unless="${estado.esSistema}">Personalizado</span>
+                </td>
+                <td>
+                    <div class="acciones">
+                        <a class="btn pequeno" th:href="@{/admin/estados-cita/editar/{id}(id=${estado.id})}">Editar</a>
+                        <form method="post" th:if="${!estado.esSistema and estado.activo}"
+                              th:action="@{/admin/estados-cita/desactivar/{id}(id=${estado.id})}"
+                              onsubmit="return confirm('¿Desactivar este estado de cita?');">
+                            <button type="submit" class="btn rojo pequeno">Eliminar</button>
+                        </form>
+                        <form method="post" th:if="${!estado.esSistema and !estado.activo}"
+                              th:action="@{/admin/estados-cita/reactivar/{id}(id=${estado.id})}"
+                              onsubmit="return confirm('¿Reactivar este estado de cita?');">
+                            <button type="submit" class="btn verde pequeno">Reactivar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${estados.totalElements == 0}">
+                <td colspan="7" style="text-align:center;padding:25px">No se encontraron estados de cita.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="paginacion">
+        <div>Total de registros: <strong th:text="${estados.totalElements}">0</strong></div>
+        <div class="acciones">
+            <a class="btn pequeno" th:if="${estados.hasPrevious()}"
+               th:href="@{/admin/estados-cita(buscar=${buscar},tamanio=${tamanio},pagina=${estados.number - 1})}">Anterior</a>
+            <span>Página <strong th:text="${estados.number + 1}">1</strong>
+                de <strong th:text="${estados.totalPages == 0 ? 1 : estados.totalPages}">1</strong></span>
+            <a class="btn pequeno" th:if="${estados.hasNext()}"
+               th:href="@{/admin/estados-cita(buscar=${buscar},tamanio=${tamanio},pagina=${estados.number + 1})}">Siguiente</a>
+        </div>
+    </div>
+    <p class="nota">Los estados internos no pueden desactivarse ni cambiar de código. Eliminar es una desactivación lógica y no modifica las citas existentes. Los estados nuevos no cambian automáticamente el flujo clínico.</p>
+</main>
+</body>
+</html>

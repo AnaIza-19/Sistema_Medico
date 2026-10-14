@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org">
 
@@ -10,24 +10,127 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>
-        Sistema Médico Hospitalario
-    </title>
+    <title>Sistema Médico Hospitalario</title>
 
-    <link
-            rel="stylesheet"
-            href="/css/estilos.css"
-    >
+    <!-- CSS ORIGINAL DEL SISTEMA -->
+    <link rel="stylesheet"
+          th:href="@{/css/estilos.css}"
+          href="/css/estilos.css">
+
+    <!-- MEJORAS VISUALES DEL PORTAL -->
+    <style>
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ==========================================
+           IMAGEN DE FONDO DEL HOSPITAL
+        ========================================== */
+
+        .principal {
+            background-image:
+                    linear-gradient(
+                            110deg,
+                            rgba(5, 42, 79, 0.88),
+                            rgba(5, 96, 143, 0.70)
+                    ),
+                    url('/img/fondo-hospital.jpeg') !important;
+
+            background-position: center center !important;
+            background-size: cover !important;
+            background-repeat: no-repeat !important;
+            min-height: 620px;
+        }
+
+        .principal .contenido-principal {
+            position: relative;
+            z-index: 2;
+        }
+
+        .principal h2,
+        .principal p,
+        .principal .descripcion-principal {
+            color: #ffffff;
+            text-shadow: 0 2px 9px rgba(0,0,0,0.28);
+        }
+
+        /* ==========================================
+           TARJETAS DE LOS MÓDULOS
+        ========================================== */
+
+        .tarjeta-acceso {
+            border: 1px solid rgba(20,95,145,0.09);
+
+            box-shadow:
+                    0 10px 28px rgba(18,52,80,0.09);
+
+            transition:
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease;
+        }
+
+        .tarjeta-acceso:hover {
+            transform: translateY(-4px);
+
+            box-shadow:
+                    0 15px 34px rgba(18,52,80,0.15);
+        }
+
+        /* ==========================================
+           BOTÓN VOLVER AL INICIO
+        ========================================== */
+
+        .contenedor-volver-inicio {
+            text-align: center;
+            margin-top: 35px;
+        }
+
+        .boton-volver-inicio {
+            display: inline-block;
+            padding: 13px 25px;
+            border-radius: 8px;
+            background-color: #1976d2;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+
+            transition:
+                    background-color 0.3s ease;
+        }
+
+        .boton-volver-inicio:hover,
+        .boton-volver-inicio:focus-visible {
+            background-color: #125aa0;
+            color: #ffffff;
+        }
+
+        /* ==========================================
+           AJUSTES PARA CELULARES
+        ========================================== */
+
+        @media (max-width: 768px) {
+
+            .principal {
+                min-height: 520px;
+                background-position: center !important;
+            }
+
+            .tarjeta-acceso:hover {
+                transform: none;
+            }
+        }
+
+    </style>
 
 </head>
 
-
 <body>
 
-
-<!-- ================================================= -->
-<!-- ENCABEZADO PRINCIPAL                              -->
-<!-- ================================================= -->
+<!-- ==========================================
+     ENCABEZADO PRINCIPAL
+========================================== -->
 
 <header class="encabezado">
 
@@ -53,6 +156,7 @@
 
         </div>
 
+        <!-- MENÚ SUPERIOR -->
 
         <nav>
 
@@ -86,59 +190,59 @@
 
 </header>
 
-
 <main>
 
+    <!-- ==========================================
+         PORTADA PRINCIPAL
+         CON IMAGEN DE FONDO
+    ========================================== -->
 
-    <!-- ================================================= -->
-    <!-- PRESENTACIÓN PRINCIPAL                            -->
-    <!-- ================================================= -->
-
-    <section
-            id="inicio"
-            class="principal"
-    >
+    <section id="inicio"
+             class="principal">
 
         <div class="contenido-principal">
 
             <div class="etiqueta-principal">
-                Sistema de Atención Hospitalaria
-            </div>
 
+                Sistema de Atención Hospitalaria
+
+            </div>
 
             <h2>
                 Bienvenido al Sistema Médico Hospitalario
             </h2>
 
-
             <p>
-                Atención médica, gestión de citas y servicios
-                hospitalarios en un solo lugar.
+                Atención médica, gestión de citas y
+                servicios hospitalarios en un solo lugar.
             </p>
-
 
             <p class="descripcion-principal">
-                Nuestro sistema permite a pacientes y personal
-                hospitalario realizar sus procesos de forma
-                rápida, segura y organizada.
+
+                Nuestro sistema permite a pacientes y
+                personal hospitalario realizar sus procesos
+                de forma rápida, segura y organizada.
+
             </p>
 
+            <!-- BOTONES DE LA PORTADA -->
 
             <div class="botones-principal">
 
                 <button
                         id="btnAgendar"
                         class="boton-principal"
-                >
+                        type="button">
+
                     Agendar una Cita
+
                 </button>
 
+                <a href="#accesos"
+                   class="boton-portada-secundario">
 
-                <a
-                        href="#accesos"
-                        class="boton-portada-secundario"
-                >
                     Acceder al Sistema
+
                 </a>
 
             </div>
@@ -147,15 +251,12 @@
 
     </section>
 
+    <!-- ==========================================
+         ACCESO A LOS MÓDULOS DEL HOSPITAL
+    ========================================== -->
 
-    <!-- ================================================= -->
-    <!-- ACCESOS PRINCIPALES                               -->
-    <!-- ================================================= -->
-
-    <section
-            id="accesos"
-            class="seccion accesos-sistema"
-    >
+    <section id="accesos"
+             class="seccion accesos-sistema">
 
         <div class="titulo-seccion">
 
@@ -168,19 +269,17 @@
             </h2>
 
             <p>
-                Seleccione el módulo correspondiente para
-                continuar.
+                Seleccione el módulo correspondiente
+                para continuar.
             </p>
 
         </div>
 
-
         <div class="grid-accesos">
 
-
-            <!-- ============================================= -->
-            <!-- PACIENTE                                     -->
-            <!-- ============================================= -->
+            <!-- ==================================
+                 1. PORTAL DEL PACIENTE
+            ================================== -->
 
             <article class="tarjeta-acceso">
 
@@ -188,52 +287,39 @@
                     👤
                 </div>
 
-
                 <h3>
                     Portal del Paciente
                 </h3>
 
-
                 <p>
-                    Ingrese a su cuenta para consultar y
-                    gestionar sus servicios médicos.
+                    Ingrese a su cuenta para consultar
+                    y gestionar sus servicios médicos.
                 </p>
-
 
                 <div class="funciones-acceso">
 
-                    <span>
-                        ✓ Inicio de sesión
-                    </span>
+                    <span>✓ Inicio de sesión</span>
 
-                    <span>
-                        ✓ Agendamiento de citas
-                    </span>
+                    <span>✓ Agendamiento de citas</span>
 
-                    <span>
-                        ✓ Consulta de citas
-                    </span>
+                    <span>✓ Consulta de citas</span>
 
-                    <span>
-                        ✓ Pago de consulta
-                    </span>
+                    <span>✓ Pago de consulta</span>
 
                 </div>
 
+                <a th:href="@{/login}"
+                   class="boton-acceso">
 
-                <a
-                        th:href="@{/login}"
-                        class="boton-acceso"
-                >
                     Ingresar como Paciente
+
                 </a>
 
             </article>
 
-
-            <!-- ============================================= -->
-            <!-- RECEPCIÓN                                    -->
-            <!-- ============================================= -->
+            <!-- ==================================
+                 2. RECEPCIÓN
+            ================================== -->
 
             <article class="tarjeta-acceso">
 
@@ -241,52 +327,40 @@
                     🏥
                 </div>
 
-
                 <h3>
                     Recepción
                 </h3>
 
-
                 <p>
-                    Acceso para personal encargado de la
-                    recepción y atención inicial del paciente.
+                    Acceso para el personal encargado
+                    de la recepción y atención inicial
+                    del paciente.
                 </p>
-
 
                 <div class="funciones-acceso">
 
-                    <span>
-                        ✓ Verificar citas
-                    </span>
+                    <span>✓ Verificar citas</span>
 
-                    <span>
-                        ✓ Buscar por DPI
-                    </span>
+                    <span>✓ Buscar por DPI</span>
 
-                    <span>
-                        ✓ Registrar citas Walk-in
-                    </span>
+                    <span>✓ Registrar citas Walk-in</span>
 
-                    <span>
-                        ✓ Atención de emergencias
-                    </span>
+                    <span>✓ Atención de emergencias</span>
 
                 </div>
 
+                <a th:href="@{/personal/login}"
+                   class="boton-acceso">
 
-                <a
-                        th:href="@{/personal/login}"
-                        class="boton-acceso"
-                >
                     Ingresar a Recepción
+
                 </a>
 
             </article>
 
-
-            <!-- ============================================= -->
-            <!-- CAJA                                         -->
-            <!-- ============================================= -->
+            <!-- ==================================
+                 3. CAJA
+            ================================== -->
 
             <article class="tarjeta-acceso">
 
@@ -294,52 +368,40 @@
                     💳
                 </div>
 
-
                 <h3>
                     Caja
                 </h3>
 
-
                 <p>
-                    Módulo destinado al registro y control
-                    de los pagos de las consultas médicas.
+                    Módulo destinado al registro y
+                    control de los pagos de las
+                    consultas médicas.
                 </p>
-
 
                 <div class="funciones-acceso">
 
-                    <span>
-                        ✓ Buscar citas pendientes
-                    </span>
+                    <span>✓ Buscar citas pendientes</span>
 
-                    <span>
-                        ✓ Cobro en efectivo
-                    </span>
+                    <span>✓ Cobro en efectivo</span>
 
-                    <span>
-                        ✓ Pago con tarjeta
-                    </span>
+                    <span>✓ Pago con tarjeta</span>
 
-                    <span>
-                        ✓ Generar comprobantes
-                    </span>
+                    <span>✓ Generar comprobantes</span>
 
                 </div>
 
+                <a th:href="@{/personal/login}"
+                   class="boton-acceso">
 
-                <a
-                        th:href="@{/personal/login}"
-                        class="boton-acceso"
-                >
                     Ingresar a Caja
+
                 </a>
 
             </article>
 
-
-            <!-- ============================================= -->
-            <!-- ENFERMERÍA - CU-07                           -->
-            <!-- ============================================= -->
+            <!-- ==================================
+                 4. ENFERMERÍA
+            ================================== -->
 
             <article class="tarjeta-acceso">
 
@@ -347,52 +409,146 @@
                     🩺
                 </div>
 
-
                 <h3>
                     Enfermería
                 </h3>
 
-
                 <p>
-                    Acceso para el personal encargado de la
-                    toma y registro de signos vitales.
+                    Acceso para el personal encargado
+                    de la toma y registro de
+                    signos vitales.
                 </p>
-
 
                 <div class="funciones-acceso">
 
-                    <span>
-                        ✓ Ver pacientes presentes
-                    </span>
+                    <span>✓ Ver pacientes presentes</span>
 
-                    <span>
-                        ✓ Llamar pacientes por turno
-                    </span>
+                    <span>✓ Llamar pacientes por turno</span>
 
-                    <span>
-                        ✓ Registrar signos vitales
-                    </span>
+                    <span>✓ Registrar signos vitales</span>
 
-                    <span>
-                        ✓ Detectar alertas clínicas
-                    </span>
+                    <span>✓ Detectar alertas clínicas</span>
 
                 </div>
 
+                <a th:href="@{/personal/login}"
+                   class="boton-acceso">
 
-                <a
-                        th:href="@{/personal/login}"
-                        class="boton-acceso"
-                >
                     Ingresar a Enfermería
+
                 </a>
 
             </article>
 
+            <!-- ==================================
+                 5. LABORATORIO
+                 NUEVO ACCESO PRINCIPAL
+            ================================== -->
 
-            <!-- ============================================= -->
-            <!-- ADMINISTRACIÓN                               -->
-            <!-- ============================================= -->
+            <article class="tarjeta-acceso">
+
+                <div class="icono-acceso">
+                    🧪
+                </div>
+
+                <h3>
+                    Laboratorio
+                </h3>
+
+                <p>
+                    Acceso para el personal encargado
+                    de gestionar las órdenes de
+                    laboratorio y los resultados
+                    de los exámenes médicos.
+                </p>
+
+                <div class="funciones-acceso">
+
+                    <span>
+                        ✓ Consultar órdenes de laboratorio
+                    </span>
+
+                    <span>
+                        ✓ Revisar exámenes solicitados
+                    </span>
+
+                    <span>
+                        ✓ Registrar resultados
+                    </span>
+
+                    <span>
+                        ✓ Consultar el seguimiento de órdenes
+                    </span>
+
+                </div>
+
+                <!-- INGRESO DEL PERSONAL -->
+
+                <a th:href="@{/personal/login}"
+                   class="boton-acceso">
+
+                    Ingresar a Laboratorio
+
+                </a>
+
+            </article>
+
+            <!-- ==================================
+                 6. FARMACIA
+                 NUEVO ACCESO PRINCIPAL
+            ================================== -->
+
+            <article class="tarjeta-acceso">
+
+                <div class="icono-acceso">
+                    💊
+                </div>
+
+                <h3>
+                    Farmacia
+                </h3>
+
+                <p>
+                    Acceso para el personal encargado
+                    de consultar recetas médicas,
+                    verificar medicamentos y realizar
+                    los despachos correspondientes.
+                </p>
+
+                <div class="funciones-acceso">
+
+                    <span>
+                        ✓ Consultar recetas médicas
+                    </span>
+
+                    <span>
+                        ✓ Verificar existencias por sucursal
+                    </span>
+
+                    <span>
+                        ✓ Despachar medicamentos
+                    </span>
+
+                    <span>
+                        ✓ Consultar movimientos de farmacia
+                    </span>
+
+                </div>
+
+                <!-- INGRESO DEL PERSONAL -->
+
+                <a th:href="@{/personal/login}"
+                   class="boton-acceso">
+
+                    Ingresar a Farmacia
+
+                </a>
+
+            </article>
+
+            <!-- ==================================
+                 7. ADMINISTRACIÓN
+            ================================== -->
 
             <article class="tarjeta-acceso">
 
@@ -400,17 +556,15 @@
                     ⚙️
                 </div>
 
-
                 <h3>
                     Administración
                 </h3>
 
-
                 <p>
-                    Acceso exclusivo para la administración
-                    y configuración del sistema hospitalario.
+                    Acceso exclusivo para la
+                    administración y configuración
+                    del sistema hospitalario.
                 </p>
-
 
                 <div class="funciones-acceso">
 
@@ -427,30 +581,27 @@
                     </span>
 
                     <span>
-                        ✓ Gestión administrativa
+                        ✓ Gestión de los catálogos del hospital
                     </span>
 
                 </div>
 
+                <a th:href="@{/admin/login}"
+                   class="boton-acceso">
 
-                <a
-                        th:href="@{/admin/login}"
-                        class="boton-acceso"
-                >
                     Ingresar como Administrador
+
                 </a>
 
             </article>
-
 
         </div>
 
     </section>
 
-
-    <!-- ================================================= -->
-    <!-- ACCESO RÁPIDO PARA PACIENTES                      -->
-    <!-- ================================================= -->
+    <!-- ==========================================
+         ACCESO RÁPIDO PARA PACIENTES
+    ========================================== -->
 
     <section class="seccion franja-paciente">
 
@@ -467,35 +618,33 @@
                 </h2>
 
                 <p>
-                    Verifique su DPI y continúe con el proceso
-                    de registro o agendamiento de su cita.
+                    Verifique su DPI y continúe con
+                    el proceso de registro o
+                    agendamiento de su cita.
                 </p>
 
             </div>
-
 
             <button
                     id="btnAgendarSecundario"
                     class="boton-franja"
                     type="button"
-                    onclick="document.getElementById('btnAgendar').click();"
-            >
+                    onclick="document.getElementById('btnAgendar').click();">
+
                 Verificar DPI
+
             </button>
 
         </div>
 
     </section>
 
+    <!-- ==========================================
+         SERVICIOS HOSPITALARIOS
+    ========================================== -->
 
-    <!-- ================================================= -->
-    <!-- SERVICIOS                                         -->
-    <!-- ================================================= -->
-
-    <section
-            id="servicios"
-            class="seccion"
-    >
+    <section id="servicios"
+             class="seccion">
 
         <div class="titulo-seccion">
 
@@ -508,19 +657,19 @@
             </h2>
 
             <p>
-                Conozca algunos de los servicios disponibles
-                dentro de nuestro sistema hospitalario.
+                Conozca algunos de los servicios
+                disponibles dentro de nuestro
+                sistema hospitalario.
             </p>
 
         </div>
 
+        <!-- INFORMACIÓN CARGADA DESDE SPRING BOOT -->
 
         <div class="tarjetas">
 
-            <div
-                    class="tarjeta"
-                    th:each="servicio : ${servicios}"
-            >
+            <div class="tarjeta"
+                 th:each="servicio : ${servicios}">
 
                 <div class="icono-servicio">
                     ✚
@@ -536,15 +685,12 @@
 
     </section>
 
+    <!-- ==========================================
+         ESPECIALIDADES MÉDICAS
+    ========================================== -->
 
-    <!-- ================================================= -->
-    <!-- ESPECIALIDADES                                    -->
-    <!-- ================================================= -->
-
-    <section
-            id="especialidades"
-            class="seccion seccion-gris"
-    >
+    <section id="especialidades"
+             class="seccion seccion-gris">
 
         <div class="titulo-seccion">
 
@@ -557,20 +703,19 @@
             </h2>
 
             <p>
-                Contamos con diferentes áreas para brindar
-                atención de acuerdo con las necesidades del
-                paciente.
+                Contamos con diferentes áreas
+                para brindar atención de acuerdo
+                con las necesidades del paciente.
             </p>
 
         </div>
 
+        <!-- ESPECIALIDADES DESDE EL SISTEMA -->
 
         <div class="tarjetas">
 
-            <div
-                    class="tarjeta"
-                    th:each="especialidad : ${especialidades}"
-            >
+            <div class="tarjeta"
+                 th:each="especialidad : ${especialidades}">
 
                 <div class="icono-servicio">
                     🩺
@@ -584,17 +729,27 @@
 
         </div>
 
+        <!-- BOTÓN VOLVER AL INICIO -->
+
+        <div class="contenedor-volver-inicio">
+
+            <a href="#inicio"
+               class="boton-volver-inicio">
+
+                ← Volver al inicio
+
+            </a>
+
+        </div>
+
     </section>
 
+    <!-- ==========================================
+         UBICACIONES
+    ========================================== -->
 
-    <!-- ================================================= -->
-    <!-- UBICACIONES                                       -->
-    <!-- ================================================= -->
-
-    <section
-            id="ubicaciones"
-            class="seccion"
-    >
+    <section id="ubicaciones"
+             class="seccion">
 
         <div class="titulo-seccion">
 
@@ -607,19 +762,16 @@
             </h2>
 
             <p>
-                Consulte las áreas disponibles para brindar
-                atención médica.
+                Consulte las áreas disponibles
+                para brindar atención médica.
             </p>
 
         </div>
 
-
         <div class="tarjetas">
 
-            <div
-                    class="tarjeta"
-                    th:each="ubicacion : ${ubicaciones}"
-            >
+            <div class="tarjeta"
+                 th:each="ubicacion : ${ubicaciones}">
 
                 <div class="icono-servicio">
                     📍
@@ -635,15 +787,12 @@
 
     </section>
 
+    <!-- ==========================================
+         HORARIOS DE ATENCIÓN
+    ========================================== -->
 
-    <!-- ================================================= -->
-    <!-- HORARIOS                                          -->
-    <!-- ================================================= -->
-
-    <section
-            id="horarios"
-            class="seccion seccion-gris"
-    >
+    <section id="horarios"
+             class="seccion seccion-gris">
 
         <div class="titulo-seccion">
 
@@ -656,19 +805,16 @@
             </h2>
 
             <p>
-                Consulte nuestros principales horarios de
-                servicio.
+                Consulte nuestros principales
+                horarios de servicio.
             </p>
 
         </div>
 
-
         <div class="tarjetas">
 
-            <div
-                    class="tarjeta"
-                    th:each="horario : ${horarios}"
-            >
+            <div class="tarjeta"
+                 th:each="horario : ${horarios}">
 
                 <div class="icono-servicio">
                     🕒
@@ -684,13 +830,11 @@
 
     </section>
 
-
 </main>
 
-
-<!-- ================================================= -->
-<!-- PIE DE PÁGINA                                     -->
-<!-- ================================================= -->
+<!-- ==========================================
+     PIE DE PÁGINA
+========================================== -->
 
 <footer class="footer">
 
@@ -703,11 +847,11 @@
             </h3>
 
             <p>
-                Plataforma de gestión y atención médica.
+                Plataforma de gestión
+                y atención médica.
             </p>
 
         </div>
-
 
         <div class="footer-enlaces">
 
@@ -727,7 +871,6 @@
 
     </div>
 
-
     <div class="footer-inferior">
 
         Sistema Médico Hospitalario
@@ -740,106 +883,110 @@
 
 </footer>
 
+<!-- ==========================================
+     MODAL DE VERIFICACIÓN DE DPI
 
-<!-- ================================================= -->
-<!-- MODAL PARA VERIFICAR DPI                          -->
-<!-- ================================================= -->
+     IMPORTANTE:
+     SE CONSERVAN LOS MISMOS IDENTIFICADORES
+     QUE UTILIZA portal.js
+========================================== -->
 
-<div
-        id="modalDpi"
-        class="modal"
->
+<div id="modalDpi"
+     class="modal">
 
     <div class="modal-contenido">
 
+        <!-- CERRAR MODAL -->
 
-        <span
-                id="cerrarModal"
-                class="cerrar"
-        >
+        <span id="cerrarModal"
+              class="cerrar">
             &times;
         </span>
 
+        <!-- ÍCONO -->
 
         <div class="icono-modal">
             👤
         </div>
 
-
         <h2>
             Verificar Registro
         </h2>
 
-
         <p>
-            Ingrese su número de DPI para verificar
-            si está registrado en el sistema.
+            Ingrese su número de DPI para
+            verificar si está registrado
+            en el sistema.
         </p>
 
+        <!-- CAMPO DPI -->
 
-        <label
-                for="dpi"
-                class="label-modal"
-        >
+        <label for="dpi"
+               class="label-modal">
+
             Número de DPI
-        </label>
 
+        </label>
 
         <input
                 type="text"
                 id="dpi"
                 maxlength="13"
-                placeholder="Ingrese los 13 dígitos de su DPI"
-        >
+                placeholder="Ingrese los 13 dígitos de su DPI">
 
+        <!-- CONTADOR DE DÍGITOS -->
 
-        <div
-                id="contador"
-                class="contador"
-        >
+        <div id="contador"
+             class="contador">
+
             0/13 dígitos
+
         </div>
 
+        <!-- MENSAJES DE VALIDACIÓN -->
 
-        <p
-                id="mensaje"
-                class="mensaje"
-        >
+        <p id="mensaje"
+           class="mensaje">
         </p>
 
+        <!-- BOTONES DEL MODAL -->
 
         <div class="botones-modal">
 
             <button
                     id="btnVerificar"
                     class="boton-principal"
-            >
-                Verificar DPI
-            </button>
+                    type="button">
 
+                Verificar DPI
+
+            </button>
 
             <button
                     id="btnCancelar"
                     class="boton-secundario"
-            >
+                    type="button">
+
                 Cancelar
+
             </button>
 
         </div>
-
 
     </div>
 
 </div>
 
+<!-- ==========================================
+     JAVASCRIPT ORIGINAL DEL PORTAL
 
-<!-- ================================================= -->
-<!-- JAVASCRIPT                                        -->
-<!-- ================================================= -->
+     NO ELIMINAR:
+     CONTROLA VERIFICACIÓN DE DPI
+========================================== -->
 
-<script src="/js/portal.js"></script>
-
+<script th:src="@{/js/portal.js}"
+        src="/js/portal.js">
+</script>
 
 </body>
-
 </html>

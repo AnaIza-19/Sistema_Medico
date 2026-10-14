@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Editar rol | CU-14</title><link rel="stylesheet" th:href="@{/css/cu14-roles.css}" href="/css/cu14-roles.css"></head>
+<body><main class="contenedor form-contenedor">
+    <h1>Editar Rol</h1><p>Administrador: <strong th:text="${adminName}">admin1</strong></p>
+    <div class="alerta error" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <form method="post" th:action="@{/admin/roles/editar/{id}(id=${rol.id})}">
+        <div class="campo"><label for="nombre">Nombre del rol *</label>
+            <input id="nombre" name="nombre" required maxlength="30" minlength="3" pattern="[A-Za-z][A-Za-z0-9_]{2,29}" th:value="${rol.nombre}">
+            <small th:if="${usuariosAsignados > 0}">Hay usuarios asignados: no cambies el nombre del rol.</small>
+            <small th:unless="${usuariosAsignados > 0}">Puedes modificar el nombre mientras no haya usuarios asignados.</small></div>
+        <div class="campo"><label for="descripcion">Descripción</label>
+            <textarea id="descripcion" name="descripcion" maxlength="255" th:text="${rol.descripcion}"></textarea></div>
+        <div class="acciones"><button class="btn" type="submit">Guardar cambios</button><a class="btn btn-gris" th:href="@{/admin/roles}">Cancelar / Volver</a></div>
+    </form>
+</main></body></html>

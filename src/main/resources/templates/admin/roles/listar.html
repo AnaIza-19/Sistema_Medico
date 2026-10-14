@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Roles | CU-14</title>
+    <link rel="stylesheet" th:href="@{/css/cu14-roles.css}" href="/css/cu14-roles.css">
+</head>
+<body>
+<main class="contenedor">
+    <h1>CU-14: Administración de Roles</h1>
+    <p class="subtitulo">Administrador: <strong th:text="${adminName}">admin1</strong></p>
+    <p>Los ocho roles internos están protegidos. Los roles nuevos pueden administrarse sin modificar las cuentas existentes.</p>
+    <nav class="acciones">
+        <a class="btn" th:href="@{/admin/roles/crear}">+ Crear rol</a>
+        <a class="btn btn-gris" th:href="@{/admin/usuarios}">Volver al panel administrativo</a>
+        <a class="btn btn-gris" th:href="@{/}">← Volver al inicio</a>
+    </nav>
+    <div class="alerta exito" th:if="${mensajeExito}" th:text="${mensajeExito}"></div>
+    <div class="alerta error" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <form class="filtros" method="get" th:action="@{/admin/roles}">
+        <label for="buscar">Buscar por nombre:</label>
+        <input id="buscar" type="search" name="buscar" placeholder="Nombre de rol" maxlength="30" th:value="${buscar}">
+        <label for="tamanio">Mostrar:</label>
+        <select id="tamanio" name="tamanio">
+            <option value="10" th:selected="${tamanio == 10}">10 registros</option>
+            <option value="25" th:selected="${tamanio == 25}">25 registros</option>
+            <option value="50" th:selected="${tamanio == 50}">50 registros</option>
+        </select>
+        <input type="hidden" name="pagina" value="0">
+        <button type="submit" class="btn">Buscar</button>
+        <a class="btn btn-gris" th:href="@{/admin/roles}">Limpiar</a>
+    </form>
+    <div class="tabla-externa"><table>
+        <thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Usuarios</th><th>Permisos</th><th>Estado</th><th>Tipo</th><th>Acciones</th></tr></thead>
+        <tbody>
+        <tr th:each="rol : ${roles.content}">
+            <td th:text="${rol.id}">1</td>
+            <td th:text="${rol.nombre}">PACIENTE</td>
+            <td th:text="${rol.descripcion != null ? rol.descripcion : 'Sin descripción'}">—</td>
+            <td th:text="${usuariosPorRol[rol.id]}">0</td>
+            <td th:text="${permisosPorRol[rol.id]}">0</td>
+            <td><span th:if="${rol.activo}" class="estado-activo">Activo</span><span th:unless="${rol.activo}" class="estado-inactivo">Inactivo</span></td>
+            <td th:text="${rol.esSistema ? 'Interno / protegido' : 'Personalizado'}">Protegido</td>
+            <td>
+                <span th:if="${rol.esSistema}" class="protegido">Protegido</span>
+                <div class="acciones-fila" th:unless="${rol.esSistema}">
+                    <a class="btn btn-chico" th:href="@{/admin/roles/editar/{id}(id=${rol.id})}">Editar</a>
+                    <a class="btn btn-chico btn-gris" th:if="${rol.activo}" th:href="@{/admin/roles/permisos/{id}(id=${rol.id})}">Permisos</a>
+                    <form method="post" th:if="${rol.activo}" th:action="@{/admin/roles/desactivar/{id}(id=${rol.id})}"
+                          onsubmit="return confirm('¿Desactivar este rol? Solo se permite si no tiene usuarios asignados.');">
+                        <button type="submit" class="btn btn-rojo btn-chico">Eliminar</button>
+                    </form>
+                    <form method="post" th:unless="${rol.activo}" th:action="@{/admin/roles/reactivar/{id}(id=${rol.id})}"
+                          onsubmit="return confirm('¿Reactivar este rol?');">
+                        <button type="submit" class="btn btn-verde btn-chico">Reactivar</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        <tr th:if="${roles.totalElements == 0}"><td colspan="8" class="sin-datos">No se encontraron roles.</td></tr>
+        </tbody>
+    </table></div>
+    <div class="paginacion">
+        <span>Total de registros: <strong th:text="${roles.totalElements}">0</strong></span>
+        <div class="acciones-fila">
+            <a class="btn btn-chico" th:if="${roles.hasPrevious()}" th:href="@{/admin/roles(buscar=${buscar},tamanio=${tamanio},pagina=${roles.number - 1})}">Anterior</a>
+            <span>Página <strong th:text="${roles.number + 1}">1</strong> de <strong th:text="${roles.totalPages > 0 ? roles.totalPages : 1}">1</strong></span>
+            <a class="btn btn-chico" th:if="${roles.hasNext()}" th:href="@{/admin/roles(buscar=${buscar},tamanio=${tamanio},pagina=${roles.number + 1})}">Siguiente</a>
+        </div>
+    </div>
+    <p class="nota">Eliminar desactiva el rol sin borrar su registro ni su auditoría. Los roles internos y los que tienen usuarios asignados están protegidos.</p>
+</main>
+</body></html>

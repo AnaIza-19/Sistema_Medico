@@ -1,0 +1,450 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Permisos del Rol | CU-14</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/cu14-roles.css}"
+          href="/css/cu14-roles.css">
+
+    <style>
+        /* =====================================
+           PERMISOS AGRUPADOS POR CATEGORÍA
+        ===================================== */
+
+        .grupos-permisos {
+            display: grid;
+            gap: 22px;
+            margin: 25px 0;
+        }
+
+        .grupo-permisos {
+            background: #f8fafd;
+            border: 1px solid #dce5f0;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .grupo-permisos h2 {
+            color: #17365d;
+            font-size: 19px;
+            margin: 0 0 8px;
+        }
+
+        .grupo-permisos p {
+            color: #607087;
+            font-size: 13px;
+            margin: 0 0 15px;
+        }
+
+        .grupo-permisos .permisos-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .grupo-permisos .check-permiso {
+            background: white;
+            cursor: pointer;
+        }
+
+        .grupo-permisos .check-permiso:hover {
+            border-color: #1976d2;
+            background: #f0f7ff;
+        }
+
+        .grupo-permisos .check-permiso input {
+            accent-color: #1976d2;
+        }
+
+        .acciones-finales {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        @media (max-width: 700px) {
+            .grupo-permisos .permisos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="contenedor form-contenedor">
+
+    <!-- =====================================
+         ENCABEZADO
+    ===================================== -->
+
+    <h1>Administración de Permisos</h1>
+
+    <p>
+        <strong>Rol:</strong>
+        <span th:text="${rol.nombre}">
+            PRUEBA_CU14
+        </span>
+    </p>
+
+    <p>
+        <strong>Administrador:</strong>
+        <span th:text="${adminName}">
+            admin1
+        </span>
+    </p>
+
+    <p>
+        Seleccione las acciones que este rol
+        tendrá permitidas dentro del
+        Sistema Médico Hospitalario.
+    </p>
+
+
+    <!-- =====================================
+         MENSAJES
+    ===================================== -->
+
+    <div class="alerta error"
+         th:if="${mensajeError}"
+         th:text="${mensajeError}">
+    </div>
+
+
+    <!-- =====================================
+         INFORMACIÓN IMPORTANTE
+    ===================================== -->
+
+    <p class="nota">
+        Los permisos están organizados por
+        módulos para facilitar su administración.
+
+        Solo pueden modificarse los permisos
+        de roles personalizados activos.
+
+        Los roles internos del hospital,
+        incluido ADMINISTRADOR,
+        permanecen protegidos.
+    </p>
+
+
+    <!-- =====================================
+         FORMULARIO DE PERMISOS
+    ===================================== -->
+
+    <form method="post"
+          th:action="@{/admin/roles/permisos/{id}(id=${rol.id})}">
+
+        <!-- CONSERVAR TOKEN CSRF SI EXISTE -->
+        <input type="hidden"
+               th:if="${_csrf != null}"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+
+
+        <!-- =================================
+             LISTADO DINÁMICO
+
+             Los códigos internos se conservan.
+             JavaScript organiza y traduce
+             las etiquetas visuales.
+        ================================= -->
+
+        <div id="listaPermisos"
+             class="permisos-grid">
+
+            <label class="check-permiso"
+                   th:each="codigo : ${disponibles}"
+                   th:attr="data-codigo=${codigo}">
+
+                <input type="checkbox"
+                       name="codigos"
+                       th:value="${codigo}"
+                       th:checked="${asignados.contains(codigo)}">
+
+                <span th:text="${codigo}">
+                    Consultar medicamentos
+                </span>
+
+            </label>
+
+        </div>
+
+
+        <!-- =================================
+             SIN PERMISOS DISPONIBLES
+        ================================= -->
+
+        <p th:if="${disponibles.isEmpty()}">
+            Aún no hay permisos disponibles
+            para asignar.
+        </p>
+
+
+        <!-- =================================
+             BOTONES
+        ================================= -->
+
+        <div class="acciones-finales">
+
+            <button class="btn"
+                    type="submit">
+                Guardar permisos
+            </button>
+
+            <a class="btn btn-gris"
+               th:href="@{/admin/roles}">
+                Cancelar / Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</main>
+
+
+<!-- ==========================================
+     TRADUCCIÓN Y AGRUPACIÓN DE PERMISOS
+
+     NO MODIFICA LOS CÓDIGOS REALES
+========================================== -->
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ======================================
+        // CATEGORÍAS DEL HOSPITAL
+        // ======================================
+
+        const categorias = {
+
+            "appointment-status": {
+                nombre: "Estados de Cita",
+                descripcion: "Administración de los estados de las citas médicas."
+            },
+
+            "branch": {
+                nombre: "Sucursales",
+                descripcion: "Administración de las sedes y sucursales del hospital."
+            },
+
+            "specialty": {
+                nombre: "Especialidades Médicas",
+                descripcion: "Administración del catálogo de especialidades."
+            },
+
+            "laboratory": {
+                nombre: "Laboratorios",
+                descripcion: "Administración de los laboratorios registrados."
+            },
+
+            "lab-exam": {
+                nombre: "Exámenes de Laboratorio",
+                descripcion: "Administración de los exámenes y sus precios."
+            },
+
+            "medicine": {
+                nombre: "Medicamentos",
+                descripcion: "Administración del catálogo de medicamentos."
+            },
+
+            "role": {
+                nombre: "Roles",
+                descripcion: "Administración de roles y permisos del sistema."
+            },
+
+            "inventory": {
+                nombre: "Inventario de Medicamentos",
+                descripcion: "Administración de existencias e inventarios."
+            },
+
+            "inventory-medicine": {
+                nombre: "Inventario de Medicamentos",
+                descripcion: "Administración de existencias e inventarios."
+            }
+
+        };
+
+
+        // ======================================
+        // ACCIONES EN ESPAÑOL
+        // ======================================
+
+        const acciones = {
+
+            "read": "Consultar",
+            "create": "Crear",
+            "update": "Editar",
+            "delete": "Desactivar",
+            "reactivate": "Reactivar"
+
+        };
+
+
+        // ======================================
+        // OBTENER PERMISOS DE THYMELEAF
+        // ======================================
+
+        const contenedor =
+            document.getElementById("listaPermisos");
+
+        if (!contenedor) {
+            return;
+        }
+
+        const permisos = Array.from(
+            contenedor.querySelectorAll(".check-permiso")
+        );
+
+
+        // ======================================
+        // AGRUPAR POR MÓDULO
+        // ======================================
+
+        const grupos = new Map();
+
+        permisos.forEach(function (elemento) {
+
+            const codigo =
+                elemento.getAttribute("data-codigo") || "";
+
+            const separador =
+                codigo.lastIndexOf("/");
+
+            const modulo =
+                separador >= 0
+                    ? codigo.substring(0, separador)
+                    : "otros";
+
+            const accion =
+                separador >= 0
+                    ? codigo.substring(separador + 1)
+                    : codigo;
+
+
+            // OBTENER NOMBRE DE CATEGORÍA
+
+            const categoria =
+                categorias[modulo] || {
+                    nombre: "Otros permisos",
+                    descripcion: "Otras funciones disponibles en el sistema."
+                };
+
+
+            // CREAR NOMBRE COMPRENSIBLE
+
+            const accionTraducida =
+                acciones[accion];
+
+            const textoTraducido =
+                accionTraducida
+                    ? accionTraducida + " " +
+                    categoria.nombre.toLowerCase()
+                    : "Permiso: " + codigo;
+
+
+            // MODIFICAR SOLO TEXTO VISIBLE
+
+            const texto =
+                elemento.querySelector("span");
+
+            if (texto) {
+                texto.textContent = textoTraducido;
+            }
+
+
+            // CONSERVAR VALORES ORIGINALES
+            // DE LOS CHECKBOX
+
+            if (!grupos.has(modulo)) {
+
+                grupos.set(modulo, {
+                    categoria: categoria,
+                    elementos: []
+                });
+
+            }
+
+            grupos.get(modulo).elementos.push(elemento);
+
+        });
+
+
+        // ======================================
+        // CONSTRUIR SECCIONES
+        // ======================================
+
+        contenedor.innerHTML = "";
+
+        contenedor.classList.remove("permisos-grid");
+
+        contenedor.classList.add("grupos-permisos");
+
+
+        grupos.forEach(function (grupo) {
+
+            const seccion =
+                document.createElement("section");
+
+            seccion.className = "grupo-permisos";
+
+
+            // TÍTULO
+
+            const titulo =
+                document.createElement("h2");
+
+            titulo.textContent =
+                grupo.categoria.nombre;
+
+            seccion.appendChild(titulo);
+
+
+            // DESCRIPCIÓN
+
+            const descripcion =
+                document.createElement("p");
+
+            descripcion.textContent =
+                grupo.categoria.descripcion;
+
+            seccion.appendChild(descripcion);
+
+
+            // CUADRÍCULA DE PERMISOS
+
+            const cuadrícula =
+                document.createElement("div");
+
+            cuadrícula.className = "permisos-grid";
+
+
+            grupo.elementos.forEach(function (elemento) {
+
+                cuadrícula.appendChild(elemento);
+
+            });
+
+
+            seccion.appendChild(cuadrícula);
+
+            contenedor.appendChild(seccion);
+
+        });
+
+    });
+
+</script>
+
+</body>
+</html>

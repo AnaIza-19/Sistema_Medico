@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exámenes de Laboratorio | CU-14</title>
+    <link rel="stylesheet" th:href="@{/css/cu14-examenes.css}" href="/css/cu14-examenes.css">
+</head>
+<body><main class="contenedor">
+    <h1>CU-14: Administración de Exámenes de Laboratorio</h1>
+    <p class="subtitulo">Administrador: <strong th:text="${usuarioActual}">admin1</strong></p>
+    <p>Los exámenes se vinculan a laboratorios activos. No se eliminan sus registros históricos ni sus órdenes.</p>
+    <nav class="acciones">
+        <a class="btn" th:href="@{/admin/examenes-laboratorio/crear}">+ Crear examen</a>
+        <a class="btn btn-gris" th:href="@{/admin/usuarios}">Volver al panel administrativo</a>
+        <a class="btn btn-gris" th:href="@{/admin/laboratorios}">Laboratorios</a>
+        <a class="btn btn-gris" th:href="@{/}">← Volver al inicio</a>
+    </nav>
+    <div class="alerta exito" role="status" th:if="${mensajeExito}" th:text="${mensajeExito}"></div>
+    <div class="alerta error" role="alert" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <form method="get" class="filtros" th:action="@{/admin/examenes-laboratorio}">
+        <label for="buscar">Buscar por nombre:</label><input id="buscar" type="search" name="buscar" maxlength="200" th:value="${buscar}" placeholder="Nombre del examen">
+        <label for="tamanio">Mostrar:</label><select id="tamanio" name="tamanio">
+        <option value="10" th:selected="${tamanio == 10}">10 registros</option>
+        <option value="25" th:selected="${tamanio == 25}">25 registros</option>
+        <option value="50" th:selected="${tamanio == 50}">50 registros</option>
+    </select><input type="hidden" name="pagina" value="0">
+        <button class="btn" type="submit">Buscar</button>
+        <a class="btn btn-gris" th:href="@{/admin/examenes-laboratorio}">Limpiar</a>
+    </form>
+    <div class="tabla-externa"><table>
+        <thead><tr><th>ID</th><th>Nombre</th><th>Laboratorio</th><th>Precio base</th><th>Rango referencia</th><th>Unidad</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+        <tr th:each="examen : ${examenes.content}">
+            <td th:text="${examen.id}">1</td>
+            <td th:text="${examen.nombre}">Hemograma</td>
+            <td th:text="${examen.laboratorio != null ? examen.laboratorio.nombre : 'Sin asignar (registro anterior)'}">Laboratorio</td>
+            <td th:text="|Q ${examen.precio}|">Q 100.00</td>
+            <td th:text="${examen.rangoReferencia != null ? examen.rangoReferencia : '—'}">—</td>
+            <td th:text="${examen.unidad != null ? examen.unidad : '—'}">—</td>
+            <td th:text="${examen.descripcion != null ? examen.descripcion : 'Sin descripción'}">—</td>
+            <td><span class="activo" th:if="${examen.activo}">Activo</span>
+                <span class="inactivo" th:unless="${examen.activo}">Inactivo</span></td>
+            <td><div class="acciones-fila">
+                <a class="btn btn-chico" th:href="@{/admin/examenes-laboratorio/editar/{id}(id=${examen.id})}">Editar</a>
+                <form method="post" th:if="${examen.activo}"
+                      th:action="@{/admin/examenes-laboratorio/desactivar/{id}(id=${examen.id})}"
+                      onsubmit="return confirm('¿Está seguro de que desea desactivar este examen? No se borrará el historial.');">
+                    <button class="btn btn-rojo btn-chico" type="submit">Eliminar</button></form>
+                <form method="post" th:unless="${examen.activo}"
+                      th:action="@{/admin/examenes-laboratorio/reactivar/{id}(id=${examen.id})}"
+                      onsubmit="return confirm('¿Desea reactivar este examen?');">
+                    <button class="btn btn-verde btn-chico" type="submit">Reactivar</button></form>
+            </div></td></tr>
+        <tr th:if="${examenes.totalElements == 0}"><td colspan="9" class="sin-datos">No se encontraron resultados.</td></tr>
+        </tbody></table></div>
+    <div class="paginacion">
+        <div>Total de registros: <strong th:text="${examenes.totalElements}">0</strong></div>
+        <div class="acciones-fila">
+            <a class="btn btn-chico" th:if="${examenes.hasPrevious()}" th:href="@{/admin/examenes-laboratorio(buscar=${buscar},tamanio=${tamanio},pagina=${examenes.number - 1})}">Anterior</a>
+            <span>Página <strong th:text="${examenes.number + 1}">1</strong> de <strong th:text="${examenes.totalPages == 0 ? 1 : examenes.totalPages}">1</strong></span>
+            <a class="btn btn-chico" th:if="${examenes.hasNext()}" th:href="@{/admin/examenes-laboratorio(buscar=${buscar},tamanio=${tamanio},pagina=${examenes.number + 1})}">Siguiente</a>
+        </div></div>
+    <p class="nota">Eliminar desactiva el examen, sin borrar físicamente el registro ni sus órdenes médicas.</p>
+</main></body></html>

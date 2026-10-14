@@ -1,16 +1,19 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
     <title>Listado de Usuarios</title>
 
     <style>
+
+        /* ==========================================
+           CONFIGURACIÓN GENERAL
+        ========================================== */
 
         * {
             box-sizing: border-box;
@@ -22,27 +25,31 @@
             background-color: #f4f6f8;
         }
 
-
-        /* ===================================== */
-        /* ESTRUCTURA GENERAL */
-        /* ===================================== */
-
         .pagina {
             display: flex;
             min-height: 100vh;
         }
 
-
-        /* ===================================== */
-        /* MENÚ LATERAL */
-        /* ===================================== */
+        /* ==========================================
+           MENÚ LATERAL ADMINISTRATIVO
+        ========================================== */
 
         .menu-lateral {
-            width: 240px;
+            width: 270px;
             background-color: #263238;
             color: white;
             padding: 25px 15px;
             flex-shrink: 0;
+
+            position: sticky;
+            top: 0;
+            height: 100vh;
+
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            scrollbar-width: thin;
+            scrollbar-color: #607d8b #263238;
         }
 
         .menu-lateral h2 {
@@ -66,6 +73,7 @@
             padding: 12px 15px;
             margin-bottom: 5px;
             border-radius: 6px;
+            transition: background-color 0.2s;
         }
 
         .menu-lateral a:hover {
@@ -86,10 +94,9 @@
             background-color: #b71c1c !important;
         }
 
-
-        /* ===================================== */
-        /* CONTENIDO */
-        /* ===================================== */
+        /* ==========================================
+           CONTENIDO PRINCIPAL
+        ========================================== */
 
         .contenido {
             flex: 1;
@@ -105,10 +112,9 @@
             margin-bottom: 25px;
         }
 
-
-        /* ===================================== */
-        /* MENSAJES */
-        /* ===================================== */
+        /* ==========================================
+           MENSAJES
+        ========================================== */
 
         .mensaje-exito {
             background-color: #d4edda;
@@ -128,10 +134,9 @@
             font-weight: bold;
         }
 
-
-        /* ===================================== */
-        /* BARRA SUPERIOR */
-        /* ===================================== */
+        /* ==========================================
+           BARRA SUPERIOR
+        ========================================== */
 
         .barra-superior {
             display: flex;
@@ -180,10 +185,9 @@
             border-radius: 5px;
         }
 
-
-        /* ===================================== */
-        /* TABLA */
-        /* ===================================== */
+        /* ==========================================
+           TABLA DE USUARIOS
+        ========================================== */
 
         .tabla-contenedor {
             overflow-x: auto;
@@ -217,10 +221,9 @@
             font-weight: bold;
         }
 
-
-        /* ===================================== */
-        /* MENÚ DE ACCIONES ⋮ */
-        /* ===================================== */
+        /* ==========================================
+           MENÚ DE ACCIONES
+        ========================================== */
 
         .acciones {
             position: relative;
@@ -280,13 +283,7 @@
         .btn-eliminar {
             color: #ef6c00;
             font-weight: bold;
-            cursor: pointer;
         }
-
-
-        /* ===================================== */
-        /* SIN DATOS */
-        /* ===================================== */
 
         .sin-datos {
             color: red;
@@ -295,10 +292,9 @@
             padding: 20px;
         }
 
-
-        /* ===================================== */
-        /* PAGINACIÓN */
-        /* ===================================== */
+        /* ==========================================
+           PAGINACIÓN
+        ========================================== */
 
         .paginacion {
             margin-top: 20px;
@@ -318,10 +314,9 @@
             font-weight: bold;
         }
 
-
-        /* ===================================== */
-        /* MODAL ELIMINACIÓN */
-        /* ===================================== */
+        /* ==========================================
+           MODAL DE ELIMINACIÓN
+        ========================================== */
 
         .modal-eliminar {
             display: none;
@@ -375,10 +370,9 @@
             cursor: pointer;
         }
 
-
-        /* ===================================== */
-        /* RESPONSIVE */
-        /* ===================================== */
+        /* ==========================================
+           DISEÑO RESPONSIVE
+        ========================================== */
 
         @media (max-width: 800px) {
 
@@ -388,6 +382,9 @@
 
             .menu-lateral {
                 width: 100%;
+                height: auto;
+                position: static;
+                overflow: visible;
             }
 
             .contenedor {
@@ -396,65 +393,139 @@
         }
 
     </style>
-
 </head>
-
 
 <body>
 
-
 <div class="pagina">
 
-
-    <!-- ================================================= -->
-    <!-- MENÚ LATERAL -->
-    <!-- ================================================= -->
+    <!-- ==========================================
+         MENÚ LATERAL DEL ADMINISTRADOR
+    ========================================== -->
 
     <aside class="menu-lateral">
 
-        <h2>
-            Panel Administrativo
-        </h2>
+        <h2>Panel Administrativo</h2>
 
+        <!-- ======================================
+             ADMINISTRACIÓN DE USUARIOS
+        ====================================== -->
 
         <div class="titulo-menu">
             Usuarios
         </div>
 
-
-        <a
-                href="/admin/usuarios"
-                class="activo-menu">
+        <a href="/admin/usuarios"
+           th:href="@{/admin/usuarios}"
+           class="activo-menu">
 
             📋 Listar Usuarios
 
         </a>
 
-
-        <a href="/admin/usuarios/crear">
+        <a href="/admin/usuarios/crear"
+           th:href="@{/admin/usuarios/crear}">
 
             ➕ Crear Usuario
 
         </a>
 
-
-        <!-- =========================================== -->
-        <!-- CU-13: ACCESO A ESPECIALIDADES POR SEDE -->
-        <!-- =========================================== -->
+        <!-- ======================================
+             CU-14: MANTENIMIENTO DE CATÁLOGOS
+        ====================================== -->
 
         <div class="titulo-menu">
             Configuración
         </div>
 
-        <a href="/branch-specialty"
-           th:href="@{/branch-specialty}">
-            🏥 Especialidades por Sede
+        <!-- 1. ESPECIALIDADES -->
+
+        <a href="/admin/especialidades"
+           th:href="@{/admin/especialidades}">
+
+            🩺 Especialidades
+
         </a>
 
+        <!-- 2. SUCURSALES -->
 
-        <a
-                href="/admin/cerrar-sesion"
-                class="cerrar-sesion">
+        <a href="/admin/sucursales"
+           th:href="@{/admin/sucursales}">
+
+            🏥 Sucursales
+
+        </a>
+
+        <!-- 3. ESTADOS DE CITA -->
+
+        <a href="/admin/estados-cita"
+           th:href="@{/admin/estados-cita}">
+
+            📋 Estados de Cita
+
+        </a>
+
+        <!-- 4. LABORATORIOS -->
+
+        <a href="/admin/laboratorios"
+           th:href="@{/admin/laboratorios}">
+
+            🧪 Laboratorios
+
+        </a>
+
+        <!-- 5. EXÁMENES DE LABORATORIO -->
+
+        <a href="/admin/examenes-laboratorio"
+           th:href="@{/admin/examenes-laboratorio}">
+
+            🔬 Exámenes de Laboratorio
+
+        </a>
+
+        <!-- 6. MEDICAMENTOS -->
+
+        <a href="/admin/medicamentos"
+           th:href="@{/admin/medicamentos}">
+
+            💊 Medicamentos
+
+        </a>
+
+        <!-- 7. ROLES -->
+
+        <a href="/admin/roles"
+           th:href="@{/admin/roles}">
+
+            🛡️ Roles
+
+        </a>
+
+        <!-- 8. INVENTARIO DE MEDICAMENTOS -->
+
+        <a href="/admin/inventario-medicamentos"
+           th:href="@{/admin/inventario-medicamentos}">
+
+            📦 Inventario de Medicamentos
+
+        </a>
+
+        <!-- 9. ESPECIALIDADES POR SEDE -->
+
+        <a href="/branch-specialty"
+           th:href="@{/branch-specialty}">
+
+            🏥 Especialidades por Sede
+
+        </a>
+
+        <!-- ======================================
+             CERRAR SESIÓN
+        ====================================== -->
+
+        <a href="/admin/cerrar-sesion"
+           th:href="@{/admin/cerrar-sesion}"
+           class="cerrar-sesion">
 
             Cerrar Sesión
 
@@ -462,242 +533,173 @@
 
     </aside>
 
-
-
-    <!-- ================================================= -->
-    <!-- CONTENIDO PRINCIPAL -->
-    <!-- ================================================= -->
+    <!-- ==========================================
+         CONTENIDO PRINCIPAL
+    ========================================== -->
 
     <main class="contenido">
 
-
         <div class="contenedor">
 
+            <h1>Listado de Usuarios</h1>
 
-            <h1>
-                Listado de Usuarios
-            </h1>
+            <!-- ==================================
+                 MENSAJE DE ÉXITO
+            ================================== -->
 
-
-            <!-- ===================================== -->
-            <!-- MENSAJE DE ÉXITO -->
-            <!-- ===================================== -->
-
-            <div
-                    class="mensaje-exito"
-                    th:if="${exito}"
-                    th:text="${exito}">
+            <div class="mensaje-exito"
+                 th:if="${exito}"
+                 th:text="${exito}">
             </div>
 
+            <!-- ==================================
+                 MENSAJE DE ERROR
+            ================================== -->
 
-            <!-- ===================================== -->
-            <!-- MENSAJE ERROR -->
-            <!-- ===================================== -->
-
-            <div
-                    class="mensaje-error-general"
-                    th:if="${errorGeneral}"
-                    th:text="${errorGeneral}">
+            <div class="mensaje-error-general"
+                 th:if="${errorGeneral}"
+                 th:text="${errorGeneral}">
             </div>
 
-
-
-            <!-- ===================================== -->
-            <!-- BÚSQUEDA -->
-            <!-- ===================================== -->
+            <!-- ==================================
+                 BÚSQUEDA DE USUARIOS
+            ================================== -->
 
             <div class="barra-superior">
 
-
-                <form
-                        class="busqueda"
-                        method="get"
-                        th:action="@{/admin/usuarios}">
-
+                <form class="busqueda"
+                      method="get"
+                      th:action="@{/admin/usuarios}">
 
                     <select name="campo">
 
-
-                        <option
-                                value="id"
+                        <option value="id"
                                 th:selected="${campo == 'id'}">
                             ID
                         </option>
 
-
-                        <option
-                                value="nombre"
+                        <option value="nombre"
                                 th:selected="${campo == 'nombre'}">
                             Nombre
                         </option>
 
-
-                        <option
-                                value="correo"
+                        <option value="correo"
                                 th:selected="${campo == 'correo'}">
                             Correo Electrónico
                         </option>
 
-
-                        <option
-                                value="rol"
+                        <option value="rol"
                                 th:selected="${campo == 'rol'}">
                             Rol
                         </option>
 
-
-                        <option
-                                value="usuario"
+                        <option value="usuario"
                                 th:selected="${campo == 'usuario'}">
                             Nombre de Usuario
                         </option>
 
-
-                        <option
-                                value="dpi"
+                        <option value="dpi"
                                 th:selected="${campo == 'dpi'}">
                             DPI
                         </option>
 
-
                     </select>
 
+                    <input type="text"
+                           name="buscar"
+                           placeholder="Buscar..."
+                           th:value="${buscar}">
 
-                    <input
-                            type="text"
-                            name="buscar"
-                            placeholder="Buscar..."
-                            th:value="${buscar}">
+                    <input type="hidden"
+                           name="tamanio"
+                           th:value="${tamanio}">
 
-
-                    <input
-                            type="hidden"
-                            name="tamanio"
-                            th:value="${tamanio}">
-
-
-                    <button
-                            type="submit"
+                    <button type="submit"
                             class="btn-buscar">
 
                         🔍 Buscar
 
                     </button>
 
-
                 </form>
 
-
-                <a
-                        href="/admin/usuarios/crear"
-                        class="btn-crear">
+                <a href="/admin/usuarios/crear"
+                   th:href="@{/admin/usuarios/crear}"
+                   class="btn-crear">
 
                     Crear Usuario
 
                 </a>
 
-
             </div>
 
-
-
-            <!-- ===================================== -->
-            <!-- TABLA -->
-            <!-- ===================================== -->
+            <!-- ==================================
+                 TABLA DE USUARIOS
+            ================================== -->
 
             <div class="tabla-contenedor">
 
                 <table>
 
-
                     <thead>
 
                     <tr>
-
                         <th>ID</th>
-
                         <th>Nombre</th>
-
                         <th>Correo Electrónico</th>
-
                         <th>Rol</th>
-
                         <th>Nombre de Usuario</th>
-
                         <th>Estado</th>
-
                         <th>Acciones</th>
-
                     </tr>
 
                     </thead>
 
-
                     <tbody>
 
+                    <!-- LISTAR USUARIOS -->
 
                     <tr th:each="usuario : ${usuarios.content}">
-
 
                         <td th:text="${usuario.id}">
                             1
                         </td>
 
-
                         <td th:text="${usuario.nombreCompleto}">
                             Nombre
                         </td>
-
 
                         <td th:text="${usuario.correo != null ? usuario.correo : '-'}">
                             correo@email.com
                         </td>
 
-
                         <td th:text="${usuario.rol != null ? usuario.rol.nombre : '-'}">
                             Rol
                         </td>
-
 
                         <td th:text="${usuario.nombreUsuario}">
                             usuario
                         </td>
 
-
                         <td>
 
-
-                            <span
-                                    th:if="${usuario.activo}"
-                                    class="activo">
-
+                            <span th:if="${usuario.activo}"
+                                  class="activo">
                                 Activo
-
                             </span>
 
-
-                            <span
-                                    th:unless="${usuario.activo}"
-                                    class="inactivo">
-
+                            <span th:unless="${usuario.activo}"
+                                  class="inactivo">
                                 Inactivo
-
                             </span>
-
 
                         </td>
 
-
-
-                        <!-- ================================= -->
-                        <!-- ACCIONES ⋮ -->
-                        <!-- ================================= -->
+                        <!-- ACCIONES DE USUARIO -->
 
                         <td class="acciones">
 
-
-                            <button
-                                    type="button"
+                            <button type="button"
                                     class="btn-menu-acciones"
                                     onclick="mostrarMenuAcciones(this)">
 
@@ -705,178 +707,128 @@
 
                             </button>
 
-
                             <div class="menu-acciones">
 
+                                <!-- EDITAR -->
 
-                                <a
-                                        th:href="@{/admin/usuarios/editar/{id}(id=${usuario.id})}"
-                                        class="editar">
+                                <a th:href="@{/admin/usuarios/editar/{id}(id=${usuario.id})}"
+                                   class="editar">
 
                                     Editar
 
                                 </a>
 
+                                <!-- ELIMINAR -->
 
-                                <button
-                                        type="button"
+                                <button type="button"
                                         class="btn-eliminar"
-                                        th:attr="
-                                            data-id=${usuario.id},
-                                            data-usuario=${usuario.nombreUsuario}
-                                        "
+                                        th:attr="data-id=${usuario.id},data-usuario=${usuario.nombreUsuario}"
                                         onclick="abrirModalEliminar(this)">
 
                                     Eliminar
 
                                 </button>
 
-
                             </div>
-
 
                         </td>
 
-
                     </tr>
 
-
-
-                    <!-- ================================= -->
                     <!-- SIN RESULTADOS -->
-                    <!-- ================================= -->
 
                     <tr th:if="${usuarios.totalElements == 0}">
 
-                        <td
-                                colspan="7"
-                                class="sin-datos">
+                        <td colspan="7"
+                            class="sin-datos">
 
-                            No se encontraron datos usuarios.
+                            No se encontraron datos de usuarios.
 
                         </td>
 
                     </tr>
 
-
                     </tbody>
-
 
                 </table>
 
             </div>
 
-
-
-            <!-- ===================================== -->
-            <!-- PAGINACIÓN -->
-            <!-- ===================================== -->
+            <!-- ==================================
+                 PAGINACIÓN DE USUARIOS
+            ================================== -->
 
             <div class="paginacion">
 
+                <!-- ELEMENTOS POR PÁGINA -->
 
                 <div>
 
+                    <form method="get"
+                          th:action="@{/admin/usuarios}">
 
-                    <form
-                            method="get"
-                            th:action="@{/admin/usuarios}">
+                        <input type="hidden"
+                               name="campo"
+                               th:value="${campo}">
 
+                        <input type="hidden"
+                               name="buscar"
+                               th:value="${buscar}">
 
-                        <input
-                                type="hidden"
-                                name="campo"
-                                th:value="${campo}">
-
-
-                        <input
-                                type="hidden"
-                                name="buscar"
-                                th:value="${buscar}">
-
-
-                        <input
-                                type="hidden"
-                                name="pagina"
-                                value="0">
-
+                        <input type="hidden"
+                               name="pagina"
+                               value="0">
 
                         <label>
                             Elementos por página:
                         </label>
 
-
-                        <select
-                                name="tamanio"
+                        <select name="tamanio"
                                 onchange="this.form.submit()">
 
-
-                            <option
-                                    value="10"
+                            <option value="10"
                                     th:selected="${tamanio == 10}">
                                 10
                             </option>
 
-
-                            <option
-                                    value="25"
+                            <option value="25"
                                     th:selected="${tamanio == 25}">
                                 25
                             </option>
 
-
-                            <option
-                                    value="50"
+                            <option value="50"
                                     th:selected="${tamanio == 50}">
                                 50
                             </option>
 
-
                         </select>
-
 
                     </form>
 
-
                 </div>
 
-
-
-                <!-- CONTEO -->
+                <!-- TOTAL DE REGISTROS -->
 
                 <div>
 
-                    <span>
-                        Registros:
-                    </span>
+                    <span>Registros:</span>
 
-                    <strong
-                            th:text="${usuarios.totalElements}">
+                    <strong th:text="${usuarios.totalElements}">
                         0
                     </strong>
 
                 </div>
 
-
-
-                <!-- PAGINACIÓN -->
+                <!-- NAVEGACIÓN DE PÁGINAS -->
 
                 <div class="paginas">
 
-
-                    <a
-                            th:if="${usuarios.hasPrevious()}"
-                            th:href="@{/admin/usuarios(
-                                campo=${campo},
-                                buscar=${buscar},
-                                pagina=${paginaActual - 1},
-                                tamanio=${tamanio}
-                            )}">
+                    <a th:if="${usuarios.hasPrevious()}"
+                       th:href="@{/admin/usuarios(campo=${campo},buscar=${buscar},pagina=${paginaActual - 1},tamanio=${tamanio})}">
 
                         Anterior
 
                     </a>
-
 
                     <span class="pagina-actual">
 
@@ -894,58 +846,37 @@
 
                     </span>
 
-
-                    <a
-                            th:if="${usuarios.hasNext()}"
-                            th:href="@{/admin/usuarios(
-                                campo=${campo},
-                                buscar=${buscar},
-                                pagina=${paginaActual + 1},
-                                tamanio=${tamanio}
-                            )}">
+                    <a th:if="${usuarios.hasNext()}"
+                       th:href="@{/admin/usuarios(campo=${campo},buscar=${buscar},pagina=${paginaActual + 1},tamanio=${tamanio})}">
 
                         Siguiente
 
                     </a>
 
-
                 </div>
-
 
             </div>
 
-
         </div>
-
 
     </main>
 
-
 </div>
 
+<!-- ==========================================
+     MODAL CONFIRMAR ELIMINACIÓN
+========================================== -->
 
-
-<!-- ================================================= -->
-<!-- MODAL CONFIRMAR ELIMINACIÓN -->
-<!-- ================================================= -->
-
-<div
-        id="modalEliminar"
-        class="modal-eliminar">
-
+<div id="modalEliminar"
+     class="modal-eliminar">
 
     <div class="modal-eliminar-contenido">
-
 
         <div class="icono-advertencia">
             ⚠️
         </div>
 
-
-        <h2>
-            Confirmar eliminación
-        </h2>
-
+        <h2>Confirmar eliminación</h2>
 
         <p id="textoEliminar">
 
@@ -954,17 +885,12 @@
 
         </p>
 
-
-        <form
-                id="formEliminar"
-                method="post">
-
+        <form id="formEliminar"
+              method="post">
 
             <div class="botones-eliminar">
 
-
-                <button
-                        type="button"
+                <button type="button"
                         class="btn-cancelar-eliminar"
                         onclick="cerrarModalEliminar()">
 
@@ -972,43 +898,36 @@
 
                 </button>
 
-
-                <button
-                        type="submit"
+                <button type="submit"
                         class="btn-confirmar-eliminar">
 
                     Eliminar
 
                 </button>
 
-
             </div>
-
 
         </form>
 
-
     </div>
-
 
 </div>
 
-
+<!-- ==========================================
+     JAVASCRIPT
+========================================== -->
 
 <script>
 
-    // =====================================================
-    // MENÚ DE ACCIONES ⋮
-    // =====================================================
+    // ======================================
+    // MENÚ DE ACCIONES DE CADA USUARIO
+    // ======================================
 
     function mostrarMenuAcciones(boton) {
 
-        const menu =
-            boton.nextElementSibling;
+        const menu = boton.nextElementSibling;
 
-
-        document
-            .querySelectorAll(".menu-acciones")
+        document.querySelectorAll(".menu-acciones")
             .forEach(function (otroMenu) {
 
                 if (otroMenu !== menu) {
@@ -1017,71 +936,51 @@
 
             });
 
-
         menu.classList.toggle("mostrar");
     }
 
+    // ======================================
+    // CERRAR MENÚ AL HACER CLIC FUERA
+    // ======================================
 
-    // Cerrar menú al hacer clic fuera
+    document.addEventListener("click", function (evento) {
 
-    document.addEventListener(
-        "click",
-        function (evento) {
+        if (!evento.target.closest(".acciones")) {
 
-            if (
-                !evento.target.closest(".acciones")
-            ) {
+            document.querySelectorAll(".menu-acciones")
+                .forEach(function (menu) {
 
-                document
-                    .querySelectorAll(".menu-acciones")
-                    .forEach(function (menu) {
+                    menu.classList.remove("mostrar");
 
-                        menu.classList.remove("mostrar");
-
-                    });
-
-            }
+                });
 
         }
-    );
-    // MODAL ELIMINAR
+
+    });
+
+    // ======================================
+    // ABRIR MODAL DE ELIMINACIÓN
+    // ======================================
+
     function abrirModalEliminar(boton) {
 
-        const id =
-            boton.getAttribute(
-                "data-id"
-            );
-
+        const id = boton.getAttribute("data-id");
 
         const nombreUsuario =
-            boton.getAttribute(
-                "data-usuario"
-            );
+            boton.getAttribute("data-usuario");
 
-
-        document.getElementById(
-            "textoEliminar"
-        ).textContent =
-
+        document.getElementById("textoEliminar").textContent =
             '¿Está seguro que desea eliminar el usuario "' +
             nombreUsuario +
             '"? Esta acción no se puede deshacer.';
 
-
-        document.getElementById(
-            "formEliminar"
-        ).action =
-
+        document.getElementById("formEliminar").action =
             "/admin/usuarios/eliminar/" + id;
 
+        document.getElementById("modalEliminar").style.display =
+            "flex";
 
-        document.getElementById(
-            "modalEliminar"
-        ).style.display = "flex";
-
-
-        document
-            .querySelectorAll(".menu-acciones")
+        document.querySelectorAll(".menu-acciones")
             .forEach(function (menu) {
 
                 menu.classList.remove("mostrar");
@@ -1089,26 +988,30 @@
             });
     }
 
+    // ======================================
+    // CERRAR MODAL
+    // ======================================
+
     function cerrarModalEliminar() {
 
-        document.getElementById(
-            "modalEliminar"
-        ).style.display = "none";
+        document.getElementById("modalEliminar").style.display =
+            "none";
     }
-    // Cerrar modal al tocar afuera
 
-    document.getElementById(
-        "modalEliminar"
-    ).addEventListener(
-        "click",
-        function (evento) {
+    // ======================================
+    // CERRAR MODAL AL TOCAR FUERA
+    // ======================================
+
+    document.getElementById("modalEliminar")
+        .addEventListener("click", function (evento) {
 
             if (evento.target === this) {
                 cerrarModalEliminar();
             }
 
-        }
-    );
+        });
+
 </script>
+
 </body>
 </html>
